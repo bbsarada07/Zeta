@@ -222,6 +222,8 @@ const AnimatedSubmitButton = ({
 
 export default function AdminHRPortal() {
   const store = useZetaStore();
+  const themeProfile = useZetaStore((s) => s.themeProfile);
+  const isDark = themeProfile === 'ONYX';
   const [activeTab, setActiveTab] = useState<TabType>('directory');
   const [selectedInternId, setSelectedInternId] = useState('');
 
@@ -479,29 +481,29 @@ export default function AdminHRPortal() {
     <div className="flex flex-col gap-5 h-full animate-fade-in font-mono text-xs max-w-6xl w-full">
 
       {/* Header */}
-      <div className="border-b border-onyx-border pb-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className={`border-b pb-3 flex flex-col md:flex-row md:items-center justify-between gap-3 ${isDark ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
         <div>
           <div className="flex items-center gap-2">
             <Lock className="text-onyx-accent-rose" size={15} />
-            <h1 className="text-sm font-bold text-onyx-bright uppercase tracking-widest">
+            <h1 className={`text-sm font-bold uppercase tracking-widest ${isDark ? 'text-[#fafafa]' : 'text-zinc-800'}`}>
               Private Admin HR &amp; Dossier Operations
             </h1>
           </div>
-          <p className="text-[9px] text-onyx-muted mt-1">
+          <p className={`text-[9px] mt-1 ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>
             Zero-Trust dossier relational storage manager · Biometric gate enforced on every mutation
           </p>
         </div>
 
         {/* Tab Controls */}
-        <div className="flex gap-1 bg-black border border-onyx-border p-1 rounded">
+        <div className={`flex gap-1 border p-1 rounded ${isDark ? 'bg-[#000000] border-[#27272a]' : 'bg-[#ffffff] border-[#e4e4e7]'}`}>
           {(['directory', 'dispatcher', 'create'] as TabType[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-3 py-1.5 text-[9px] font-black uppercase tracking-wider rounded transition-all ${
                 activeTab === tab
-                  ? 'bg-onyx-accent-rose text-onyx-canvas'
-                  : 'text-onyx-muted hover:text-onyx-bright'
+                  ? 'bg-onyx-accent-rose text-white'
+                  : (isDark ? 'text-zinc-500 hover:text-zinc-300' : 'text-zinc-500 hover:text-zinc-800')
               }`}
             >
               {tab === 'directory' ? 'Dossier Directory' : tab === 'dispatcher' ? 'Secure Dispatcher' : 'New Dossier'}
@@ -515,8 +517,8 @@ export default function AdminHRPortal() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start flex-1 min-h-0">
 
           {/* Intern list */}
-          <div className="lg:col-span-4 bg-onyx-panel border border-onyx-border rounded-lg p-4 flex flex-col gap-3 max-h-[70vh] overflow-y-auto">
-            <h2 className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5 border-b border-onyx-border/50 pb-2">
+          <div className={`lg:col-span-4 rounded-lg p-4 flex flex-col gap-3 max-h-[70vh] overflow-y-auto border ${isDark ? 'bg-[#09090b] text-[#fafafa] border-[#27272a]' : 'bg-[#f4f4f5] text-[#09090b] border-[#e4e4e7]'}`}>
+            <h2 className={`text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5 border-b pb-2 ${isDark ? 'text-zinc-400 border-[#27272a]/50' : 'text-zinc-600 border-zinc-200'}`}>
               <FolderOpen size={11} className="text-onyx-accent-rose" />
               Intern Files ({store.internDossiers.length})
             </h2>
@@ -527,13 +529,15 @@ export default function AdminHRPortal() {
                   onClick={() => setSelectedInternId(dossier.intern_id)}
                   className={`w-full text-left p-3 rounded border transition-all flex flex-col gap-1 ${
                     selectedInternId === dossier.intern_id
-                      ? 'bg-onyx-accent-rose/5 border-onyx-accent-rose'
-                      : 'bg-black/35 border-onyx-border/50 hover:border-zinc-700'
+                      ? 'bg-onyx-accent-rose/5 border-onyx-accent-rose text-onyx-accent-rose'
+                      : (isDark 
+                          ? 'bg-black/35 border-[#27272a]/50 hover:border-zinc-700 text-[#fafafa]' 
+                          : 'bg-white border-zinc-200 hover:border-zinc-400 text-[#09090b]')
                   }`}
                 >
                   <div className="flex justify-between items-center gap-2">
-                    <span className="font-bold text-onyx-bright truncate">{dossier.profile_metadata.full_name}</span>
-                    <span className="text-[7px] bg-zinc-900 border border-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded uppercase font-bold flex-shrink-0">
+                    <span className={`font-bold truncate ${selectedInternId === dossier.intern_id ? 'text-onyx-accent-rose' : (isDark ? 'text-[#fafafa]' : 'text-black')}`}>{dossier.profile_metadata.full_name}</span>
+                    <span className={`text-[7px] px-1.5 py-0.5 rounded uppercase font-bold flex-shrink-0 ${isDark ? 'bg-zinc-900 border border-zinc-800 text-zinc-400' : 'bg-zinc-100 border border-zinc-200 text-zinc-600'}`}>
                       {dossier.intern_id}
                     </span>
                   </div>
@@ -553,11 +557,11 @@ export default function AdminHRPortal() {
             {activeDossier ? (
               <>
                 {/* Profile card */}
-                <div className="bg-onyx-panel border border-onyx-border rounded-lg p-5 space-y-4">
-                  <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 border-b border-onyx-border pb-3">
+                <div className={`rounded-lg p-5 space-y-4 border ${isDark ? 'bg-[#09090b] text-[#fafafa] border-[#27272a]' : 'bg-[#f4f4f5] text-[#09090b] border-[#e4e4e7]'}`}>
+                  <div className={`flex flex-col sm:flex-row justify-between sm:items-center gap-3 border-b pb-3 ${isDark ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
                     <div>
-                      <h2 className="text-sm font-bold text-onyx-bright">{activeDossier.profile_metadata.full_name}</h2>
-                      <p className="text-[9px] text-zinc-500 mt-0.5">{activeDossier.profile_metadata.department_role}</p>
+                      <h2 className={`text-sm font-bold ${isDark ? 'text-[#fafafa]' : 'text-black'}`}>{activeDossier.profile_metadata.full_name}</h2>
+                      <p className={`text-[9px] mt-0.5 ${isDark ? 'text-zinc-500' : 'text-zinc-600'}`}>{activeDossier.profile_metadata.department_role}</p>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-[8px] bg-onyx-accent-rose/10 border border-onyx-accent-rose/30 text-onyx-accent-rose px-2 py-0.5 rounded font-bold uppercase">
@@ -573,9 +577,9 @@ export default function AdminHRPortal() {
                       ['Corporate Email', activeDossier.profile_metadata.corporate_email],
                       ['Joining Date',    new Date(activeDossier.profile_metadata.joining_date).toLocaleDateString()],
                     ].map(([label, value]) => (
-                      <div key={label} className="flex justify-between py-1 border-b border-onyx-border/20">
-                        <span className="text-zinc-500 uppercase font-medium">{label}:</span>
-                        <span className="text-onyx-bright font-mono">{value}</span>
+                      <div key={label} className={`flex justify-between py-1 border-b ${isDark ? 'border-[#27272a]/20' : 'border-zinc-200'}`}>
+                        <span className={`uppercase font-medium ${isDark ? 'text-zinc-500' : 'text-zinc-600'}`}>{label}:</span>
+                        <span className={`font-mono ${isDark ? 'text-[#fafafa]' : 'text-black'}`}>{value}</span>
                       </div>
                     ))}
                   </div>
@@ -585,12 +589,12 @@ export default function AdminHRPortal() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                   {/* Financial Ledger — with kinetic reveal */}
-                  <div className="bg-onyx-panel border border-onyx-border rounded-lg p-5 flex flex-col gap-4">
+                  <div className={`rounded-lg p-5 flex flex-col gap-4 border ${isDark ? 'bg-[#09090b] text-[#fafafa] border-[#27272a]' : 'bg-[#f4f4f5] text-[#09090b] border-[#e4e4e7]'}`}>
                     <div>
-                      <h3 className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5 border-b border-onyx-border/50 pb-2 mb-3">
+                      <h3 className={`text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5 border-b pb-2 mb-3 ${isDark ? 'text-zinc-400 border-[#27272a]/50' : 'text-zinc-600 border-zinc-200'}`}>
                         <DollarSign size={11} className="text-onyx-accent-rose" />
                         Financial Ledger
-                        <span className="ml-auto text-[7px] text-zinc-700 font-mono normal-case tracking-normal">
+                        <span className={`ml-auto text-[7px] font-mono normal-case tracking-normal ${isDark ? 'text-zinc-700' : 'text-zinc-500'}`}>
                           [click values to reveal]
                         </span>
                       </h3>
@@ -600,25 +604,25 @@ export default function AdminHRPortal() {
                           ['Paid To Date Total',       `$${(activeDossier.financial_ledger.paid_to_date_total / 100).toLocaleString()}`,  `fin_pt_${activeDossier.intern_id}`],
                           ['Pending Adjustment Payout',`$${(activeDossier.financial_ledger.pending_payout / 100).toLocaleString()}`,      `fin_pp_${activeDossier.intern_id}`],
                         ].map(([label, value, key]) => (
-                          <div key={key as string} className="flex justify-between py-1 border-b border-onyx-border/20 items-center gap-2">
-                            <span className="text-zinc-500">{label}:</span>
+                          <div key={key as string} className={`flex justify-between py-1 border-b items-center gap-2 ${isDark ? 'border-[#27272a]/20' : 'border-zinc-200'}`}>
+                            <span className={`text-zinc-500 ${isDark ? 'text-zinc-500' : 'text-zinc-600'}`}>{label}:</span>
                             <KineticFinancialField fieldKey={key as string} plaintextValue={value as string} />
                           </div>
                         ))}
-                        <div className="flex justify-between py-1 border-b border-onyx-border/20">
-                          <span className="text-zinc-500">Bank Status:</span>
+                        <div className={`flex justify-between py-1 border-b ${isDark ? 'border-[#27272a]/20' : 'border-zinc-200'}`}>
+                          <span className={`text-zinc-500 ${isDark ? 'text-zinc-500' : 'text-zinc-600'}`}>Bank Status:</span>
                           <span className="text-emerald-400 font-bold uppercase">{activeDossier.financial_ledger.bank_payout_status}</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Adjust financials form */}
-                    <form onSubmit={handleFinancialUpdate} className="bg-black/40 border border-onyx-border rounded p-3 space-y-2">
+                    <form onSubmit={handleFinancialUpdate} className={`border rounded p-3 space-y-2 ${isDark ? 'bg-black/40 border-[#27272a]' : 'bg-white border-zinc-200'}`}>
                       <div className="flex gap-2">
                         <select
                           value={finField}
                           onChange={(e) => setFinField(e.target.value as FinField)}
-                          className="flex-1 bg-black border border-onyx-border rounded p-1.5 text-[9px] text-onyx-bright focus:outline-none"
+                          className={`flex-1 border rounded p-1.5 text-[9px] focus:outline-none ${isDark ? 'bg-black border-[#27272a] text-[#fafafa]' : 'bg-white border-zinc-300 text-black'}`}
                         >
                           <option value="base_stipend">Base Stipend</option>
                           <option value="pending_payout">Pending Payout</option>
@@ -629,7 +633,7 @@ export default function AdminHRPortal() {
                           placeholder="USD"
                           value={finAmountUsd}
                           onChange={(e) => setFinAmountUsd(e.target.value)}
-                          className="w-20 bg-black border border-onyx-border rounded p-1.5 text-[9px] text-onyx-bright font-mono focus:outline-none"
+                          className={`w-20 border rounded p-1.5 text-[9px] font-mono focus:outline-none ${isDark ? 'bg-black border-[#27272a] text-[#fafafa]' : 'bg-white border-zinc-300 text-black'}`}
                         />
                       </div>
                       <AnimatedSubmitButton
@@ -641,34 +645,34 @@ export default function AdminHRPortal() {
                   </div>
 
                   {/* CRM Metrics */}
-                  <div className="bg-onyx-panel border border-onyx-border rounded-lg p-5">
-                    <h3 className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5 border-b border-onyx-border/50 pb-2 mb-3">
+                  <div className={`rounded-lg p-5 border ${isDark ? 'bg-[#09090b] text-[#fafafa] border-[#27272a]' : 'bg-[#f4f4f5] text-[#09090b] border-[#e4e4e7]'}`}>
+                    <h3 className={`text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5 border-b pb-2 mb-3 ${isDark ? 'text-zinc-400 border-[#27272a]/50' : 'text-zinc-600 border-zinc-200'}`}>
                       <LineChart size={11} className="text-onyx-accent-rose" />
                       CRM Contribution Metrics
                     </h3>
                     <div className="space-y-2 text-[9px]">
                       {[
-                        ['Associated Leads',        String(activeDossier.crm_contribution_metrics.associated_lead_ids.length), 'text-onyx-bright font-bold font-mono'],
+                        ['Associated Leads',        String(activeDossier.crm_contribution_metrics.associated_lead_ids.length), `${isDark ? 'text-[#fafafa]' : 'text-black'} font-bold font-mono`],
                         ['Pipeline Contract Value', `$${activeDossier.crm_contribution_metrics.total_contracts_value.toLocaleString()} USD`, 'text-emerald-400 font-bold font-mono'],
                         ['Ambassador Referrals',    `${activeDossier.crm_contribution_metrics.ambassador_referrals_count} referrals`, 'text-purple-400 font-bold font-mono'],
                       ].map(([label, value, cls]) => (
-                        <div key={label as string} className="flex justify-between py-1 border-b border-onyx-border/20">
-                          <span className="text-zinc-500">{label}:</span>
+                        <div key={label as string} className={`flex justify-between py-1 border-b ${isDark ? 'border-[#27272a]/20' : 'border-zinc-200'}`}>
+                          <span className={`text-zinc-500 ${isDark ? 'text-zinc-500' : 'text-zinc-600'}`}>{label}:</span>
                           <span className={cls as string}>{value}</span>
                         </div>
                       ))}
                       <div className="mt-2">
-                        <span className="text-zinc-500 uppercase text-[7px] font-bold tracking-wider block mb-1">Associated Lead IDs:</span>
+                        <span className={`uppercase text-[7px] font-bold tracking-wider block mb-1 ${isDark ? 'text-zinc-500' : 'text-zinc-600'}`}>Associated Lead IDs:</span>
                         {activeDossier.crm_contribution_metrics.associated_lead_ids.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
                             {activeDossier.crm_contribution_metrics.associated_lead_ids.map((lid) => (
-                              <span key={lid} className="text-[7px] bg-black border border-onyx-border px-1.5 py-0.5 rounded font-mono text-zinc-300">
+                              <span key={lid} className={`text-[7px] border px-1.5 py-0.5 rounded font-mono ${isDark ? 'bg-black border-[#27272a] text-zinc-300' : 'bg-white border-zinc-300 text-zinc-700'}`}>
                                 {lid}
                               </span>
                             ))}
                           </div>
                         ) : (
-                          <span className="text-zinc-600 italic">No linked CRM sales cycles.</span>
+                          <span className={`italic ${isDark ? 'text-zinc-600' : 'text-zinc-500'}`}>No linked CRM sales cycles.</span>
                         )}
                       </div>
                     </div>
@@ -676,38 +680,38 @@ export default function AdminHRPortal() {
                 </div>
 
                 {/* Work History + Log Form */}
-                <div className="bg-onyx-panel border border-onyx-border rounded-lg p-5 space-y-4">
-                  <h3 className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5 border-b border-onyx-border/50 pb-2">
+                <div className={`rounded-lg p-5 space-y-4 border ${isDark ? 'bg-[#09090b] text-[#fafafa] border-[#27272a]' : 'bg-[#f4f4f5] text-[#09090b] border-[#e4e4e7]'}`}>
+                  <h3 className={`text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5 border-b pb-2 ${isDark ? 'text-zinc-400 border-[#27272a]/50' : 'text-zinc-600 border-zinc-200'}`}>
                     <History size={11} className="text-onyx-accent-rose" />
                     Work History Stream
                   </h3>
 
                   {/* Log entry form */}
-                  <form onSubmit={handleAddWorkLog} className="bg-black/35 border border-onyx-border/80 rounded p-4 grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                  <form onSubmit={handleAddWorkLog} className={`border rounded p-4 grid grid-cols-1 md:grid-cols-12 gap-3 items-end ${isDark ? 'bg-black/35 border-[#27272a]/80' : 'bg-white border-zinc-200'}`}>
                     <div className="md:col-span-4 space-y-1">
-                      <label className="text-[7px] text-zinc-400 uppercase font-bold">Project Title *</label>
+                      <label className={`text-[7px] uppercase font-bold ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>Project Title *</label>
                       <input
                         type="text"
                         required
                         placeholder="e.g. Audit Log Scramble"
                         value={newProjectTitle}
                         onChange={(e) => setNewProjectTitle(e.target.value)}
-                        className="w-full bg-black border border-onyx-border rounded p-2 text-[9px] text-onyx-bright focus:outline-none"
+                        className={`w-full border rounded p-2 text-[9px] focus:outline-none ${isDark ? 'bg-black border-[#27272a] text-[#fafafa]' : 'bg-white border-zinc-300 text-black'}`}
                       />
                     </div>
                     <div className="md:col-span-5 space-y-1">
-                      <label className="text-[7px] text-zinc-400 uppercase font-bold">Task Description *</label>
+                      <label className={`text-[7px] uppercase font-bold ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>Task Description *</label>
                       <input
                         type="text"
                         required
                         placeholder="Analyzed cipher payload..."
                         value={newDescription}
                         onChange={(e) => setNewDescription(e.target.value)}
-                        className="w-full bg-black border border-onyx-border rounded p-2 text-[9px] text-onyx-bright focus:outline-none"
+                        className={`w-full border rounded p-2 text-[9px] focus:outline-none ${isDark ? 'bg-black border-[#27272a] text-[#fafafa]' : 'bg-white border-zinc-300 text-black'}`}
                       />
                     </div>
                     <div className="md:col-span-3 space-y-1">
-                      <label className="text-[7px] text-zinc-400 uppercase font-bold">Score (1–100)</label>
+                      <label className={`text-[7px] uppercase font-bold ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>Score (1–100)</label>
                       <input
                         type="number"
                         required
@@ -715,17 +719,17 @@ export default function AdminHRPortal() {
                         max="100"
                         value={newEfficiencyScore}
                         onChange={(e) => setNewEfficiencyScore(e.target.value)}
-                        className="w-full bg-black border border-onyx-border rounded p-2 text-[9px] text-onyx-bright font-mono focus:outline-none"
+                        className={`w-full border rounded p-2 text-[9px] font-mono focus:outline-none ${isDark ? 'bg-black border-[#27272a] text-[#fafafa]' : 'bg-white border-zinc-300 text-black'}`}
                       />
                     </div>
                     <div className="md:col-span-9 space-y-1">
-                      <label className="text-[7px] text-zinc-400 uppercase font-bold">Reviewer Notes (Optional)</label>
+                      <label className={`text-[7px] uppercase font-bold ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>Reviewer Notes (Optional)</label>
                       <input
                         type="text"
                         placeholder="e.g. Well documented"
                         value={newReviewerNotes}
                         onChange={(e) => setNewReviewerNotes(e.target.value)}
-                        className="w-full bg-black border border-onyx-border rounded p-2 text-[9px] text-onyx-bright focus:outline-none"
+                        className={`w-full border rounded p-2 text-[9px] focus:outline-none ${isDark ? 'bg-black border-[#27272a] text-[#fafafa]' : 'bg-white border-zinc-300 text-black'}`}
                       />
                     </div>
                     <div className="md:col-span-3">
@@ -741,11 +745,11 @@ export default function AdminHRPortal() {
                   <div className="space-y-2.5">
                     {activeDossier.work_history_stream.length > 0 ? (
                       activeDossier.work_history_stream.map((task) => (
-                        <div key={task.task_id} className="bg-black/45 border border-onyx-border/40 rounded p-3 space-y-1.5">
+                        <div key={task.task_id} className={`border rounded p-3 space-y-1.5 ${isDark ? 'bg-black/45 border-[#27272a]/40 text-[#fafafa]' : 'bg-white border-zinc-200 text-[#09090b]'}`}>
                           <div className="flex justify-between items-start gap-2">
                             <div>
-                              <h4 className="font-bold text-onyx-bright">{task.project_title}</h4>
-                              <p className="text-[9px] text-zinc-400 mt-0.5 leading-relaxed">{task.description}</p>
+                              <h4 className={`font-bold ${isDark ? 'text-[#fafafa]' : 'text-black'}`}>{task.project_title}</h4>
+                              <p className={`text-[9px] mt-0.5 leading-relaxed ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>{task.description}</p>
                             </div>
                             <div className="text-right flex-shrink-0 space-y-1">
                               <span
@@ -757,21 +761,21 @@ export default function AdminHRPortal() {
                               >
                                 {task.efficiency_score}%
                               </span>
-                              <span className="block text-[7px] text-zinc-600 font-mono">
+                              <span className={`block text-[7px] font-mono ${isDark ? 'text-zinc-600' : 'text-zinc-500'}`}>
                                 {new Date(task.timestamp_iso).toLocaleString()}
                               </span>
                             </div>
                           </div>
                           {task.reviewer_notes && (
-                            <div className="text-[8px] bg-zinc-950/50 border border-zinc-900/60 p-2 rounded text-zinc-500">
-                              <span className="font-bold text-zinc-400 uppercase tracking-widest text-[7px]">Notes: </span>
+                            <div className={`text-[8px] border p-2 rounded ${isDark ? 'bg-zinc-950/50 border-zinc-900/60 text-zinc-500' : 'bg-[#f4f4f5] border-zinc-200 text-zinc-600'}`}>
+                              <span className={`font-bold uppercase tracking-widest text-[7px] ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>Notes: </span>
                               {task.reviewer_notes}
                             </div>
                           )}
                         </div>
                       ))
                     ) : (
-                      <p className="text-zinc-500 italic text-center py-6 border border-dashed border-onyx-border/30 rounded text-[9px]">
+                      <p className={`text-zinc-500 italic text-center py-6 border border-dashed rounded text-[9px] ${isDark ? 'border-[#27272a]/30' : 'border-zinc-200'}`}>
                         No operations logged in work stream yet.
                       </p>
                     )}
@@ -779,7 +783,7 @@ export default function AdminHRPortal() {
                 </div>
               </>
             ) : (
-              <div className="bg-onyx-panel border border-onyx-border rounded-lg p-10 text-center text-onyx-muted uppercase tracking-widest">
+              <div className={`border rounded-lg p-10 text-center uppercase tracking-widest ${isDark ? 'bg-[#09090b] text-zinc-500 border-[#27272a]' : 'bg-[#f4f4f5] text-zinc-600 border-zinc-200'}`}>
                 No intern file selected.
               </div>
             )}
@@ -791,22 +795,26 @@ export default function AdminHRPortal() {
       {activeTab === 'dispatcher' && (
         <form
           onSubmit={handleStartDispatch}
-          className="bg-onyx-panel border border-onyx-border rounded-lg p-5 space-y-4 max-w-xl mx-auto w-full"
+          className={`border rounded-lg p-5 space-y-4 max-w-xl mx-auto w-full transition-colors ${
+            isDark ? 'bg-[#09090b] text-[#fafafa] border-[#27272a]' : 'bg-[#f4f4f5] text-[#09090b] border-[#e4e4e7]'
+          }`}
         >
-          <div className="flex items-center gap-2 border-b border-onyx-border pb-3">
+          <div className={`flex items-center gap-2 border-b pb-3 ${isDark ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
             <Cpu size={12} className="text-onyx-accent-rose" />
-            <h2 className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">
+            <h2 className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-zinc-300' : 'text-[#09090b]'}`}>
               Secure Communication Dispatcher
             </h2>
           </div>
 
           {/* Recipient */}
           <div className="space-y-1">
-            <label className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">Recipient Intern ID *</label>
+            <label className={`text-[8px] font-bold uppercase tracking-widest ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>Recipient Intern ID *</label>
             <select
               value={selectedInternId}
               onChange={(e) => setSelectedInternId(e.target.value)}
-              className="w-full bg-black border border-onyx-border rounded p-2.5 text-[10px] text-onyx-bright focus:outline-none focus:border-zinc-600 font-mono"
+              className={`w-full rounded p-2.5 text-[10px] focus:outline-none font-mono border transition-colors ${
+                isDark ? 'bg-black border-[#27272a] text-white focus:border-zinc-600' : 'bg-white border-zinc-300 text-black focus:border-zinc-400'
+              }`}
             >
               {store.internDossiers.map((d) => (
                 <option key={d.intern_id} value={d.intern_id}>
@@ -818,7 +826,7 @@ export default function AdminHRPortal() {
 
           {/* Subject */}
           <div className="space-y-1">
-            <label className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">Subject Category *</label>
+            <label className={`text-[8px] font-bold uppercase tracking-widest ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>Subject Category *</label>
             <div className="flex gap-2">
               {(['PAYROLL', 'COMPLAINT', 'PERFORMANCE'] as SubjectCategory[]).map((cat) => (
                 <button
@@ -828,7 +836,9 @@ export default function AdminHRPortal() {
                   className={`flex-1 py-2 text-[9px] font-bold tracking-widest rounded border transition-all ${
                     subject === cat
                       ? 'text-onyx-canvas bg-onyx-accent-rose border-onyx-accent-rose'
-                      : 'text-onyx-muted bg-black border-onyx-border hover:border-zinc-700'
+                      : (isDark
+                          ? 'text-onyx-muted bg-black border-onyx-border hover:border-zinc-700'
+                          : 'text-zinc-600 bg-white border-zinc-300 hover:border-zinc-400')
                   }`}
                 >
                   {cat}
@@ -839,7 +849,7 @@ export default function AdminHRPortal() {
 
           {/* Financial override */}
           <div className="space-y-1">
-            <label className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">
+            <label className={`text-[8px] font-bold uppercase tracking-widest ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>
               Stipend Financial Adjustment (USD)
             </label>
             <input
@@ -847,36 +857,46 @@ export default function AdminHRPortal() {
               placeholder="e.g. 3200"
               value={stipendOverride}
               onChange={(e) => setStipendOverride(e.target.value)}
-              className="w-full bg-black border border-onyx-border rounded p-2.5 text-[10px] text-onyx-bright font-mono focus:outline-none focus:border-zinc-600"
+              className={`w-full rounded p-2.5 text-[10px] font-mono focus:outline-none border transition-colors ${
+                isDark ? 'bg-black border-[#27272a] text-white focus:border-zinc-600' : 'bg-white border-zinc-300 text-black focus:border-zinc-400'
+              }`}
             />
           </div>
 
           {/* Message body */}
           <div className="space-y-1">
-            <label className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">Secure Communication Body *</label>
+            <label className={`text-[8px] font-bold uppercase tracking-widest ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>Secure Communication Body *</label>
             <textarea
               required
               rows={4}
               placeholder="Type official private feedback or payroll processing notice..."
               value={messageBody}
               onChange={(e) => setMessageBody(e.target.value)}
-              className="w-full bg-black border border-onyx-border rounded p-2.5 text-[10px] text-onyx-bright font-mono focus:outline-none focus:border-zinc-600 leading-relaxed resize-none"
+              className={`w-full rounded p-2.5 text-[10px] font-mono focus:outline-none leading-relaxed resize-none border transition-colors ${
+                isDark ? 'bg-black border-[#27272a] text-white focus:border-zinc-600' : 'bg-white border-zinc-300 text-black focus:border-zinc-400'
+              }`}
             />
           </div>
 
           {/* Ephemeral toggle */}
-          <div className="flex items-center gap-2.5 bg-black/40 border border-onyx-border/30 p-3 rounded">
+          <div className={`flex items-center gap-2.5 p-3 rounded border transition-colors ${
+            isDark ? 'bg-black/40 border-[#27272a]/30' : 'bg-white border-zinc-200'
+          }`}>
             <input
               type="checkbox"
               id="ephemeral"
               checked={isEphemeral}
               onChange={(e) => setIsEphemeral(e.target.checked)}
-              className="rounded border-onyx-border bg-black text-onyx-accent-rose focus:ring-0 cursor-pointer"
+              className={`rounded focus:ring-0 cursor-pointer border ${
+                isDark ? 'border-onyx-border bg-black text-onyx-accent-rose' : 'border-zinc-300 bg-white text-onyx-accent-rose'
+              }`}
             />
-            <label htmlFor="ephemeral" className="text-[9px] font-bold text-zinc-300 uppercase tracking-wider cursor-pointer select-none">
+            <label htmlFor="ephemeral" className={`text-[9px] font-bold uppercase tracking-wider cursor-pointer select-none ${
+              isDark ? 'text-zinc-300' : 'text-zinc-600'
+            }`}>
               Mark as Ephemeral Message
             </label>
-            <span className="text-[7px] text-zinc-600 font-mono ml-auto">
+            <span className={`text-[7px] font-mono ml-auto ${isDark ? 'text-zinc-600' : 'text-zinc-500'}`}>
               Purges from client cache on dismissal
             </span>
           </div>
@@ -889,9 +909,13 @@ export default function AdminHRPortal() {
       {activeTab === 'create' && (
         <form
           onSubmit={handleCreateDossier}
-          className="bg-onyx-panel border border-onyx-border rounded-lg p-5 space-y-4 max-w-md mx-auto w-full"
+          className={`border rounded-lg p-5 space-y-4 max-w-md mx-auto w-full transition-colors ${
+            isDark ? 'bg-[#09090b] text-[#fafafa] border-[#27272a]' : 'bg-[#f4f4f5] text-[#09090b] border-[#e4e4e7]'
+          }`}
         >
-          <h2 className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5 border-b border-onyx-border/50 pb-2">
+          <h2 className={`text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5 border-b pb-2 ${
+            isDark ? 'text-zinc-400 border-onyx-border/50' : 'text-[#09090b] border-zinc-200'
+          }`}>
             <PlusCircle size={11} className="text-onyx-accent-rose" />
             Create Intern Dossier
           </h2>
@@ -903,24 +927,28 @@ export default function AdminHRPortal() {
             { label: 'Base Stipend (USD)*', placeholder: '2500',                       value: createBaseStipend, onChange: setCreateBaseStipend, type: 'number' },
           ].map(({ label, placeholder, value, onChange, type }) => (
             <div key={label} className="space-y-1">
-              <label className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">{label}</label>
+              <label className={`text-[8px] font-bold uppercase tracking-widest ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>{label}</label>
               <input
                 type={type}
                 required
                 placeholder={placeholder}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                className="w-full bg-black border border-onyx-border rounded p-2.5 text-[10px] text-onyx-bright focus:outline-none focus:border-zinc-600"
+                className={`w-full rounded p-2.5 text-[10px] focus:outline-none border transition-colors ${
+                  isDark ? 'bg-black border-[#27272a] text-white focus:border-zinc-600' : 'bg-white border-zinc-300 text-black focus:border-zinc-400'
+                }`}
               />
             </div>
           ))}
 
           <div className="space-y-1">
-            <label className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">Parent Division (Tenant Lock) *</label>
+            <label className={`text-[8px] font-bold uppercase tracking-widest ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>Parent Division (Tenant Lock) *</label>
             <select
               value={createTenant}
               onChange={(e) => setCreateTenant(e.target.value as TenantCompany)}
-              className="w-full bg-black border border-onyx-border rounded p-2.5 text-[10px] text-onyx-bright focus:outline-none"
+              className={`w-full rounded p-2.5 text-[10px] focus:outline-none border transition-colors ${
+                isDark ? 'bg-black border-[#27272a] text-white' : 'bg-white border-zinc-300 text-black'
+              }`}
             >
               <option value="skill_tank">Skill Tank Systems</option>
               <option value="vriddhi">Vriddhi Logistics</option>
@@ -935,8 +963,10 @@ export default function AdminHRPortal() {
       )}
 
       {/* Security notice */}
-      <div className="flex items-center gap-2 text-[7px] font-mono text-zinc-700 border-t border-onyx-border/20 pt-3 mt-auto">
-        <AlertTriangle size={9} className="text-zinc-800 flex-shrink-0" />
+      <div className={`flex items-center gap-2 text-[7px] font-mono border-t pt-3 mt-auto ${
+        isDark ? 'text-zinc-600 border-[#27272a]/20' : 'text-zinc-500 border-zinc-200'
+      }`}>
+        <AlertTriangle size={9} className={`${isDark ? 'text-zinc-700' : 'text-zinc-500'} flex-shrink-0`} />
         All mutations require biometric hardware-token verification. Actions are sealed with AES-GCM-256 and logged to the WAL transaction ledger.
       </div>
 
