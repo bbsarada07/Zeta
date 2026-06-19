@@ -1,4 +1,4 @@
-# ==============================================================================
+ # ==============================================================================
 # PROJECT ZETA GITIGNORE RULES
 # Explicitly blocks all local dependencies, build artifacts, caching layers,
 # and environment credentials from leaking into public source control.
