@@ -1,0 +1,35 @@
+# ==============================================================================
+# PROJECT ZETA GITIGNORE RULES
+# Explicitly blocks all local dependencies, build artifacts, caching layers,
+# and environment credentials from leaking into public source control.
+# ==============================================================================
+
+# ─── 1. Hardcore Security Rules (Credentials & Keys) ──────────────────────────
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.key
+
+# ─── 2. Heavy Package Dependency Isolation ──────────────────────────────────
+node_modules/
+jspm_packages/
+web_modules/
+
+# ─── 3. Production Build and Artifact Targets ───────────────────────────────
+dist/
+build/
+out/
+.next/
+.cache/
+
+# ─── 4. Operating System and Local Editor Metadata ──────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+npm-debug.log*
+yarn-debug.log*

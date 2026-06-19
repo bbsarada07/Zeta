@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root, .theme-onyx {
+    --color-onyx-canvas: #000000;
+    --color-onyx-panel: #09090b;
+    --color-onyx-border: #27272a;
+    --color-onyx-muted: #a1a1aa;
+    --color-onyx-bright: #fafafa;
+    --color-onyx-accent-green: #22c55e;
+    --color-onyx-accent-cyan: #06b6d4;
+    --color-onyx-accent-purple: #a855f7;
+    --color-onyx-accent-amber: #f59e0b;
+    --color-onyx-accent-rose: #f43f5e;
+
+    /* Neon agent badges */
+    --color-agent-growth: #38bdf8;
+    --color-agent-logistics: #f59e0b;
+    --color-agent-network: #a855f7;
+    --color-agent-director: #10b981;
+    --color-agent-security: #f43f5e;
+  }
+
+  .theme-alabaster {
+    --color-onyx-canvas: #ffffff;
+    --color-onyx-panel: #f4f4f5;
+    --color-onyx-border: #e4e4e7;
+    --color-onyx-muted: #71717a;
+    --color-onyx-bright: #09090b;
+    --color-onyx-accent-green: #16a34a;
+    --color-onyx-accent-cyan: #0891b2;
+    --color-onyx-accent-purple: #9333ea;
+    --color-onyx-accent-amber: #d97706;
+    --color-onyx-accent-rose: #dc2626;
+
+    /* Tactical deep-tone agent badges */
+    --color-agent-growth: #1e3a8a;
+    --color-agent-logistics: #7c2d12;
+    --color-agent-network: #4c1d95;
+    --color-agent-director: #064e3b;
+    --color-agent-security: #7f1d1d;
+  }
+
+  body {
+    background-color: var(--color-onyx-canvas);
+    color: var(--color-onyx-bright);
+    font-family: 'Inter', 'Outfit', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    margin: 0;
+  }
+
+  html, body, #root {
+    min-height: 100vh;
+    background-color: var(--color-onyx-canvas);
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+  }
+}
+
+/* Custom scrollbar matching active theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-onyx-canvas);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-onyx-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-onyx-muted);
+}
+
+/* Premium text shadow glow animations for Matrix effect */
+.text-glow-green {
+  text-shadow: 0 0 8px var(--color-onyx-accent-green), 0 0 16px rgba(34, 197, 94, 0.15);
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 8px var(--color-onyx-accent-cyan), 0 0 16px rgba(6, 182, 212, 0.15);
+}
+
+.text-glow-purple {
+  text-shadow: 0 0 8px var(--color-onyx-accent-purple), 0 0 16px rgba(168, 85, 247, 0.15);
+}
+
+.text-glow-rose {
+  text-shadow: 0 0 8px var(--color-onyx-accent-rose), 0 0 16px rgba(244, 63, 94, 0.15);
+}
+
+/* Operational matrix pulse animation */
+@keyframes matrix-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.95);
+  }
+}
+
+.animate-pulse-glow {
+  animation: matrix-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
