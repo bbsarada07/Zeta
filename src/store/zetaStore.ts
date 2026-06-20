@@ -84,6 +84,8 @@ export interface ZetaState {
   addLead: (leadData: Omit<Lead, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateLeadStage: (id: string, stage: PipelineStage) => void;
   logLeadActivity: (id: string, activity: string) => void;
+  mergeLeads: (primaryId: string, duplicateId: string) => void;
+  triggerPipelineIngestion: (tenantFilter: TenantCompany | 'global') => void;
 
   // ERP & Finance Actions
   issueInvoice: (
@@ -91,6 +93,7 @@ export interface ZetaState {
     lineItemsData: Omit<InvoiceLineItem, 'id' | 'totalPrice'>[],
     ambassadorCode?: string
   ) => Invoice;
+  autoIssueInvoiceOnWon: (leadId: string) => void;
   restockAsset: (skuCode: string, quantity: number) => void; // OpsAgent stock mutation action
   restockSKU: (skuCode: string) => void;
   updateInvoiceStatus: (id: string, status: InvoiceStatus) => void;
@@ -110,6 +113,9 @@ export interface ZetaState {
   createInternDossierAction: (tenant: TenantCompany, profile: InitialProfile) => void;
   appendInternWorkLogAction: (internId: string, task: Omit<Task, 'task_id' | 'timestamp_iso'>) => void;
   updateInternFinancialsAction: (internId: string, field: 'base_stipend' | 'pending_payout', amount: number) => void;
+
+  // Cross-sell & Flywheel
+  dispatchFlywheelEvent: (leadId: string, leadName: string, tenant: TenantCompany) => void;
 
   // Theme & Session Lock
   themeProfile: 'ONYX' | 'ALABASTER';
@@ -641,7 +647,144 @@ export const useZetaStore = create<ZetaState>((set, get) => ({
     });
     if (leadToNotify && prevStageToNotify) {
       notifyMutation('leads', 'update_stage', { leadId: id, previousStage: prevStageToNotify, newStage: stage, lead: leadToNotify });
+      // Auto-invoice on CLOSED_WON transition
+      if (stage === 'CLOSED_WON' && leadToNotify) {
+        setTimeout(() => {
+          get().autoIssueInvoiceOnWon(id);
+          get().dispatchFlywheelEvent(id, leadToNotify!.name, leadToNotify!.tenant_company);
+        }, 400);
+      }
     }
+  },
+
+  // ----------------------------------------
+  // Merge Duplicate Leads
+  // ----------------------------------------
+
+  mergeLeads: (primaryId, duplicateId) => {
+    set((state) => {
+      const primary = state.rawLeads.find(l => l.id === primaryId);
+      const duplicate = state.rawLeads.find(l => l.id === duplicateId);
+      if (!primary || !duplicate) return {};
+
+      const mergedLogs = [
+        ...(primary.activityLogs || []),
+        ...(duplicate.activityLogs || []),
+        `[MERGE] Records merged from duplicate lead: ${duplicate.name} (${duplicate.id})`
+      ];
+      const mergedLead: Lead = {
+        ...primary,
+        activityLogs: mergedLogs,
+        potentialValue: Math.max(primary.potentialValue, duplicate.potentialValue),
+        updatedAt: new Date().toISOString()
+      };
+
+      const updatedRawLeads = state.rawLeads
+        .filter(l => l.id !== duplicateId)
+        .map(l => l.id === primaryId ? mergedLead : l);
+
+      const filtered = filterState(state.currentUser, updatedRawLeads, state.rawContacts, state.rawInvoices, state.rawAuditLogs);
+      setLocalStorageItem('zeta_leads', updatedRawLeads);
+      return { rawLeads: updatedRawLeads, ...filtered };
+    });
+    notifyMutation('leads', 'merge_duplicates', { primaryId, duplicateId });
+  },
+
+  // ----------------------------------------
+  // Pipeline Ingestion Simulator
+  // ----------------------------------------
+
+  triggerPipelineIngestion: (tenantFilter) => {
+    const state = get();
+    const tenantLeads = tenantFilter === 'global' ? state.rawLeads : state.rawLeads.filter(l => l.tenant_company === tenantFilter);
+    const prospectLeads = tenantLeads.filter(l => l.pipelineStage === 'PROSPECT');
+
+    const ingestionMessages = [
+      `[ROUTING PROTOCOL] ADS PIPELINE INGESTION INITIATED — ${tenantFilter.toUpperCase()} CONTEXT`,
+      `[ROUTING PROTOCOL] Scanning ${tenantLeads.length} active leads across pipeline matrix...`,
+      `[ROUTING PROTOCOL] Identified ${prospectLeads.length} PROSPECT-stage leads eligible for qualification push`,
+      `[ROUTING PROTOCOL] Executing NLP lead scoring against CRM velocity data...`,
+      `[ROUTING PROTOCOL] Lead enrichment pass complete. Highest-value target: ${prospectLeads.sort((a, b) => b.potentialValue - a.potentialValue)[0]?.name ?? 'N/A'}`,
+      `[ROUTING PROTOCOL] ADS INGESTION SEQUENCE COMMITTED — WAL sync complete ✓`
+    ];
+
+    ingestionMessages.forEach((msg, i) => {
+      setTimeout(() => {
+        get().addThoughtLedgerEntry({
+          agentName: 'GrowthAgent',
+          status: i === ingestionMessages.length - 1 ? 'action_executed' : 'inspecting',
+          thoughtProcess: msg,
+          activeTenantTrack: tenantFilter,
+          currentTask: 'ADS Pipeline Ingestion',
+          tx_hash: i === ingestionMessages.length - 1 ? Math.random().toString(36).substring(2, 18) : undefined
+        });
+      }, i * 350);
+    });
+  },
+
+  // ----------------------------------------
+  // Auto-Invoice on CLOSED_WON
+  // ----------------------------------------
+
+  autoIssueInvoiceOnWon: (leadId) => {
+    const state = get();
+    const lead = state.rawLeads.find(l => l.id === leadId);
+    if (!lead || lead.pipelineStage !== 'CLOSED_WON') return;
+
+    // Check if invoice already exists for this lead
+    const existingInvoice = state.rawInvoices.find(i => i.customerId === leadId);
+    if (existingInvoice) return;
+
+    // Auto-generate invoice using first warehouse asset as a service line item
+    const primaryAsset = state.warehouseAssets[0];
+    if (!primaryAsset) return;
+
+    try {
+      get().issueInvoice(
+        leadId,
+        [{
+          assetId: primaryAsset.id,
+          description: `Professional Services — ${lead.companyName} Engagement`,
+          quantity: 1,
+          unitPrice: Math.min(lead.potentialValue * 0.65, primaryAsset.unitPrice)
+        }]
+      );
+
+      // Log auto-invoice event
+      setTimeout(() => {
+        get().addThoughtLedgerEntry({
+          agentName: 'DirectorAgent',
+          status: 'action_executed',
+          thoughtProcess: `[AUTO-INVOICE] Deal CLOSED_WON detected for ${lead.name} (${lead.companyName}). Auto-generated invoice INV sequence. Value: $${(lead.potentialValue * 0.65).toFixed(2)}`,
+          activeTenantTrack: lead.tenant_company,
+          currentTask: 'Auto Invoice Factory',
+          mutations: {
+            targetCollection: 'invoices',
+            actionType: 'approve_commission',
+            payloadDelta: { leadId, leadName: lead.name }
+          }
+        });
+      }, 50);
+    } catch (e) {
+      // Silently handle if invoice already exists
+    }
+  },
+
+  // ----------------------------------------
+  // Flywheel Cross-sell Event
+  // ----------------------------------------
+
+  dispatchFlywheelEvent: (leadId, leadName, tenant) => {
+    setTimeout(() => {
+      get().addThoughtLedgerEntry({
+        agentName: 'NetworkAgent',
+        status: 'action_executed',
+        thoughtProcess: `[FLYWHEEL CROSS-SELL] Opportunity detected: ${leadName} (${leadId}) entered CLOSED_WON status. Initiating cross-venture referral engine for ${tenant.toUpperCase()} → adjacent venture upsell sequence. Centle Router engaged.`,
+        activeTenantTrack: tenant,
+        currentTask: 'Flywheel Cross-Sell Router',
+        tx_hash: Math.random().toString(36).substring(2, 18)
+      });
+    }, 800);
   },
 
   logLeadActivity: (id, activity) => {
@@ -1012,6 +1155,17 @@ export const useZetaStore = create<ZetaState>((set, get) => ({
       return { ambassadors: updated };
     });
     notifyMutation('payouts', 'approve_commission', { ambassador: newAmbassador });
+    // Log ambassador registration event to terminal
+    setTimeout(() => {
+      get().addThoughtLedgerEntry({
+        agentName: 'NetworkAgent',
+        status: 'action_executed',
+        thoughtProcess: `[ROUTING PROTOCOL] New ambassador partner registered: ${name} (Code: ${code.toUpperCase()}). Referral engine activated. Discount rate: 5% on qualifying deals. Payout tracking initialized.`,
+        activeTenantTrack: tenant_company,
+        currentTask: 'Ambassador Registration',
+        tx_hash: Math.random().toString(36).substring(2, 18)
+      });
+    }, 200);
   },
 
   updateInvoiceStatus: (id, status) => {

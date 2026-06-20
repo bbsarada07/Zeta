@@ -44,6 +44,14 @@ import type { TenantCompany, PipelineStage } from '../types/zeta';
 type NavView = 'dashboard' | 'crm' | 'erp' | 'invoices' | 'ambassadors' | 'mailbox' | 'hr_portal';
 type TenantFilter = TenantCompany | 'global';
 
+// Flywheel cross-sell toast state interface
+interface FlywheelToast {
+  id: string;
+  leadName: string;
+  tenant: string;
+  visible: boolean;
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const TENANT_LABELS: Record<TenantFilter, string> = {
@@ -157,9 +165,23 @@ const KpiCard = ({
   );
 };
 
+// AI Next-Action suggestion engine
+const getNextAction = (lead: Lead): { text: string; color: string } => {
+  switch (lead.pipelineStage) {
+    case 'PROSPECT': return { text: '→ Schedule Discovery Call', color: 'text-onyx-accent-cyan' };
+    case 'QUALIFICATION': return { text: '→ Send Capability Deck', color: 'text-onyx-accent-purple' };
+    case 'PROPOSAL': return { text: '→ Follow Up on RFP', color: 'text-onyx-accent-amber' };
+    case 'NEGOTIATION': return { text: '→ Escalate to Director', color: 'text-orange-400' };
+    case 'CLOSED_WON': return { text: '✓ Initiate Onboarding', color: 'text-onyx-accent-green' };
+    case 'CLOSED_LOST': return { text: '↺ Re-engagement in 90d', color: 'text-zinc-500' };
+    default: return { text: '→ Review Lead', color: 'text-zinc-400' };
+  }
+};
+
 const LeadCard = ({ lead, onClick }: { lead: Lead; onClick: () => void }) => {
   const themeProfile = useZetaStore((s) => s.themeProfile);
   const isOnyx = themeProfile === 'ONYX';
+  const nextAction = getNextAction(lead);
   return (
     <div 
       onClick={onClick}
@@ -197,6 +219,8 @@ const LeadCard = ({ lead, onClick }: { lead: Lead; onClick: () => void }) => {
           />
         </div>
       </div>
+      {/* AI Next-Action Badge */}
+      <p className={`text-[10px] font-mono mt-2 font-semibold truncate ${nextAction.color}`}>{nextAction.text}</p>
     </div>
   );
 };
@@ -323,11 +347,50 @@ export default function Dashboard() {
   const addLead = useZetaStore((s) => s.addLead);
   const updateLeadStage = useZetaStore((s) => s.updateLeadStage);
   const logLeadActivity = useZetaStore((s) => s.logLeadActivity);
+  const mergeLeads = useZetaStore((s) => s.mergeLeads);
+  const triggerPipelineIngestion = useZetaStore((s) => s.triggerPipelineIngestion);
   const issueInvoice = useZetaStore((s) => s.issueInvoice);
   const restockSKU = useZetaStore((s) => s.restockSKU);
   const restockAsset = useZetaStore((s) => s.restockAsset);
   const addAmbassador = useZetaStore((s) => s.addAmbassador);
   const updateInvoiceStatus = useZetaStore((s) => s.updateInvoiceStatus);
+
+  // Flywheel Cross-sell Toast System
+  const [flywheelToasts, setFlywheelToasts] = useState<FlywheelToast[]>([]);
+
+  // Subscribe to CLOSED_WON transitions via thought ledger updates for flywheel toasts
+  useEffect(() => {
+    const flywheelEntries = agentThoughtLedger
+      .filter(e => e.thoughtProcess?.includes('[FLYWHEEL CROSS-SELL]') && e.agentName === 'NetworkAgent')
+      .slice(0, 1);
+    if (flywheelEntries.length > 0) {
+      const entry = flywheelEntries[0];
+      const toastId = `toast_${entry.id}`;
+      setFlywheelToasts(prev => {
+        if (prev.some(t => t.id === toastId)) return prev;
+        const match = entry.thoughtProcess.match(/Opportunity detected: (.+?) \(/);
+        const tenantMatch = entry.thoughtProcess.match(/for ([A-Z_]+) →/);
+        const newToast: FlywheelToast = {
+          id: toastId,
+          leadName: match ? match[1] : 'Deal',
+          tenant: tenantMatch ? tenantMatch[1] : (entry.activeTenantTrack || 'GLOBAL'),
+          visible: true
+        };
+        return [newToast, ...prev].slice(0, 3);
+      });
+      // Auto-dismiss after 7 seconds
+      setTimeout(() => {
+        setFlywheelToasts(prev => prev.map(t => t.id === toastId ? { ...t, visible: false } : t));
+        setTimeout(() => setFlywheelToasts(prev => prev.filter(t => t.id !== toastId)), 500);
+      }, 7000);
+    }
+  }, [agentThoughtLedger]);
+
+  // Duplicate detection state
+  const [isMergeModalOpen, setIsMergeModalOpen] = useState(false);
+  const [mergePrimaryId, setMergePrimaryId] = useState<string>('');
+  const [mergeDuplicateId, setMergeDuplicateId] = useState<string>('');
+  const [isPipelineIngesting, setIsPipelineIngesting] = useState(false);
 
   // Modals UI States
   const [activeLeadForModal, setActiveLeadForModal] = useState<Lead | null>(null);
@@ -1080,17 +1143,51 @@ export default function Dashboard() {
             <div className="flex flex-col gap-4 h-full">
               {/* Toolbar */}
               <div className="flex justify-between items-center flex-wrap gap-2">
-                <div className="relative w-64">
-                  <span className="absolute left-2.5 top-2.5 text-onyx-muted">
-                    <Search size={14} />
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="Search leads..."
-                    value={crmSearch}
-                    onChange={(e) => setCrmSearch(e.target.value)}
-                    className="w-full text-xs bg-onyx-panel border border-onyx-border rounded pl-8 pr-3 py-2 text-onyx-bright placeholder-onyx-muted focus:outline-none focus:border-zinc-500 transition-colors font-mono"
-                  />
+                <div className="flex gap-2 flex-wrap items-center">
+                  <div className="relative w-64">
+                    <span className="absolute left-2.5 top-2.5 text-onyx-muted">
+                      <Search size={14} />
+                    </span>
+                    <input
+                      type="text"
+                      placeholder="Search leads..."
+                      value={crmSearch}
+                      onChange={(e) => setCrmSearch(e.target.value)}
+                      className="w-full text-xs bg-onyx-panel border border-onyx-border rounded pl-8 pr-3 py-2 text-onyx-bright placeholder-onyx-muted focus:outline-none focus:border-zinc-500 transition-colors font-mono"
+                    />
+                  </div>
+                  {/* ADS Pipeline Ingestion Simulator */}
+                  <button
+                    id="ads-pipeline-ingestion-btn"
+                    onClick={() => {
+                      setIsPipelineIngesting(true);
+                      triggerPipelineIngestion(tenantFilter);
+                      setTimeout(() => setIsPipelineIngesting(false), 2500);
+                    }}
+                    disabled={isPipelineIngesting}
+                    className={`flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded border transition-all font-mono ${
+                      isPipelineIngesting
+                        ? 'bg-onyx-accent-cyan/5 border-onyx-accent-cyan/20 text-onyx-accent-cyan cursor-wait animate-pulse'
+                        : 'bg-onyx-accent-cyan/10 border-onyx-accent-cyan/30 text-onyx-accent-cyan hover:bg-onyx-accent-cyan/20'
+                    }`}
+                  >
+                    <Zap size={13} />
+                    {isPipelineIngesting ? 'INGESTING...' : 'ADS PIPELINE INGESTION'}
+                  </button>
+                  {/* Merge Records Trigger */}
+                  {filteredLeads.length >= 2 && (
+                    <button
+                      id="merge-records-btn"
+                      onClick={() => {
+                        setMergePrimaryId(filteredLeads[0].id);
+                        setMergeDuplicateId(filteredLeads[1].id);
+                        setIsMergeModalOpen(true);
+                      }}
+                      className="flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded border border-onyx-accent-amber/30 text-onyx-accent-amber bg-onyx-accent-amber/5 hover:bg-onyx-accent-amber/15 transition-all font-mono"
+                    >
+                      <RefreshCw size={13} /> MERGE RECORDS
+                    </button>
+                  )}
                 </div>
                 <button 
                   onClick={() => setIsAddLeadModalOpen(true)}
@@ -1355,27 +1452,36 @@ export default function Dashboard() {
                 <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="border-b border-onyx-border bg-onyx-panel/80">
-                      {['Ambassador Code', 'Partner Name', 'Tenant Context', 'Total Referrals', 'Total Revenue Generated', 'Total Discounts Paid', 'Status'].map((h) => (
+                      {['Rank', 'Ambassador Code', 'Partner Name', 'Tenant Context', 'Total Referrals', 'Total Revenue Generated', 'Commissions Paid', 'Status'].map((h) => (
                         <th key={h} className="text-left text-xs font-bold tracking-wider uppercase text-onyx-muted py-4 px-6">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {ambassadorStats.map((amb, idx) => (
-                      <tr key={amb.id} className={`border-b border-onyx-border/30 hover:bg-onyx-panel/60 transition-colors ${idx % 2 === 0 ? 'bg-onyx-canvas/60' : 'bg-onyx-panel/40'}`}>
-                        <td className="py-4 px-6 font-mono text-onyx-accent-purple text-sm font-bold">{amb.code}</td>
-                        <td className="py-4 px-6 text-onyx-bright font-semibold">{amb.name}</td>
-                        <td className="py-4 px-6 text-onyx-muted font-mono text-sm font-semibold">{amb.tenant_company ? TENANT_LABELS[amb.tenant_company] : 'GLOBAL'}</td>
-                        <td className="py-4 px-6 font-mono font-bold text-center tabular-nums text-sm">{amb.referrals}</td>
-                        <td className="py-4 px-6 font-mono text-onyx-accent-green font-bold text-sm">${amb.salesGenerated.toFixed(2)}</td>
-                        <td className="py-4 px-6 font-mono text-onyx-accent-rose font-bold text-sm">${amb.discountsEarned.toFixed(2)}</td>
-                        <td className="py-4 px-6">
-                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-onyx-accent-green bg-onyx-accent-green/10 border border-onyx-accent-green/20 px-2.5 py-1 rounded-md font-mono">
-                            ACTIVE
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
+                    {[...ambassadorStats]
+                      .sort((a, b) => b.salesGenerated - a.salesGenerated)
+                      .map((amb, idx) => {
+                        const rankEmoji = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+                        const rankColor = idx === 0 ? 'text-yellow-400' : idx === 1 ? 'text-zinc-400' : idx === 2 ? 'text-amber-600' : 'text-zinc-600';
+                        return (
+                          <tr key={amb.id} className={`border-b border-onyx-border/30 hover:bg-onyx-panel/60 transition-colors ${idx % 2 === 0 ? 'bg-onyx-canvas/60' : 'bg-onyx-panel/40'}`}>
+                            <td className="py-4 px-6">
+                              <span className={`font-mono font-black text-sm ${rankColor}`}>{rankEmoji}</span>
+                            </td>
+                            <td className="py-4 px-6 font-mono text-onyx-accent-purple text-sm font-bold">{amb.code}</td>
+                            <td className="py-4 px-6 text-onyx-bright font-semibold">{amb.name}</td>
+                            <td className="py-4 px-6 text-onyx-muted font-mono text-sm font-semibold">{amb.tenant_company ? TENANT_LABELS[amb.tenant_company] : 'GLOBAL'}</td>
+                            <td className="py-4 px-6 font-mono font-bold text-center tabular-nums text-sm">{amb.referrals}</td>
+                            <td className="py-4 px-6 font-mono text-onyx-accent-green font-bold text-sm">${amb.salesGenerated.toFixed(2)}</td>
+                            <td className="py-4 px-6 font-mono text-onyx-accent-rose font-bold text-sm">${amb.discountsEarned.toFixed(2)}</td>
+                            <td className="py-4 px-6">
+                              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-onyx-accent-green bg-onyx-accent-green/10 border border-onyx-accent-green/20 px-2.5 py-1 rounded-md font-mono">
+                                ACTIVE
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
                   </tbody>
                 </table>
               </div>
@@ -2065,11 +2171,26 @@ export default function Dashboard() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Referral Discount Code *</label>
+                <div className="flex items-center justify-between">
+                  <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Referral Discount Code *</label>
+                  {newAmbName && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const prefix = newAmbName.replace(/\s+/g, '').substring(0, 5).toUpperCase();
+                        const suffix = Math.floor(10 + Math.random() * 90);
+                        setNewAmbCode(`${prefix}${suffix}`);
+                      }}
+                      className="text-[9px] text-onyx-accent-cyan hover:text-cyan-300 font-mono font-bold uppercase tracking-wider transition-colors"
+                    >
+                      ✦ Auto-Generate
+                    </button>
+                  )}
+                </div>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. ARIA5"
+                  placeholder="e.g. ARIA5 or click Auto-Generate"
                   value={newAmbCode}
                   onChange={(e) => setNewAmbCode(e.target.value)}
                   className="w-full bg-onyx-canvas border border-onyx-border rounded p-2 text-xs text-onyx-bright focus:outline-none focus:border-zinc-500 font-mono"
@@ -2104,6 +2225,120 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* 6. Merge Records Modal */}
+      {isMergeModalOpen && (
+        <div className="fixed inset-0 bg-onyx-canvas/80 backdrop-blur-sm z-50 flex justify-center items-center p-4">
+          <div className="bg-onyx-panel border border-onyx-border rounded-lg w-full max-w-lg overflow-hidden flex flex-col font-mono text-xs shadow-glow-amber animate-fade-in">
+            <div className="p-4 border-b border-onyx-border flex justify-between items-center bg-onyx-panel/80">
+              <span className="text-[10px] text-onyx-accent-amber font-bold tracking-widest uppercase">⚡ Merge Records — Duplicate CRM Resolver</span>
+              <button onClick={() => setIsMergeModalOpen(false)} className="text-onyx-muted hover:text-onyx-bright transition-colors">
+                <X size={16} />
+              </button>
+            </div>
+            <div className="p-5 space-y-5">
+              <p className="text-[10px] text-zinc-400 leading-relaxed font-mono border border-dashed border-onyx-accent-amber/20 bg-onyx-accent-amber/5 p-3 rounded">
+                Select two lead records to merge. The primary record will absorb all activity logs from the duplicate and retain the higher deal value. The duplicate record will be permanently removed.
+              </p>
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Primary Record (Keep)</label>
+                  <select
+                    value={mergePrimaryId}
+                    onChange={(e) => setMergePrimaryId(e.target.value)}
+                    className="w-full bg-onyx-canvas border border-onyx-border rounded p-2 text-xs text-onyx-bright focus:outline-none focus:border-onyx-accent-green font-mono"
+                  >
+                    {filteredLeads.map(l => (
+                      <option key={l.id} value={l.id}>{l.name} — {l.companyName} (${l.potentialValue.toLocaleString()})</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Duplicate Record (Remove)</label>
+                  <select
+                    value={mergeDuplicateId}
+                    onChange={(e) => setMergeDuplicateId(e.target.value)}
+                    className="w-full bg-onyx-canvas border border-onyx-border rounded p-2 text-xs text-onyx-bright focus:outline-none focus:border-onyx-accent-rose font-mono"
+                  >
+                    {filteredLeads.filter(l => l.id !== mergePrimaryId).map(l => (
+                      <option key={l.id} value={l.id}>{l.name} — {l.companyName} (${l.potentialValue.toLocaleString()})</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              {mergePrimaryId && mergeDuplicateId && mergePrimaryId !== mergeDuplicateId && (
+                <div className="bg-onyx-canvas/40 border border-onyx-border/40 p-3 rounded text-[10px] space-y-1 text-zinc-400">
+                  <p className="text-zinc-500 font-bold uppercase tracking-widest">Merge Preview</p>
+                  <p>Primary: <span className="text-onyx-accent-green font-bold">{filteredLeads.find(l => l.id === mergePrimaryId)?.name}</span></p>
+                  <p>Duplicate to absorb: <span className="text-onyx-accent-rose font-bold">{filteredLeads.find(l => l.id === mergeDuplicateId)?.name}</span></p>
+                  <p>Combined activity logs: <span className="text-onyx-bright font-bold">{((filteredLeads.find(l => l.id === mergePrimaryId)?.activityLogs?.length || 0) + (filteredLeads.find(l => l.id === mergeDuplicateId)?.activityLogs?.length || 0))} entries</span></p>
+                </div>
+              )}
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={() => {
+                    if (!mergePrimaryId || !mergeDuplicateId || mergePrimaryId === mergeDuplicateId) {
+                      alert('Please select two distinct lead records.');
+                      return;
+                    }
+                    mergeLeads(mergePrimaryId, mergeDuplicateId);
+                    setIsMergeModalOpen(false);
+                    setMergePrimaryId('');
+                    setMergeDuplicateId('');
+                  }}
+                  disabled={!mergePrimaryId || !mergeDuplicateId || mergePrimaryId === mergeDuplicateId}
+                  className={`flex-1 py-2.5 rounded font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 ${
+                    !mergePrimaryId || !mergeDuplicateId || mergePrimaryId === mergeDuplicateId
+                      ? 'bg-zinc-800 text-zinc-500 border border-zinc-700 cursor-not-allowed'
+                      : 'bg-onyx-accent-amber hover:bg-amber-400 text-onyx-canvas shadow-sm'
+                  }`}
+                >
+                  <RefreshCw size={14} /> Execute Merge
+                </button>
+                <button
+                  onClick={() => setIsMergeModalOpen(false)}
+                  className="px-5 py-2.5 rounded border border-onyx-border text-onyx-muted hover:text-onyx-bright hover:border-zinc-500 transition-all font-bold uppercase tracking-wider"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 7. Flywheel Cross-Sell Toast Banner System (Fixed Bottom-Right) */}
+      <div className="fixed bottom-6 right-6 z-[60] flex flex-col gap-3 pointer-events-none" style={{ maxWidth: '360px' }}>
+        {flywheelToasts.map(toast => (
+          <div
+            key={toast.id}
+            className={`pointer-events-auto transition-all duration-500 ${
+              toast.visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            }`}
+          >
+            <div className="bg-[#09090b] border border-onyx-accent-purple/40 rounded-xl p-4 shadow-[0_0_30px_rgba(168,85,247,0.2)] font-mono text-xs relative overflow-hidden">
+              {/* Animated glow border */}
+              <div className="absolute inset-0 rounded-xl border border-onyx-accent-purple/20 animate-pulse pointer-events-none" />
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-onyx-accent-purple/15 border border-onyx-accent-purple/30 flex items-center justify-center flex-shrink-0">
+                  <ArrowUpRight size={16} className="text-onyx-accent-purple" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-onyx-accent-purple font-bold tracking-widest uppercase mb-1">⚡ Flywheel Cross-Sell Activated</p>
+                  <p className="text-zinc-300 text-xs font-semibold truncate">{toast.leadName} → CLOSED WON</p>
+                  <p className="text-zinc-500 text-[10px] mt-0.5">Centle Router engaged · {toast.tenant} venture cross-sell pipeline initiated</p>
+                </div>
+                <button
+                  onClick={() => setFlywheelToasts(prev => prev.filter(t => t.id !== toast.id))}
+                  className="text-zinc-600 hover:text-zinc-300 transition-colors flex-shrink-0"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
 
     </div>
   );
