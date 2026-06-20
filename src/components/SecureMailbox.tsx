@@ -293,7 +293,7 @@ const SecureMessageItem = ({
           />
           <button
             onClick={handleSendReply}
-            className="text-xs font-mono font-bold uppercase tracking-wider text-onyx-canvas bg-onyx-accent-rose hover:bg-rose-400 border border-onyx-accent-rose px-5 py-2.5 rounded-lg transition-all shadow-glow-rose"
+            className="w-full sm:w-auto h-12 text-xs font-mono font-bold uppercase tracking-wider text-onyx-canvas bg-onyx-accent-rose hover:bg-rose-400 border border-onyx-accent-rose px-5 rounded-lg transition-all shadow-glow-rose flex items-center justify-center"
           >
             Send Response
           </button>
@@ -436,7 +436,7 @@ export default function SecureMailbox({ tenantFilter }: { tenantFilter: string }
   };
 
   return (
-    <div className="flex flex-col gap-4 h-full animate-fade-in font-mono">
+    <div className="flex flex-col gap-4 h-full animate-fade-in font-mono overflow-y-auto min-h-screen pb-16 md:overflow-visible md:min-h-0 md:pb-0">
       {/* Mount integrity scan header */}
       <IntegrityCheckHeader />
 
@@ -577,7 +577,7 @@ export default function SecureMailbox({ tenantFilter }: { tenantFilter: string }
 
                 <button
                   type="submit"
-                  className="w-full py-3.5 text-sm font-bold uppercase tracking-widest text-onyx-canvas bg-onyx-accent-rose hover:bg-rose-400 border border-onyx-accent-rose rounded-lg transition-all shadow-glow-rose flex items-center justify-center gap-2"
+                  className="w-full h-12 text-sm font-bold uppercase tracking-widest text-onyx-canvas bg-onyx-accent-rose hover:bg-rose-400 border border-onyx-accent-rose rounded-lg transition-all shadow-glow-rose flex items-center justify-center gap-2"
                 >
                   <Send size={14} />
                   Transmit Payload

@@ -733,7 +733,7 @@ export default function Login({ onHandshakeStart, onHandshakeComplete, onSecurit
       </div>
 
       {/* Right Panel: Gateway Command Center (40% Width) */}
-      <div className="relative z-10 w-full md:w-[40vw] h-full flex flex-col justify-center bg-[#09090b] border-l border-[#27272a] px-8 md:px-12 py-10 shadow-[0_0_80px_rgba(0,0,0,0.9)]">
+      <div className="relative z-10 w-full md:w-[40vw] h-full flex flex-col justify-center bg-[#09090b] border-l border-[#27272a] px-8 md:px-12 py-10 shadow-[0_0_80px_rgba(0,0,0,0.9)] overflow-y-auto min-h-screen pb-16 md:overflow-visible md:min-h-0 md:pb-0">
         
         {/* Subtle Ambient Accent Border Glow */}
         <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
@@ -761,7 +761,7 @@ export default function Login({ onHandshakeStart, onHandshakeComplete, onSecurit
 
           {/* Form control card */}
           <div className="my-auto py-4 space-y-5">
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="flex flex-col w-full gap-4 px-2">
               
               <div className="space-y-1.5">
                 <label className="text-[9px] font-bold text-zinc-400 tracking-wider uppercase font-mono">
@@ -779,7 +779,7 @@ export default function Login({ onHandshakeStart, onHandshakeComplete, onSecurit
                     onFocus={() => setIsEmailFocused(true)}
                     onBlur={() => setIsEmailFocused(false)}
                     placeholder="admin@centle.com"
-                    className={`w-full bg-black border border-[#27272a] rounded-md pl-10 pr-4 py-3 text-xs text-zinc-200 placeholder-zinc-700 transition-all duration-300 font-mono shadow-inner shadow-black/80 ${brandTheme.borderGlow}`}
+                    className={`w-full bg-black border border-[#27272a] rounded-md pl-10 pr-4 h-12 text-xs text-zinc-200 placeholder-zinc-700 transition-all duration-300 font-mono shadow-inner shadow-black/80 ${brandTheme.borderGlow}`}
                   />
                 </div>
               </div>
@@ -798,7 +798,7 @@ export default function Login({ onHandshakeStart, onHandshakeComplete, onSecurit
                     disabled={authState !== 'idle'}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••••••"
-                    className={`w-full bg-black border border-[#27272a] rounded-md pl-10 pr-4 py-3 text-xs text-zinc-200 placeholder-zinc-700 transition-all duration-300 font-mono shadow-inner shadow-black/80 ${brandTheme.borderGlow}`}
+                    className={`w-full bg-black border border-[#27272a] rounded-md pl-10 pr-4 h-12 text-xs text-zinc-200 placeholder-zinc-700 transition-all duration-300 font-mono shadow-inner shadow-black/80 ${brandTheme.borderGlow}`}
                   />
                 </div>
               </div>
@@ -825,7 +825,7 @@ export default function Login({ onHandshakeStart, onHandshakeComplete, onSecurit
               <button
                 type="submit"
                 disabled={authState !== 'idle' || isTyping}
-                className={`w-full py-3 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all duration-300 font-mono flex justify-center items-center border ${
+                className={`w-full h-12 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all duration-300 font-mono flex justify-center items-center border ${
                   authState === 'idle'
                     ? 'bg-zinc-100 hover:bg-zinc-200 text-black border-transparent shadow-[0_0_15px_rgba(255,255,255,0.05)]'
                     : 'bg-black text-zinc-500 border-zinc-800 cursor-not-allowed'

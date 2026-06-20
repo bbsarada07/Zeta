@@ -136,33 +136,38 @@ const KpiCard = ({
   icon: Icon,
   color,
   sub,
+  hiddenMobile,
 }: {
   label: string;
   value: string | number;
   icon: React.ElementType;
   color: string;
   sub?: string;
+  hiddenMobile?: boolean;
 }) => {
   const themeProfile = useZetaStore((s) => s.themeProfile);
   const isOnyx = themeProfile === 'ONYX';
   return (
-    <div className={`border rounded-xl p-6 flex flex-col gap-4 shadow-2xl transition-all duration-200 ${
+    <div className={`border rounded-xl shadow-2xl transition-all duration-200 snap-center flex-shrink-0 ${
+      hiddenMobile ? 'hidden md:flex' : 'flex'
+    } ${
       isOnyx 
         ? 'bg-[#09090b] text-[#fafafa] border-[#27272a] hover:border-zinc-500 shadow-zinc-950/50' 
         : 'bg-[#f4f4f5] text-[#09090b] border-[#e4e4e7] hover:border-zinc-300 shadow-zinc-200'
-    }`}>
-      <div className="flex items-center justify-between">
-        <span className={`text-sm font-semibold tracking-wider uppercase ${
+    } p-3 min-w-[140px] max-w-[160px] h-20 md:p-6 md:min-w-0 md:max-w-none md:h-auto flex-col gap-1 md:gap-4 md:flex-1`}>
+      <div className="flex items-center justify-between gap-1">
+        <span className={`text-[9px] md:text-sm font-semibold tracking-wider uppercase truncate ${
           isOnyx ? 'text-zinc-400' : 'text-zinc-600'
         }`}>{label}</span>
-        <div className={`p-2 rounded-lg ${color}`}>
-          <Icon size={16} />
+        <div className={`p-1 md:p-2 rounded-lg ${color} flex-shrink-0`}>
+          <Icon size={12} className="md:hidden" />
+          <Icon size={16} className="hidden md:block" />
         </div>
       </div>
-      <div className={`text-3xl font-bold tracking-tight ${
+      <div className={`text-base md:text-3xl font-bold tracking-tight truncate ${
         isOnyx ? 'text-[#fafafa]' : 'text-black'
       }`}>{value}</div>
-      {sub && <div className={`text-xs font-medium ${
+      {sub && <div className={`hidden md:block text-xs font-medium ${
         isOnyx ? 'text-zinc-500' : 'text-zinc-600'
       }`}>{sub}</div>}
     </div>
@@ -704,7 +709,7 @@ export default function Dashboard() {
   }, [currentUser]);
 
   return (
-    <div className={`flex h-screen w-screen overflow-hidden font-sans select-none relative ${
+    <div className={`flex h-screen w-screen max-w-full overflow-hidden font-sans select-none relative ${
       isOnyx ? 'bg-[#000000] text-[#fafafa] border-[#27272a]' : 'bg-[#ffffff] text-[#09090b] border-[#e4e4e7]'
     }`}>
       {/* Mobile Sticky Top Header */}
@@ -721,9 +726,22 @@ export default function Dashboard() {
         </div>
         
         <div className="flex items-center gap-2">
+          {/* Sleek green blinking system status indicator */}
+          <button
+            onClick={() => setIsMobileTerminalOpen(true)}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 border rounded-md text-[9px] font-bold font-mono tracking-wider transition-all min-h-[44px] ${
+              isOnyx
+                ? 'bg-onyx-accent-green/10 border-onyx-accent-green/20 text-onyx-accent-green'
+                : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+            }`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
+            <span className="animate-pulse">● 12 AGENTS</span>
+          </button>
+
           <button
             onClick={() => setShowGatewayRouter(true)}
-            className={`flex items-center gap-1 px-2.5 py-1.5 border rounded-md text-[9px] font-bold uppercase transition-all tracking-wider ${
+            className={`flex items-center justify-center gap-1 px-2.5 py-1.5 border rounded-md text-[9px] font-bold uppercase transition-all tracking-wider min-h-[44px] min-w-[44px] ${
               isOnyx
                 ? 'bg-onyx-accent-purple/10 border-onyx-accent-purple/30 text-onyx-accent-purple hover:bg-onyx-accent-purple/20'
                 : 'bg-fuchsia-50 border-fuchsia-300 text-fuchsia-800 hover:bg-fuchsia-100'
@@ -735,7 +753,7 @@ export default function Dashboard() {
           
           <button 
             onClick={() => setIsMobileDrawerOpen(true)}
-            className={`p-1.5 rounded-lg border transition-all ${
+            className={`p-1.5 rounded-lg border transition-all min-h-[44px] min-w-[44px] flex items-center justify-center ${
               isOnyx ? 'bg-zinc-950 border-zinc-800 hover:border-zinc-600 text-zinc-300' : 'bg-white border-zinc-200 hover:border-zinc-400 text-zinc-700'
             }`}
           >
@@ -768,7 +786,7 @@ export default function Dashboard() {
               </div>
               <button 
                 onClick={() => setIsMobileDrawerOpen(false)}
-                className={`p-1 rounded-md border ${
+                className={`p-1.5 rounded-md border min-h-[44px] min-w-[44px] flex items-center justify-center ${
                   isOnyx ? 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-black'
                 }`}
               >
@@ -794,7 +812,7 @@ export default function Dashboard() {
                     <button
                       id="mobile-tenant-switcher-btn"
                       onClick={() => setTenantDropOpen((o) => !o)}
-                      className={`w-full flex items-center justify-between border rounded-md px-3 py-2 text-xs font-semibold transition-colors duration-150 ${
+                      className={`w-full flex items-center justify-between border rounded-md px-3 py-3 min-h-[44px] text-xs font-semibold transition-colors duration-150 ${
                         isOnyx ? 'bg-[#000000] border-[#27272a] text-[#fafafa] hover:border-zinc-500' : 'bg-[#ffffff] border-[#e4e4e7] text-[#09090b] hover:border-zinc-400'
                       }`}
                     >
@@ -846,7 +864,7 @@ export default function Dashboard() {
                       setActiveNav(id);
                       setIsMobileDrawerOpen(false);
                     }}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-xs font-medium transition-all duration-150 ${
+                    className={`w-full flex items-center gap-3 px-3 py-3 min-h-[44px] rounded-md text-xs font-medium transition-all duration-150 ${
                       isActive
                         ? (isOnyx 
                             ? 'bg-onyx-accent-green/10 text-onyx-accent-green border border-onyx-accent-green/20' 
@@ -878,7 +896,7 @@ export default function Dashboard() {
                   lockSession();
                   setIsMobileDrawerOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-xs font-medium border border-transparent transition-all duration-150 text-left ${
+                className={`w-full flex items-center gap-3 px-3 py-3 min-h-[44px] rounded-md text-xs font-medium border border-transparent transition-all duration-150 text-left ${
                   isOnyx 
                     ? 'text-onyx-accent-cyan hover:bg-onyx-accent-cyan/5 hover:border-onyx-accent-cyan/20' 
                     : 'text-cyan-700 hover:bg-cyan-700/5 hover:border-cyan-700/20'
@@ -893,7 +911,7 @@ export default function Dashboard() {
                   logout();
                   setIsMobileDrawerOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-xs font-medium border border-transparent transition-all duration-150 text-left ${
+                className={`w-full flex items-center gap-3 px-3 py-3 min-h-[44px] rounded-md text-xs font-medium border border-transparent transition-all duration-150 text-left ${
                   isOnyx 
                     ? 'text-onyx-accent-rose hover:bg-onyx-accent-rose/5 hover:border-onyx-accent-rose/20' 
                     : 'text-rose-700 hover:bg-rose-700/5 hover:border-rose-700/20'
@@ -1085,9 +1103,9 @@ export default function Dashboard() {
 
         {/* KPI Grid */}
         <section className={`flex-shrink-0 p-4 border-b ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
-          <div key={activeNav} className={`grid grid-cols-1 md:grid-cols-3 ${
+          <div key={activeNav} className={`flex flex-row overflow-x-auto snap-x snap-mandatory scrollbar-none gap-3 w-full pb-2 md:grid md:grid-cols-3 ${
             ['dashboard', 'erp', 'invoices', 'ambassadors'].includes(activeNav) ? 'xl:grid-cols-4' : 'xl:grid-cols-3'
-          } gap-6 animate-fade-in transition-all duration-200 ease-in-out`}>
+          } md:gap-6 animate-fade-in transition-all duration-200 ease-in-out`}>
             {(() => {
               switch (activeNav) {
                 case 'hr_portal':
@@ -1106,6 +1124,7 @@ export default function Dashboard() {
                         icon={ShieldCheck}
                         color="bg-onyx-accent-green/10 text-onyx-accent-green"
                         sub="HSM key encryption pass"
+                        hiddenMobile
                       />
                       <KpiCard
                         label="PENDING MONITORING DEPLOYMENTS"
@@ -1163,6 +1182,7 @@ export default function Dashboard() {
                         icon={Lock}
                         color="bg-onyx-accent-green/10 text-onyx-accent-green"
                         sub="Active token validated"
+                        hiddenMobile
                       />
                       <KpiCard
                         label="THREAT SURFACE"
@@ -1170,6 +1190,7 @@ export default function Dashboard() {
                         icon={AlertTriangle}
                         color="bg-zinc-800 text-zinc-500"
                         sub="Vulnerability Detected"
+                        hiddenMobile
                       />
                     </>
                   );
@@ -1338,7 +1359,7 @@ export default function Dashboard() {
                 </div>
  
                 {/* Dashboard live terminal stream */}
-                <div className={`border rounded-xl p-6 flex flex-col gap-4 flex-1 min-h-[200px] shadow-2xl ${isOnyx ? 'bg-[#09090b] border-[#27272a] shadow-zinc-950/40' : 'bg-[#f4f4f5] border-[#e4e4e7] shadow-zinc-200'}`}>
+                <div className={`border rounded-xl p-6 hidden md:flex flex-col gap-4 flex-1 min-h-[200px] shadow-2xl ${isOnyx ? 'bg-[#09090b] border-[#27272a] shadow-zinc-950/40' : 'bg-[#f4f4f5] border-[#e4e4e7] shadow-zinc-200'}`}>
                   <div className={`flex items-center justify-between border-b pb-2 ${isOnyx ? 'border-[#27272a]/50' : 'border-[#e4e4e7]'}`}>
                     <h3 className={`text-lg font-semibold tracking-wide uppercase ${isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'}`}>Live Agent Diagnostics Stream</h3>
                     <span className={`text-xs font-semibold ${isOnyx ? 'text-zinc-400' : 'text-zinc-500'}`}>{filteredTerminalEntries.length} entries</span>
@@ -2725,22 +2746,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Mobile Telemetry bottom bar */}
-      <div 
-        className={`fixed bottom-0 left-0 right-0 h-12 border-t flex items-center justify-between px-4 z-30 md:hidden cursor-pointer ${
-          isOnyx ? 'bg-[#09090b] border-[#27272a]' : 'bg-[#f4f4f5] border-[#e4e4e7]'
-        }`}
-        onClick={() => setIsMobileTerminalOpen(true)}
-      >
-        <div className="flex items-center gap-2">
-          <Activity size={12} className={`animate-pulse ${isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'}`} />
-          <span className={`text-[10px] font-mono font-bold uppercase tracking-wider ${isOnyx ? 'text-zinc-400' : 'text-zinc-600'}`}>Agent Matrix</span>
-        </div>
-        <span className={`text-[9px] font-mono font-bold ${isOnyx ? 'text-zinc-500' : 'text-zinc-600'}`}>
-          {filteredTerminalEntries.length} entries ↑
-        </span>
-      </div>
-
       {/* Mobile Terminal Bottom Sheet */}
       {isMobileTerminalOpen && (
         <div className="fixed inset-0 z-50 md:hidden bg-black/60 backdrop-blur-sm" onClick={() => setIsMobileTerminalOpen(false)}>
@@ -2759,7 +2764,7 @@ export default function Dashboard() {
               </div>
               <button 
                 onClick={() => setIsMobileTerminalOpen(false)}
-                className={`p-1 rounded-md border ${
+                className={`min-h-[44px] min-w-[44px] flex items-center justify-center p-1 rounded-md border ${
                   isOnyx ? 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-black'
                 }`}
               >

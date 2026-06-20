@@ -210,7 +210,7 @@ const AnimatedSubmitButton = ({
       type={onClick ? 'button' : 'submit'}
       disabled={disabled || btnState !== 'idle'}
       onClick={onClick}
-      className={`w-full py-3 rounded-lg text-sm font-semibold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 border ${cfg.cls}`}
+      className={`w-full h-12 rounded-lg text-sm font-semibold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 border ${cfg.cls}`}
     >
       {cfg.icon}
       {cfg.label}
@@ -478,38 +478,36 @@ export default function AdminHRPortal() {
   // ─────────────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col gap-5 h-full animate-fade-in font-mono text-xs max-w-6xl w-full">
+    <div className="flex flex-col gap-5 h-full animate-fade-in font-mono text-xs max-w-6xl w-full overflow-y-auto min-h-screen pb-16 md:overflow-visible md:min-h-0 md:pb-0">
 
       {/* Header */}
-      <div className={`border-b pb-3 flex flex-col md:flex-row md:items-center justify-between gap-3 ${isDark ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
-        <div>
-          <div className="flex items-center gap-2">
-            <Lock className="text-onyx-accent-rose" size={15} />
-            <h1 className={`text-sm font-bold uppercase tracking-widest ${isDark ? 'text-[#fafafa]' : 'text-zinc-800'}`}>
-              Private Admin HR &amp; Dossier Operations
-            </h1>
-          </div>
-          <p className={`text-[9px] mt-1 ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>
-            Zero-Trust dossier relational storage manager · Biometric gate enforced on every mutation
-          </p>
+      <div className={`border-b pb-3 flex flex-col gap-1.5 ${isDark ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
+        <div className="flex items-center gap-2">
+          <Lock className="text-onyx-accent-rose" size={15} />
+          <h1 className={`text-sm font-bold uppercase tracking-widest ${isDark ? 'text-[#fafafa]' : 'text-zinc-800'}`}>
+            Private Admin HR &amp; Dossier Operations
+          </h1>
         </div>
+        <p className={`text-[9px] ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>
+          Zero-Trust dossier relational storage manager · Biometric gate enforced on every mutation
+        </p>
+      </div>
 
-        {/* Tab Controls */}
-        <div className={`flex gap-1 border p-1 rounded ${isDark ? 'bg-[#000000] border-[#27272a]' : 'bg-[#ffffff] border-[#e4e4e7]'}`}>
-          {(['directory', 'dispatcher', 'create'] as TabType[]).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-3 py-1.5 text-[9px] font-black uppercase tracking-wider rounded transition-all ${
-                activeTab === tab
-                  ? 'bg-onyx-accent-rose text-white'
-                  : (isDark ? 'text-zinc-500 hover:text-zinc-300' : 'text-zinc-500 hover:text-zinc-800')
-              }`}
-            >
-              {tab === 'directory' ? 'Dossier Directory' : tab === 'dispatcher' ? 'Secure Dispatcher' : 'New Dossier'}
-            </button>
-          ))}
-        </div>
+      {/* Tab Controls */}
+      <div className={`flex flex-col sm:flex-row gap-1 border p-1 rounded w-full md:w-auto self-start ${isDark ? 'bg-[#000000] border-[#27272a]' : 'bg-[#ffffff] border-[#e4e4e7]'}`}>
+        {(['directory', 'dispatcher', 'create'] as TabType[]).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`w-full md:w-auto min-h-[44px] md:min-h-0 flex items-center justify-center py-3 px-4 md:py-1.5 text-[9px] font-black uppercase tracking-wider rounded transition-all ${
+              activeTab === tab
+                ? 'bg-onyx-accent-rose text-white'
+                : (isDark ? 'text-zinc-500 hover:text-zinc-300' : 'text-zinc-500 hover:text-zinc-800')
+            }`}
+          >
+            {tab === 'directory' ? 'Dossier Directory' : tab === 'dispatcher' ? 'Secure Dispatcher' : 'New Dossier'}
+          </button>
+        ))}
       </div>
 
       {/* ── TAB: DIRECTORY ── */}
@@ -633,7 +631,7 @@ export default function AdminHRPortal() {
                           placeholder="USD"
                           value={finAmountUsd}
                           onChange={(e) => setFinAmountUsd(e.target.value)}
-                          className={`w-28 h-12 px-4 text-sm font-medium font-mono rounded-lg border focus:ring-2 focus:ring-rose-500 focus:outline-none transition-colors ${isDark ? 'bg-[#0e0e11]/80 border-[#27272a] text-[#fafafa]' : 'bg-white border-zinc-300 text-black'}`}
+                          className={`w-full sm:w-28 h-12 px-4 text-sm font-medium font-mono rounded-lg border focus:ring-2 focus:ring-rose-500 focus:outline-none transition-colors ${isDark ? 'bg-[#0e0e11]/80 border-[#27272a] text-[#fafafa]' : 'bg-white border-zinc-300 text-black'}`}
                         />
                       </div>
                       <AnimatedSubmitButton
