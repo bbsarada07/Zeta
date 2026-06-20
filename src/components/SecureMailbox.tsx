@@ -12,7 +12,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useZetaStore } from '../store/zetaStore';
-import { mockDecryptString, generateTxHash } from '../agents/agentRouter';
+import { mockDecryptString, mockEncryptString, generateTxHash } from '../agents/agentRouter';
 import {
   Shield,
   Eye,
@@ -25,6 +25,8 @@ import {
   Lock,
   CheckCircle2,
   AlertTriangle,
+  Send,
+  Activity,
 } from 'lucide-react';
 import type { SecureMessage } from '../types/zeta';
 
@@ -127,10 +129,12 @@ const SecureMessageItem = ({
   msg,
   onDismiss,
   isAdminView,
+  tenantFilter,
 }: {
   msg: SecureMessage;
   onDismiss: (id: string) => void;
   isAdminView: boolean;
+  tenantFilter: string;
 }) => {
   // Stable per-message tracking signature (derived from message_id, not random on each render)
   const sigRef = useRef<string>('');
@@ -142,15 +146,34 @@ const SecureMessageItem = ({
     for (let i = 0; i < 8; i++) {
       sig += chars[(base.charCodeAt(i % base.length) + i * 13) % 16];
     }
-    sig += '...';
-    for (let i = 8; i < 11; i++) {
-      sig += chars[(base.charCodeAt(i % base.length) + i * 7) % 16];
-    }
     sigRef.current = sig;
   }
 
+  const currentUser = useZetaStore((s) => s.currentUser);
+  const dispatchSecureMessage = useZetaStore((s) => s.dispatchSecureMessage);
+  const dossiers = useZetaStore((s) => s.internDossiers);
+  
+  const isIntern = currentUser?.role === 'intern';
+  const targetInternId = currentUser?.internId;
+  const myDossier = isIntern && targetInternId
+    ? dossiers.find((d) => d.intern_id === targetInternId) ?? null
+    : null;
+
+  const activeIdentity = isIntern 
+    ? (myDossier?.tenant_company || targetInternId || 'intern')
+    : (tenantFilter !== 'global' && tenantFilter ? tenantFilter : 'Global Admin');
+
+  // A received dispatch is where we are the recipient
+  const isReceived = isAdminView
+    ? (msg.recipient === 'Global Admin' || msg.recipient_intern_id === 'Global Admin')
+    : (isIntern 
+        ? (msg.recipient === targetInternId || msg.recipient_intern_id === targetInternId)
+        : (msg.recipient === tenantFilter)
+      );
+
   const [isDecrypted, setIsDecrypted] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(false);
+  const [replyText, setReplyText] = useState('');
 
   const decryptedBody = mockDecryptString(msg.body_content_encrypted_string);
 
@@ -163,6 +186,30 @@ const SecureMessageItem = ({
       setIsDecrypted(false);
       setShouldAnimate(false);
     }
+  };
+
+  const handleSendReply = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!replyText.trim()) return;
+
+    const encrypted = mockEncryptString(replyText);
+
+    dispatchSecureMessage({
+      sender: activeIdentity,
+      recipient: 'Global Admin',
+      subject: `RE: ${msg.subject || msg.subject_category}`,
+      body: encrypted,
+      isRead: false,
+
+      recipient_intern_id: 'Global Admin',
+      sender_role: isIntern ? 'Intern' : 'TenantRep',
+      subject_category: msg.subject_category || 'PAYROLL',
+      body_content_encrypted_string: encrypted,
+      is_ephemeral: false
+    });
+
+    setReplyText('');
+    alert('Secure response payload transmitted successfully.');
   };
 
   return (
@@ -194,8 +241,8 @@ const SecureMessageItem = ({
 
       {/* Routing metadata */}
       <div className="text-[9px] text-zinc-500 font-mono space-y-0.5 border-l-2 border-zinc-800 pl-2">
-        <p className="uppercase font-bold tracking-widest">FROM: {msg.sender_role} ROUTING NODE</p>
-        <p className="uppercase font-bold tracking-widest">RECIPIENT INTERN ID: {msg.recipient_intern_id}</p>
+        <p className="uppercase font-bold tracking-widest">FROM: {msg.sender} ROUTING NODE</p>
+        <p className="uppercase font-bold tracking-widest">RECIPIENT: {msg.recipient}</p>
         {isAdminView && (
           <p className="uppercase tracking-wider text-zinc-600">
             ENCRYPTION: AES-GCM-256 / ASYMMETRIC PASSKEY
@@ -226,6 +273,33 @@ const SecureMessageItem = ({
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-zinc-700/30 to-transparent" />
       </div>
 
+      {/* Reply Container - Inline Conditional Protocol */}
+      {isDecrypted && isReceived && (
+        <div className="p-5 border border-onyx-border rounded-xl bg-[#09090b]/80 space-y-4 animate-fade-in">
+          <h4 className="text-xs font-bold uppercase tracking-widest text-onyx-accent-rose flex items-center gap-1.5">
+            <Lock size={10} />
+            REPLY SECURE PROTOCOL
+          </h4>
+          <p className="text-[10px] text-zinc-500 font-mono">
+            IDENTITY ANCHOR: <span className="text-zinc-300 font-bold uppercase">{activeIdentity}</span> (SYSTEM LOCK)
+          </p>
+          <textarea
+            required
+            rows={3}
+            placeholder="Type secure response payload to Global Admin..."
+            value={replyText}
+            onChange={(e) => setReplyText(e.target.value)}
+            className="w-full p-4 text-xs font-medium font-mono rounded-lg bg-[#0e0e11]/80 border border-zinc-800 text-white focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 leading-relaxed resize-none"
+          />
+          <button
+            onClick={handleSendReply}
+            className="text-xs font-mono font-bold uppercase tracking-wider text-onyx-canvas bg-onyx-accent-rose hover:bg-rose-400 border border-onyx-accent-rose px-5 py-2.5 rounded-lg transition-all shadow-glow-rose"
+          >
+            Send Response
+          </button>
+        </div>
+      )}
+
       {/* Action Row */}
       <div className="flex items-center gap-3 mt-1 border-t border-onyx-border/20 pt-2.5">
         <button
@@ -255,15 +329,28 @@ const SecureMessageItem = ({
 };
 
 // ─── Main SecureMailbox Component ──────────────────────────────────────────────
-export default function SecureMailbox() {
+export default function SecureMailbox({ tenantFilter }: { tenantFilter: string }) {
   const currentUser    = useZetaStore((s) => s.currentUser);
   const secureMailboxQueue  = useZetaStore((s) => s.secureMailboxQueue);
   const dismissSecureMessage = useZetaStore((s) => s.dismissSecureMessage);
+  const dispatchSecureMessage = useZetaStore((s) => s.dispatchSecureMessage);
   const dossiers       = useZetaStore((s) => s.internDossiers);
 
   const isAdmin  = currentUser?.role === 'global_admin';
   const isIntern = currentUser?.role === 'intern';
   const targetInternId = currentUser?.internId;
+
+  const [recipientInternId, setRecipientInternId] = useState('');
+  const [subjectLine, setSubjectLine] = useState('');
+  const [messageBody, setMessageBody] = useState('');
+  const [diagnosticLog, setDiagnosticLog] = useState<string | null>(null);
+
+  // Set default recipient on load
+  useEffect(() => {
+    if (dossiers.length > 0 && !recipientInternId) {
+      setRecipientInternId(dossiers[0].intern_id);
+    }
+  }, [dossiers, recipientInternId]);
 
   // ── Zero-Trust Layout Boundary ────────────────────────────────────────────
   // If the session is locked to an intern, ONLY their messages are mapped.
@@ -271,11 +358,38 @@ export default function SecureMailbox() {
   const messages = secureMailboxQueue.filter((msg) => {
     if (isIntern) {
       // Hard boundary: must match the locked intern's ID exactly
-      if (!targetInternId || msg.recipient_intern_id !== targetInternId) {
-        return false; // Structural exclusion — not rendered, not readable
-      }
+      return (
+        msg.recipient === targetInternId ||
+        msg.recipient_intern_id === targetInternId ||
+        msg.sender === targetInternId
+      );
     }
-    return true; // Admin sees full cross-tenant queue
+
+    // Otherwise, we are an Admin / Tenant Rep viewing through tenantFilter
+    if (tenantFilter === 'global') {
+      // Display all messages sent to or from administration nodes
+      return (
+        msg.sender === 'Global Admin' ||
+        msg.recipient === 'Global Admin' ||
+        msg.recipient_intern_id === 'Global Admin'
+      );
+    } else {
+      // Restrict strictly to dispatches sent to or from that specific tenant or its interns
+      if (msg.sender === tenantFilter || msg.recipient === tenantFilter) {
+        return true;
+      }
+      const senderDossier = dossiers.find((d) => d.intern_id === msg.sender);
+      if (senderDossier && senderDossier.tenant_company === tenantFilter) {
+        return true;
+      }
+      const recipientDossier = dossiers.find(
+        (d) => d.intern_id === msg.recipient || d.intern_id === msg.recipient_intern_id
+      );
+      if (recipientDossier && recipientDossier.tenant_company === tenantFilter) {
+        return true;
+      }
+      return false;
+    }
   });
 
   const myDossier =
@@ -284,6 +398,42 @@ export default function SecureMailbox() {
       : null;
 
   const handleDismiss = (id: string) => dismissSecureMessage(id);
+
+  const handleAdminDispatch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!recipientInternId || !subjectLine.trim() || !messageBody.trim()) return;
+
+    // Progressive logging stream
+    setDiagnosticLog('[SECURE CRYPTO MATRIX] Salting payload...');
+    setTimeout(() => {
+      setDiagnosticLog('[SECURE CRYPTO MATRIX] Salting payload... Encrypting dispatch block...');
+      setTimeout(() => {
+        setDiagnosticLog('[SECURE CRYPTO MATRIX] Salting payload... Encrypting dispatch block... Dispatched.');
+        
+        const encrypted = mockEncryptString(messageBody);
+        dispatchSecureMessage({
+          sender: 'Global Admin',
+          recipient: recipientInternId,
+          subject: subjectLine,
+          body: encrypted,
+          isRead: false,
+          
+          recipient_intern_id: recipientInternId,
+          sender_role: 'Admin',
+          subject_category: 'PAYROLL',
+          body_content_encrypted_string: encrypted,
+          is_ephemeral: false
+        });
+
+        setSubjectLine('');
+        setMessageBody('');
+
+        setTimeout(() => {
+          setDiagnosticLog(null);
+        }, 4000);
+      }, 600);
+    }, 600);
+  };
 
   return (
     <div className="flex flex-col gap-4 h-full animate-fade-in font-mono">
@@ -302,7 +452,7 @@ export default function SecureMailbox() {
           <p className="text-[9px] text-onyx-muted mt-1 font-mono">
             {isIntern
               ? `Workspace lock active: recipient key bound to [${targetInternId}]. Cross-tenant access: DENIED.`
-              : 'Global Security Oversight Monitor — All recipient queues visible. Asymmetric routing: ENABLED.'}
+              : `Global Security Oversight Monitor — Workspace role: ${tenantFilter === 'global' ? 'Global Admin' : tenantFilter.toUpperCase()}. Asymmetric routing: ENABLED.`}
           </p>
         </div>
 
@@ -324,9 +474,17 @@ export default function SecureMailbox() {
         {/* ── Messages List ─── */}
         <div
           className={`${
-            isIntern && myDossier ? 'xl:col-span-6' : 'xl:col-span-12 max-w-2xl'
+            (isIntern && myDossier) ? 'xl:col-span-6' : (isAdmin ? 'xl:col-span-7' : 'xl:col-span-12 max-w-2xl')
           } space-y-4 max-h-[75vh] overflow-y-auto pr-1`}
         >
+          {/* Micro-terminal diagnostic log stream */}
+          {diagnosticLog && (
+            <div className="bg-[#09090b] border border-emerald-500/30 text-emerald-400 p-4 rounded-lg font-mono text-xs mb-4 shadow-[0_0_15px_rgba(16,185,129,0.15)] flex items-center gap-2 animate-pulse">
+              <Activity size={12} className="animate-spin text-emerald-400 animate-duration-1000" />
+              <span>{diagnosticLog}</span>
+            </div>
+          )}
+
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 border border-dashed border-onyx-border rounded-lg gap-3 bg-black/20">
               <MailOpen className="text-onyx-border animate-pulse" size={28} />
@@ -343,10 +501,91 @@ export default function SecureMailbox() {
                 msg={msg}
                 onDismiss={handleDismiss}
                 isAdminView={isAdmin}
+                tenantFilter={tenantFilter}
               />
             ))
           )}
         </div>
+
+        {/* ── Admin Dispatch Panel (only for logged-in global admin) ─── */}
+        {isAdmin && (
+          <div className="xl:col-span-5 space-y-4 max-h-[75vh] overflow-y-auto pr-1">
+            <div className="bg-onyx-panel border border-onyx-border rounded-2xl p-8 shadow-2xl space-y-6">
+              <div className="border-b border-onyx-border pb-3 flex items-center justify-between">
+                <div>
+                  <h2 className="text-sm font-bold text-onyx-bright uppercase tracking-widest flex items-center gap-1.5">
+                    <Lock className="text-onyx-accent-rose" size={13} />
+                    NEW ENCRYPTED DISPATCH
+                  </h2>
+                  <p className="text-[9px] text-zinc-600 mt-1 font-mono uppercase">
+                    Zero-Trust Outbound Cryptographic Channel
+                  </p>
+                </div>
+                <div className="flex items-center gap-1 text-[8px] font-mono text-rose-400 bg-rose-950/20 border border-rose-800/30 px-1.5 py-0.5 rounded">
+                  <Shield className="animate-pulse" size={8} />
+                  SECURE NODE
+                </div>
+              </div>
+
+              <form onSubmit={handleAdminDispatch} className="space-y-5">
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                    Recipient Intern
+                  </label>
+                  <select
+                    required
+                    value={recipientInternId}
+                    onChange={(e) => setRecipientInternId(e.target.value)}
+                    className="w-full h-12 px-4 text-sm font-medium font-mono rounded-lg bg-[#0e0e11]/80 border border-zinc-800 text-white focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                  >
+                    <option value="" disabled>Select target recipient...</option>
+                    {dossiers.map((d) => (
+                      <option key={d.intern_id} value={d.intern_id}>
+                        {d.profile_metadata.full_name} ({d.intern_id} - {d.tenant_company.replace(/_/g, ' ').toUpperCase()})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                    Subject Line / Category
+                  </label>
+                  <input
+                    required
+                    type="text"
+                    placeholder="Enter dispatch subject classification..."
+                    value={subjectLine}
+                    onChange={(e) => setSubjectLine(e.target.value)}
+                    className="w-full h-12 px-4 text-sm font-medium font-mono rounded-lg bg-[#0e0e11]/80 border border-zinc-800 text-white focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                    Secure Payload / Message Body
+                  </label>
+                  <textarea
+                    required
+                    rows={6}
+                    placeholder="Enter secure message contents..."
+                    value={messageBody}
+                    onChange={(e) => setMessageBody(e.target.value)}
+                    className="w-full p-4 text-sm font-medium font-mono rounded-lg bg-[#0e0e11]/80 border border-zinc-800 text-white focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 leading-relaxed resize-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3.5 text-sm font-bold uppercase tracking-widest text-onyx-canvas bg-onyx-accent-rose hover:bg-rose-400 border border-onyx-accent-rose rounded-lg transition-all shadow-glow-rose flex items-center justify-center gap-2"
+                >
+                  <Send size={14} />
+                  Transmit Payload
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* ── Intern Dossier Panel (only for logged-in interns) ─── */}
         {isIntern && myDossier && (

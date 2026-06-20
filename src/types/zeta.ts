@@ -210,10 +210,18 @@ export interface Ambassador {
  * Encrypted communication message schema.
  */
 export interface SecureMessage {
+  id: string;
+  sender: string;
+  recipient: string;
+  subject: string;
+  body: string;
+  timestamp: string;
+  isRead: boolean;
+
   message_id: string;
   recipient_intern_id: string;
-  sender_role: 'HR' | 'Admin';
-  subject_category: 'PAYROLL' | 'COMPLAINT' | 'PERFORMANCE';
+  sender_role: 'HR' | 'Admin' | string;
+  subject_category: 'PAYROLL' | 'COMPLAINT' | 'PERFORMANCE' | string;
   body_content_encrypted_string: string;
   is_ephemeral: boolean;
   timestamp_iso: string;

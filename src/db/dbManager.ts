@@ -25,7 +25,7 @@ import type {
   DbCommitEvent,
   FinancialLedger,
 } from '../types/database';
-import type { TenantCompany, UserRole } from '../types/zeta';
+import type { TenantCompany, UserRole, SecureMessage } from '../types/zeta';
 
 // ─── CONSTANTS ──────────────────────────────────────────────────────────────
 
@@ -729,4 +729,63 @@ const _dossierToLegacy = (
     })),
     crm_contribution_metrics: record.crm_contribution_metrics,
   };
+};
+
+/**
+ * Load secure messages from LocalStorage, seeding defaults if empty.
+ */
+export const loadSecureMessages = (): SecureMessage[] => {
+  if (typeof window === 'undefined') return [];
+  const val = localStorage.getItem('zeta_secure_mailbox_queue');
+  if (!val) {
+    const seed: SecureMessage[] = [
+      {
+        id: 'msg_seed_1',
+        sender: 'Global Admin',
+        recipient: 'ST-204',
+        subject: 'PAYROLL',
+        body: 'Stipend adjustment calculated for standard 18% net payout details context.',
+        timestamp: new Date(Date.now() - 10 * 60000).toISOString(),
+        isRead: false,
+        message_id: 'msg_seed_1',
+        recipient_intern_id: 'ST-204',
+        sender_role: 'HR',
+        subject_category: 'PAYROLL',
+        body_content_encrypted_string: 'Stipend adjustment calculated for standard 18% net payout details context.',
+        is_ephemeral: false,
+        timestamp_iso: new Date(Date.now() - 10 * 60000).toISOString()
+      },
+      {
+        id: 'msg_seed_2',
+        sender: 'Global Admin',
+        recipient: 'ST-204',
+        subject: 'PERFORMANCE',
+        body: 'Outstanding design scoping deliverables noted. Performance index set to 9.2.',
+        timestamp: new Date(Date.now() - 5 * 60000).toISOString(),
+        isRead: false,
+        message_id: 'msg_seed_2',
+        recipient_intern_id: 'ST-204',
+        sender_role: 'Admin',
+        subject_category: 'PERFORMANCE',
+        body_content_encrypted_string: 'Outstanding design scoping deliverables noted. Performance index set to 9.2.',
+        is_ephemeral: true,
+        timestamp_iso: new Date(Date.now() - 5 * 60000).toISOString()
+      }
+    ];
+    localStorage.setItem('zeta_secure_mailbox_queue', JSON.stringify(seed));
+    return seed;
+  }
+  try {
+    return JSON.parse(val);
+  } catch {
+    return [];
+  }
+};
+
+/**
+ * Save secure messages to LocalStorage persistence tracking array.
+ */
+export const saveSecureMessages = (messages: SecureMessage[]): void => {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('zeta_secure_mailbox_queue', JSON.stringify(messages));
 };

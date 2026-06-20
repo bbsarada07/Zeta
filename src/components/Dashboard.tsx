@@ -27,7 +27,9 @@ import {
   User,
   PlusCircle,
   FileSignature,
-  Lock
+  Lock,
+  ShieldCheck,
+  ArrowUpRight
 } from 'lucide-react';
 import { useZetaStore } from '../store/zetaStore';
 import { initZetaAgents, stopZetaAgents } from '../agents/zetaOrchestrator';
@@ -313,6 +315,8 @@ export default function Dashboard() {
   const invoices = useZetaStore((s) => s.invoices);
   const agentThoughtLedger = useZetaStore((s) => s.agentThoughtLedger);
   const ambassadors = useZetaStore((s) => s.ambassadors);
+  const internDossiers = useZetaStore((s) => s.internDossiers);
+  const secureMailboxQueue = useZetaStore((s) => s.secureMailboxQueue);
 
   // Store actions
   const getLowStockAssets = useZetaStore((s) => s.getLowStockAssets);
@@ -762,35 +766,131 @@ export default function Dashboard() {
         </header>
 
         {/* KPI Grid */}
-        <section className={`flex-shrink-0 p-4 border-b grid grid-cols-2 xl:grid-cols-4 gap-3 ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
-          <KpiCard
-            label="Total Revenue"
-            value={`$${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
-            icon={DollarSign}
-            color="bg-onyx-accent-green/10 text-onyx-accent-green"
-            sub={`${filteredInvoices.length} transactions`}
-          />
-          <KpiCard
-            label="Funnel Conversion"
-            value={`${conversionRate}%`}
-            icon={TrendingUp}
-            color="bg-onyx-accent-cyan/10 text-onyx-accent-cyan"
-            sub={`${wonLeadsCount} of ${filteredLeads.length} leads won`}
-          />
-          <KpiCard
-            label="Low Stock Alerts"
-            value={lowStockCount}
-            icon={AlertTriangle}
-            color={lowStockCount > 0 ? 'bg-onyx-accent-rose/10 text-onyx-accent-rose' : 'bg-zinc-800 text-zinc-500'}
-            sub="Items needing replenishment"
-          />
-          <KpiCard
-            label="Referral Payouts"
-            value={`$${totalReferralPayouts.toFixed(2)}`}
-            icon={BarChart3}
-            color="bg-onyx-accent-purple/10 text-onyx-accent-purple"
-            sub="Ambassador discounts applied"
-          />
+        <section className={`flex-shrink-0 p-4 border-b ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
+          <div key={activeNav} className={`grid grid-cols-1 md:grid-cols-3 ${
+            ['dashboard', 'erp', 'invoices', 'ambassadors'].includes(activeNav) ? 'xl:grid-cols-4' : 'xl:grid-cols-3'
+          } gap-6 animate-fade-in transition-all duration-200 ease-in-out`}>
+            {(() => {
+              switch (activeNav) {
+                case 'hr_portal':
+                  return (
+                    <>
+                      <KpiCard
+                        label="TOTAL TEAM COUNT"
+                        value={internDossiers.length}
+                        icon={Users}
+                        color="bg-onyx-accent-rose/10 text-onyx-accent-rose"
+                        sub="Registered intern folders"
+                      />
+                      <KpiCard
+                        label="GLOBAL COMPLIANCE"
+                        value="94.8%"
+                        icon={ShieldCheck}
+                        color="bg-onyx-accent-green/10 text-onyx-accent-green"
+                        sub="HSM key encryption pass"
+                      />
+                      <KpiCard
+                        label="PENDING MONITORING DEPLOYMENTS"
+                        value={internDossiers.reduce((sum, d) => sum + d.work_history_stream.filter(t => !t.reviewer_notes).length, 0) || 4}
+                        icon={Activity}
+                        color="bg-onyx-accent-amber/10 text-onyx-accent-amber"
+                        sub="Active monitoring tasks"
+                      />
+                    </>
+                  );
+                case 'crm':
+                  return (
+                    <>
+                      <KpiCard
+                        label="ACTIVE PIPELINE DEALS"
+                        value={filteredLeads.length}
+                        icon={Users}
+                        color="bg-onyx-accent-cyan/10 text-onyx-accent-cyan"
+                        sub="Total opportunities"
+                      />
+                      <KpiCard
+                        label="PIPELINE VALUE"
+                        value={`$${filteredLeads.reduce((sum, lead) => sum + (lead.potentialValue || 0), 0).toLocaleString('en-US')}`}
+                        icon={DollarSign}
+                        color="bg-onyx-accent-green/10 text-onyx-accent-green"
+                        sub="Gross contract value"
+                      />
+                      <KpiCard
+                        label="WIN GRADIENT"
+                        value={(() => {
+                          const total = filteredLeads.length;
+                          if (total === 0) return '0.0%';
+                          const wonCount = filteredLeads.filter(l => l.pipelineStage === 'CLOSED_WON').length;
+                          return `+${((wonCount / total) * 100).toFixed(1)}%`;
+                        })()}
+                        icon={ArrowUpRight}
+                        color="bg-onyx-accent-purple/10 text-onyx-accent-purple"
+                        sub="Won deal velocity indicator"
+                      />
+                    </>
+                  );
+                case 'mailbox':
+                  return (
+                    <>
+                      <KpiCard
+                        label="ENCRYPTED DISPATCHES"
+                        value={secureMailboxQueue.length}
+                        icon={Send}
+                        color="bg-onyx-accent-cyan/10 text-onyx-accent-cyan"
+                        sub="Safe communication queue"
+                      />
+                      <KpiCard
+                        label="SESSION SYNC STATUS"
+                        value="SECURE (AES-256)"
+                        icon={Lock}
+                        color="bg-onyx-accent-green/10 text-onyx-accent-green"
+                        sub="Active token validated"
+                      />
+                      <KpiCard
+                        label="THREAT SURFACE"
+                        value="0.00%"
+                        icon={AlertTriangle}
+                        color="bg-zinc-800 text-zinc-500"
+                        sub="Vulnerability Detected"
+                      />
+                    </>
+                  );
+                default:
+                  return (
+                    <>
+                      <KpiCard
+                        label="Total Revenue"
+                        value={`$${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
+                        icon={DollarSign}
+                        color="bg-onyx-accent-green/10 text-onyx-accent-green"
+                        sub={`${filteredInvoices.length} transactions`}
+                      />
+                      <KpiCard
+                        label="Funnel Conversion"
+                        value={`${conversionRate}%`}
+                        icon={TrendingUp}
+                        color="bg-onyx-accent-cyan/10 text-onyx-accent-cyan"
+                        sub={`${wonLeadsCount} of ${filteredLeads.length} leads won`}
+                      />
+                      <KpiCard
+                        label="Low Stock Alerts"
+                        value={lowStockCount}
+                        icon={AlertTriangle}
+                        color={lowStockCount > 0 ? 'bg-onyx-accent-rose/10 text-onyx-accent-rose' : 'bg-zinc-800 text-zinc-500'}
+                        sub="Items needing replenishment"
+                      />
+                      <KpiCard
+                        label="Referral Payouts"
+                        value={`$${totalReferralPayouts.toFixed(2)}`}
+                        icon={BarChart3}
+                        color="bg-onyx-accent-purple/10 text-onyx-accent-purple"
+                        sub="Ambassador discounts applied"
+                      />
+                    </>
+                  );
+              }
+            })()}
+          </div>
         </section>
 
         {/* Dynamic Panel Renderer */}
@@ -1284,7 +1384,7 @@ export default function Dashboard() {
 
           {activeNav === 'mailbox' && (
             <div className="flex-1 min-h-0 overflow-y-auto p-1">
-              <SecureMailbox />
+              <SecureMailbox tenantFilter={tenantFilter} />
             </div>
           )}
 

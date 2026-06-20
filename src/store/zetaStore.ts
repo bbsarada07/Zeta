@@ -21,6 +21,8 @@ import {
   createInternDossier,
   appendWorkLog,
   updateStipendOrPayout,
+  loadSecureMessages,
+  saveSecureMessages,
 } from '../db/dbManager';
 import type { InternDossier, Task, InitialProfile } from '../types/database';
 
@@ -101,7 +103,7 @@ export interface ZetaState {
   addThoughtLedgerEntry: (entryData: Omit<ThoughtLedgerEntry, 'id' | 'timestamp'> & { id?: string | number }) => void; // Stream thought logs
 
   // Secure Mailbox Actions
-  dispatchSecureMessage: (msg: Omit<SecureMessage, 'message_id' | 'timestamp_iso'>) => void;
+  dispatchSecureMessage: (msg: Partial<SecureMessage> & { body_content_encrypted_string: string; recipient_intern_id: string }) => void;
   dismissSecureMessage: (message_id: string) => void;
 
   // Dossier Database Actions
@@ -561,26 +563,7 @@ export const useZetaStore = create<ZetaState>((set, get) => ({
   auditLogs: getLocalStorageItem('zeta_audit_logs', []),
   agentThoughtLedger: getLocalStorageItem('zeta_agent_thought_ledger', []),
   ambassadors: getLocalStorageItem('zeta_ambassadors', seedAmbassadors),
-  secureMailboxQueue: getLocalStorageItem('zeta_secure_mailbox_queue', [
-    {
-      message_id: 'msg_seed_1',
-      recipient_intern_id: 'ST-204',
-      sender_role: 'HR',
-      subject_category: 'PAYROLL',
-      body_content_encrypted_string: 'Stipend adjustment calculated for standard 18% net payout details context.',
-      is_ephemeral: false,
-      timestamp_iso: new Date(Date.now() - 10 * 60000).toISOString()
-    },
-    {
-      message_id: 'msg_seed_2',
-      recipient_intern_id: 'ST-204',
-      sender_role: 'Admin',
-      subject_category: 'PERFORMANCE',
-      body_content_encrypted_string: 'Outstanding design scoping deliverables noted. Performance index set to 9.2.',
-      is_ephemeral: true,
-      timestamp_iso: new Date(Date.now() - 5 * 60000).toISOString()
-    }
-  ]),
+  secureMailboxQueue: loadSecureMessages(),
   internDossiers: loadDossiers(), // Sync: returns in-memory tables snapshot (may be empty on first boot before async init)
 
 
@@ -860,14 +843,29 @@ export const useZetaStore = create<ZetaState>((set, get) => ({
 
   // Secure Mailbox Actions
   dispatchSecureMessage: (msg) => {
+    const msgId = 'msg_' + Math.random().toString(36).substring(2, 11);
+    const nowIso = new Date().toISOString();
     const newMsg: SecureMessage = {
       ...msg,
-      message_id: 'msg_' + Math.random().toString(36).substring(2, 11),
-      timestamp_iso: new Date().toISOString()
+      id: msgId,
+      sender: msg.sender || (msg.sender_role === 'Admin' ? 'Global Admin' : 'HR Manager') || 'Global Admin',
+      recipient: msg.recipient || msg.recipient_intern_id || '',
+      subject: msg.subject || msg.subject_category || 'PAYROLL',
+      body: msg.body || msg.body_content_encrypted_string || '',
+      timestamp: nowIso,
+      isRead: msg.isRead ?? false,
+
+      message_id: msgId,
+      recipient_intern_id: msg.recipient_intern_id || msg.recipient || '',
+      sender_role: msg.sender_role || (msg.sender === 'Global Admin' ? 'Admin' : 'HR'),
+      subject_category: (msg.subject_category || msg.subject || 'PAYROLL') as any,
+      body_content_encrypted_string: msg.body_content_encrypted_string || msg.body || '',
+      is_ephemeral: msg.is_ephemeral ?? false,
+      timestamp_iso: nowIso
     };
     set((state) => {
       const updated = [...state.secureMailboxQueue, newMsg];
-      setLocalStorageItem('zeta_secure_mailbox_queue', updated);
+      saveSecureMessages(updated);
       return { secureMailboxQueue: updated };
     });
   },
@@ -875,7 +873,7 @@ export const useZetaStore = create<ZetaState>((set, get) => ({
   dismissSecureMessage: (message_id) => {
     set((state) => {
       const updated = state.secureMailboxQueue.filter((m) => m.message_id !== message_id);
-      setLocalStorageItem('zeta_secure_mailbox_queue', updated);
+      saveSecureMessages(updated);
       return { secureMailboxQueue: updated };
     });
   },
