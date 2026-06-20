@@ -618,7 +618,7 @@ export default function AdminHRPortal() {
 
                     {/* Adjust financials form */}
                     <form onSubmit={handleFinancialUpdate} className={`border rounded-xl p-4 space-y-3 ${isDark ? 'bg-black/40 border-[#27272a]' : 'bg-white border-zinc-200'}`}>
-                      <div className="flex gap-3">
+                      <div className="flex flex-col sm:flex-row gap-3">
                         <select
                           value={finField}
                           onChange={(e) => setFinField(e.target.value as FinField)}
@@ -795,7 +795,7 @@ export default function AdminHRPortal() {
       {activeTab === 'dispatcher' && (
         <form
           onSubmit={handleStartDispatch}
-          className={`border rounded-2xl p-8 space-y-5 shadow-2xl max-w-xl mx-auto w-full transition-colors ${
+          className={`border rounded-2xl p-5 md:p-8 space-y-5 shadow-2xl max-w-xl mx-auto w-full transition-colors ${
             isDark ? 'bg-[#09090b] text-[#fafafa] border-[#27272a]' : 'bg-[#f4f4f5] text-[#09090b] border-[#e4e4e7]'
           }`}
         >
@@ -909,7 +909,7 @@ export default function AdminHRPortal() {
       {activeTab === 'create' && (
         <form
           onSubmit={handleCreateDossier}
-          className={`border rounded-2xl p-8 space-y-5 shadow-2xl max-w-md mx-auto w-full transition-colors ${
+          className={`border rounded-2xl p-5 md:p-8 space-y-5 shadow-2xl max-w-md mx-auto w-full transition-colors ${
             isDark ? 'bg-[#09090b] text-[#fafafa] border-[#27272a]' : 'bg-[#f4f4f5] text-[#09090b] border-[#e4e4e7]'
           }`}
         >

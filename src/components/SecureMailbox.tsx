@@ -460,7 +460,7 @@ export default function SecureMailbox({ tenantFilter }: { tenantFilter: string }
           {isIntern && (
             <div className="flex items-center gap-1.5 text-[8px] font-mono text-rose-400 bg-rose-950/20 border border-rose-800/30 px-2 py-1 rounded">
               <Lock size={8} />
-              TENANT LOCK ENFORCED
+              [IDENTITY LOCK] TENANT ENFORCED
             </div>
           )}
           <div className="text-[9px] font-mono font-semibold bg-purple-950/30 text-onyx-accent-purple border border-purple-800/20 px-2.5 py-1 rounded">

@@ -29,7 +29,11 @@ import {
   FileSignature,
   Lock,
   ShieldCheck,
-  ArrowUpRight
+  ArrowUpRight,
+  Menu,
+  Globe,
+  Briefcase,
+  GraduationCap
 } from 'lucide-react';
 import { useZetaStore } from '../store/zetaStore';
 import { initZetaAgents, stopZetaAgents } from '../agents/zetaOrchestrator';
@@ -392,6 +396,13 @@ export default function Dashboard() {
   const [mergeDuplicateId, setMergeDuplicateId] = useState<string>('');
   const [isPipelineIngesting, setIsPipelineIngesting] = useState(false);
 
+  // ── Mobile UI State ──────────────────────────────────────────────────────────
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+  const [isMobileTerminalOpen, setIsMobileTerminalOpen] = useState(false);
+  const [activeMobileStage, setActiveMobileStage] = useState<PipelineStage>('PROSPECT');
+  const [showGatewayRouter, setShowGatewayRouter] = useState(false);
+  const [gatewayRouterChoice, setGatewayRouterChoice] = useState<string | null>(null);
+
   // Modals UI States
   const [activeLeadForModal, setActiveLeadForModal] = useState<Lead | null>(null);
   const [isAddLeadModalOpen, setIsAddLeadModalOpen] = useState(false);
@@ -620,6 +631,38 @@ export default function Dashboard() {
     alert(`SKU ${skuCode} stock set to ${qty}.`);
   };
 
+  const handleGatewayChoice = (choice: 'student' | 'enterprise' | 'coordinator') => {
+    setGatewayRouterChoice(choice);
+    
+    let targetVenture = '';
+    let msg = '';
+    if (choice === 'student') {
+      targetVenture = 'Skill Tank';
+      msg = 'Redirecting to Skill Tank internship onboarding portal...';
+    } else if (choice === 'enterprise') {
+      targetVenture = 'Vriddhi';
+      msg = 'Routing query to Vriddhi B2B enterprise pipeline...';
+    } else {
+      targetVenture = 'Promtal';
+      msg = 'Forwarding college coordinator registration to Promtal...';
+    }
+    
+    const newToast: FlywheelToast = {
+      id: `gateway_${Date.now()}`,
+      leadName: `User (${choice.toUpperCase()})`,
+      tenant: targetVenture.toUpperCase().replace(' ', '_'),
+      visible: true
+    };
+    
+    setFlywheelToasts(prev => [newToast, ...prev]);
+    alert(`${msg}\nCross-sell matching initiated for ${targetVenture}.`);
+    
+    setTimeout(() => {
+      setShowGatewayRouter(false);
+      setGatewayRouterChoice(null);
+    }, 500);
+  };
+
   // ── Ambassador Handlers ────────────────────────────────────────────────────
   const handleAddAmbassadorSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -661,11 +704,211 @@ export default function Dashboard() {
   }, [currentUser]);
 
   return (
-    <div className={`flex h-screen w-screen overflow-hidden font-sans select-none ${
+    <div className={`flex h-screen w-screen overflow-hidden font-sans select-none relative ${
       isOnyx ? 'bg-[#000000] text-[#fafafa] border-[#27272a]' : 'bg-[#ffffff] text-[#09090b] border-[#e4e4e7]'
     }`}>
+      {/* Mobile Sticky Top Header */}
+      <header className={`fixed top-0 left-0 right-0 h-16 border-b px-4 flex items-center justify-between z-40 md:hidden backdrop-blur ${
+        isOnyx ? 'bg-[#000000]/95 border-[#27272a] text-[#fafafa]' : 'bg-[#ffffff]/95 border-[#e4e4e7] text-[#09090b]'
+      }`}>
+        <div className="flex items-center gap-2">
+          <div className={`w-6 h-6 rounded flex items-center justify-center border ${
+            isOnyx ? 'bg-onyx-accent-green/10 border-onyx-accent-green/30' : 'bg-emerald-800/10 border-emerald-800/30'
+          }`}>
+            <Zap size={12} className={isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'} />
+          </div>
+          <span className={`text-xs font-bold tracking-tight ${isOnyx ? 'text-[#fafafa]' : 'text-black'}`}>ZETA</span>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowGatewayRouter(true)}
+            className={`flex items-center gap-1 px-2.5 py-1.5 border rounded-md text-[9px] font-bold uppercase transition-all tracking-wider ${
+              isOnyx
+                ? 'bg-onyx-accent-purple/10 border-onyx-accent-purple/30 text-onyx-accent-purple hover:bg-onyx-accent-purple/20'
+                : 'bg-fuchsia-50 border-fuchsia-300 text-fuchsia-800 hover:bg-fuchsia-100'
+            }`}
+          >
+            <Globe size={10} />
+            Router
+          </button>
+          
+          <button 
+            onClick={() => setIsMobileDrawerOpen(true)}
+            className={`p-1.5 rounded-lg border transition-all ${
+              isOnyx ? 'bg-zinc-950 border-zinc-800 hover:border-zinc-600 text-zinc-300' : 'bg-white border-zinc-200 hover:border-zinc-400 text-zinc-700'
+            }`}
+          >
+            <Menu size={16} />
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile Drawer Overlay */}
+      {isMobileDrawerOpen && (
+        <div 
+          className="fixed inset-0 z-50 md:hidden bg-black/60 backdrop-blur-sm"
+          onClick={() => setIsMobileDrawerOpen(false)}
+        >
+          <div 
+            className={`w-64 h-full border-r flex flex-col transition-all duration-300 transform translate-x-0 ${
+              isOnyx ? 'bg-[#000000] text-[#fafafa] border-[#27272a]' : 'bg-[#ffffff] text-[#09090b] border-[#e4e4e7]'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Logo & Close Button */}
+            <div className={`px-4 py-4 border-b flex items-center justify-between ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
+              <div className="flex items-center gap-2.5">
+                <div className={`w-7 h-7 rounded-md flex items-center justify-center border ${
+                  isOnyx ? 'bg-onyx-accent-green/10 border-onyx-accent-green/30' : 'bg-emerald-800/10 border-emerald-800/30'
+                }`}>
+                  <Zap size={14} className={isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'} />
+                </div>
+                <span className={`text-sm font-bold tracking-tight ${isOnyx ? 'text-[#fafafa]' : 'text-black'}`}>ZETA</span>
+              </div>
+              <button 
+                onClick={() => setIsMobileDrawerOpen(false)}
+                className={`p-1 rounded-md border ${
+                  isOnyx ? 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-black'
+                }`}
+              >
+                <X size={14} />
+              </button>
+            </div>
+
+            {/* Tenant Switcher */}
+            {currentUser?.role !== 'intern' && (
+              <div className={`px-3 py-3 border-b relative ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
+                <p className={`text-[9px] tracking-widest uppercase mb-1.5 ${isOnyx ? 'text-zinc-500' : 'text-zinc-600'}`}>Workspace</p>
+                {currentUser?.role === 'tenant_rep' ? (
+                  <div className={`w-full flex items-center justify-between border rounded-md px-3 py-2 text-xs font-semibold select-none ${
+                    isOnyx ? 'bg-[#000000] border-[#27272a] text-[#fafafa]' : 'bg-[#ffffff] border-[#e4e4e7] text-[#09090b]'
+                  }`}>
+                    <span className="truncate">{TENANT_LABELS[tenantFilter]}</span>
+                    <span className="text-[8px] bg-emerald-950/40 border border-emerald-800/20 text-[#22c55e] font-mono px-1 rounded uppercase tracking-wider scale-95">
+                      LOCKED
+                    </span>
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      id="mobile-tenant-switcher-btn"
+                      onClick={() => setTenantDropOpen((o) => !o)}
+                      className={`w-full flex items-center justify-between border rounded-md px-3 py-2 text-xs font-semibold transition-colors duration-150 ${
+                        isOnyx ? 'bg-[#000000] border-[#27272a] text-[#fafafa] hover:border-zinc-500' : 'bg-[#ffffff] border-[#e4e4e7] text-[#09090b] hover:border-zinc-400'
+                      }`}
+                    >
+                      <span className="truncate">{TENANT_LABELS[tenantFilter]}</span>
+                      <ChevronDown
+                        size={12}
+                        className={`flex-shrink-0 ml-1 transition-transform duration-200 ${isOnyx ? 'text-zinc-500' : 'text-zinc-600'} ${tenantDropOpen ? 'rotate-180' : ''}`}
+                      />
+                    </button>
+                    {tenantDropOpen && (
+                      <div className={`absolute left-3 right-3 top-full mt-1 z-50 border rounded-md shadow-xl overflow-hidden ${
+                        isOnyx ? 'bg-[#09090b] border-[#27272a]' : 'bg-[#f4f4f5] border-[#e4e4e7]'
+                      }`}>
+                        {(Object.keys(TENANT_LABELS) as TenantFilter[]).map((key) => (
+                          <button
+                            key={key}
+                            onClick={() => {
+                              setTenantFilter(key);
+                              setTenantDropOpen(false);
+                              setIsMobileDrawerOpen(false);
+                            }}
+                            className={`w-full text-left px-3 py-2 text-xs transition-colors duration-100 ${
+                              isOnyx ? 'hover:bg-[#000000]' : 'hover:bg-[#ffffff]'
+                            } ${
+                              tenantFilter === key
+                                ? (isOnyx ? 'text-onyx-accent-green font-semibold' : 'text-emerald-800 font-semibold')
+                                : (isOnyx ? 'text-zinc-300' : 'text-zinc-700')
+                            }`}
+                          >
+                            {TENANT_LABELS[key]}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Nav Items */}
+            <nav className="flex-1 px-3 py-3 space-y-0.5">
+              {navItems.map(({ id, label, icon: Icon }) => {
+                const isActive = activeNav === id;
+                return (
+                  <button
+                    key={id}
+                    id={`mobile-nav-${id}`}
+                    onClick={() => {
+                      setActiveNav(id);
+                      setIsMobileDrawerOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-xs font-medium transition-all duration-150 ${
+                      isActive
+                        ? (isOnyx 
+                            ? 'bg-onyx-accent-green/10 text-onyx-accent-green border border-onyx-accent-green/20' 
+                            : 'bg-emerald-800/10 text-emerald-800 border border-emerald-800/20')
+                        : (isOnyx 
+                            ? 'text-zinc-400 hover:text-zinc-200 hover:bg-[#09090b] border border-transparent' 
+                            : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 border border-transparent')
+                    }`}
+                  >
+                    <Icon size={14} />
+                    {label}
+                    {isActive && (
+                      <div className={`ml-auto w-1 h-4 rounded-full ${isOnyx ? 'bg-onyx-accent-green' : 'bg-emerald-800'}`} />
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+
+            {/* System status & Secure Actions */}
+            <div className={`px-3 py-3 border-t mt-auto flex flex-col gap-1.5 ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
+              <div className="flex items-center gap-2 px-1 mb-1">
+                <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${isOnyx ? 'bg-onyx-accent-green' : 'bg-emerald-800'}`} />
+                <span className={`text-[10px] font-mono ${isOnyx ? 'text-zinc-500' : 'text-zinc-600'}`}>Agents running</span>
+              </div>
+              
+              <button
+                onClick={() => {
+                  lockSession();
+                  setIsMobileDrawerOpen(false);
+                }}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-xs font-medium border border-transparent transition-all duration-150 text-left ${
+                  isOnyx 
+                    ? 'text-onyx-accent-cyan hover:bg-onyx-accent-cyan/5 hover:border-onyx-accent-cyan/20' 
+                    : 'text-cyan-700 hover:bg-cyan-700/5 hover:border-cyan-700/20'
+                }`}
+              >
+                <Lock size={14} />
+                <span>Lock Session</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  logout();
+                  setIsMobileDrawerOpen(false);
+                }}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-xs font-medium border border-transparent transition-all duration-150 text-left ${
+                  isOnyx 
+                    ? 'text-onyx-accent-rose hover:bg-onyx-accent-rose/5 hover:border-onyx-accent-rose/20' 
+                    : 'text-rose-700 hover:bg-rose-700/5 hover:border-rose-700/20'
+                }`}
+              >
+                <LogOut size={14} />
+                <span>Secure Log Out</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Left Navigation Rail ─────────────────────────────────────────── */}
-      <aside className={`w-52 flex-shrink-0 border-r flex flex-col ${
+      <aside className={`hidden md:flex w-52 flex-shrink-0 border-r flex flex-col ${
         isOnyx ? 'bg-[#000000] text-[#fafafa] border-[#27272a]' : 'bg-[#ffffff] text-[#09090b] border-[#e4e4e7]'
       }`}>
         {/* Logo */}
@@ -799,12 +1042,12 @@ export default function Dashboard() {
       </aside>
 
       {/* ── Center Panel ─────────────────────────────────────────────────── */}
-      <main className={`flex-1 flex flex-col min-w-0 overflow-hidden ${
+      <main className={`flex-1 flex flex-col min-w-0 overflow-hidden pt-16 md:pt-0 ${
         isOnyx ? 'bg-[#000000] text-[#fafafa] border-[#27272a]' : 'bg-[#ffffff] text-[#09090b] border-[#e4e4e7]'
       }`}>
         {/* Top bar */}
-        <header className={`h-12 flex-shrink-0 border-b flex items-center px-5 gap-4 ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
-          <div className="flex-1">
+        <header className={`hidden md:flex h-12 flex-shrink-0 border-b items-center px-5 gap-4 ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
+          <div className="flex-1 flex items-center">
             <span className={`text-xs font-mono ${isOnyx ? 'text-zinc-500' : 'text-zinc-600'}`}>
               {tenantFilter === 'global' ? 'All Tenants' : TENANT_LABELS[tenantFilter]}
             </span>
@@ -812,6 +1055,18 @@ export default function Dashboard() {
             <span className={`text-xs font-semibold capitalize tracking-widest font-mono ${isOnyx ? 'text-[#fafafa]' : 'text-black'}`}>{activeNav}</span>
           </div>
           <div className="flex items-center gap-4 text-[10px] font-mono">
+            <button
+              onClick={() => setShowGatewayRouter(true)}
+              className={`flex items-center gap-1.5 px-3 py-1 border rounded-md font-bold uppercase transition-all tracking-wider ${
+                isOnyx
+                  ? 'bg-onyx-accent-purple/10 border-onyx-accent-purple/30 text-onyx-accent-purple hover:bg-onyx-accent-purple/20 shadow-sm shadow-fuchsia-950/20'
+                  : 'bg-fuchsia-50 border-fuchsia-300 text-fuchsia-800 hover:bg-fuchsia-100'
+              }`}
+            >
+              <Globe size={11} />
+              Venture Router
+            </button>
+            <span className={`select-none ${isOnyx ? 'text-zinc-800' : 'text-zinc-300'}`}>|</span>
             <button
               onClick={() => toggleTheme()}
               className={`hover:underline cursor-pointer tracking-widest uppercase font-bold ${
@@ -1197,8 +1452,54 @@ export default function Dashboard() {
                 </button>
               </div>
 
-              {/* Kanban Board */}
-              <div className="flex gap-4 h-full overflow-x-auto pb-4 min-h-0 flex-1">
+              {/* Mobile Stage Selector */}
+              <div className="flex md:hidden overflow-x-auto gap-1.5 pb-2 scrollbar-none flex-shrink-0">
+                {PIPELINE_STAGES.map((stage) => {
+                  const stageLeads = filteredLeads.filter((l) => l.pipelineStage === stage);
+                  const isActive = activeMobileStage === stage;
+                  return (
+                    <button
+                      key={stage}
+                      onClick={() => setActiveMobileStage(stage)}
+                      className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold font-mono tracking-wider transition-all border ${
+                        isActive
+                          ? (isOnyx 
+                              ? 'bg-onyx-accent-cyan/20 border-onyx-accent-cyan text-onyx-accent-cyan' 
+                              : 'bg-cyan-100 border-cyan-600 text-cyan-800')
+                          : (isOnyx 
+                              ? 'bg-[#09090b] border-[#27272a] text-zinc-400 hover:text-zinc-200' 
+                              : 'bg-[#f4f4f5] border-[#e4e4e7] text-zinc-600 hover:text-zinc-950')
+                      }`}
+                    >
+                      {stage.replace('_', ' ')} ({stageLeads.length})
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Mobile Stage Card Column */}
+              <div className="flex md:hidden flex-col flex-1 min-h-0 overflow-y-auto bg-onyx-panel/20 border border-onyx-border/60 rounded-xl p-4">
+                {(() => {
+                  const stageLeads = filteredLeads.filter((l) => l.pipelineStage === activeMobileStage);
+                  if (stageLeads.length === 0) {
+                    return (
+                      <div className="text-center text-xs text-onyx-muted py-12 border border-dashed border-onyx-border rounded-xl">
+                        No opportunities in {activeMobileStage.replace('_', ' ')}
+                      </div>
+                    );
+                  }
+                  return stageLeads.map((lead) => (
+                    <LeadCard 
+                      key={lead.id} 
+                      lead={lead} 
+                      onClick={() => setActiveLeadForModal(lead)} 
+                    />
+                  ));
+                })()}
+              </div>
+
+              {/* Desktop Kanban Board */}
+              <div className="hidden md:flex gap-4 h-full overflow-x-auto pb-4 min-h-0 flex-1">
                 {PIPELINE_STAGES.map((stage) => {
                   const stageLeads = filteredLeads.filter((l) => l.pipelineStage === stage);
                   return (
@@ -1265,7 +1566,7 @@ export default function Dashboard() {
               </div>
 
               {/* Table Ledger */}
-              <div className="bg-onyx-panel border border-onyx-border rounded-xl shadow-2xl overflow-hidden flex-1 min-h-0 overflow-y-auto">
+              <div className="bg-onyx-panel border border-onyx-border rounded-xl shadow-2xl overflow-auto flex-1 min-h-0">
                 <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="border-b border-onyx-border bg-onyx-panel/80">
@@ -1379,7 +1680,7 @@ export default function Dashboard() {
               </div>
 
               {/* Invoices Table */}
-              <div className="bg-onyx-panel border border-onyx-border rounded-xl shadow-2xl overflow-hidden flex-1 min-h-0 overflow-y-auto">
+              <div className="bg-onyx-panel border border-onyx-border rounded-xl shadow-2xl overflow-auto flex-1 min-h-0">
                 <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="border-b border-onyx-border bg-onyx-panel/80">
@@ -1448,7 +1749,7 @@ export default function Dashboard() {
               </div>
 
               {/* Ambassadors table list */}
-              <div className="bg-onyx-panel border border-onyx-border rounded-xl shadow-2xl overflow-hidden flex-1 min-h-0 overflow-y-auto">
+              <div className="bg-onyx-panel border border-onyx-border rounded-xl shadow-2xl overflow-auto flex-1 min-h-0">
                 <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="border-b border-onyx-border bg-onyx-panel/80">
@@ -2339,6 +2640,147 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
+
+      {/* 8. Gateway Router Survey Modal */}
+      {showGatewayRouter && (
+        <div className="fixed inset-0 bg-onyx-canvas/80 backdrop-blur-sm z-50 flex justify-center items-center p-4">
+          <div className="bg-[#09090b] border border-[#27272a] rounded-2xl w-full max-w-md overflow-hidden flex flex-col font-mono text-xs shadow-[0_0_50px_rgba(168,85,247,0.3)] animate-fade-in text-[#fafafa]">
+            {/* Header */}
+            <div className="p-5 border-b border-[#27272a] flex justify-between items-center bg-[#09090b]/85">
+              <div className="flex items-center gap-2">
+                <Globe size={16} className="text-onyx-accent-purple animate-spin-slow" style={{ animationDuration: '6s' }} />
+                <span className="text-xs font-bold text-onyx-accent-purple tracking-widest uppercase">CENTLE VENTURE ROUTER</span>
+              </div>
+              <button 
+                onClick={() => {
+                  setShowGatewayRouter(false);
+                  setGatewayRouterChoice(null);
+                }} 
+                className="text-zinc-500 hover:text-zinc-200 transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            
+            {/* Body */}
+            <div className="p-6 space-y-4">
+              <p className="text-zinc-400 text-[10px] leading-relaxed">
+                Identify your primary operational cohort. The autonomic router will classify your session and trigger cross-sell matchmaking with partner ventures.
+              </p>
+              
+              <div className="space-y-3">
+                {[
+                  {
+                    id: 'student',
+                    label: 'Student',
+                    icon: GraduationCap,
+                    desc: 'Onboard as Intern and align with Skill Tank development targets.',
+                    color: 'text-onyx-accent-cyan hover:border-onyx-accent-cyan/60 bg-onyx-accent-cyan/5 hover:bg-onyx-accent-cyan/10 border-onyx-accent-cyan/20'
+                  },
+                  {
+                    id: 'enterprise',
+                    label: 'Enterprise Client',
+                    icon: Briefcase,
+                    desc: 'Route transaction volume through Vriddhi corporate logistics.',
+                    color: 'text-onyx-accent-green hover:border-onyx-accent-green/60 bg-onyx-accent-green/5 hover:bg-onyx-accent-green/10 border-onyx-accent-green/20'
+                  },
+                  {
+                    id: 'coordinator',
+                    label: 'College Coordinator',
+                    icon: Globe,
+                    desc: 'Engage with Promtal media networks and recruitment pipelines.',
+                    color: 'text-onyx-accent-purple hover:border-onyx-accent-purple/60 bg-onyx-accent-purple/5 hover:bg-onyx-accent-purple/10 border-onyx-accent-purple/20'
+                  }
+                ].map((cohort) => {
+                  const CohortIcon = cohort.icon;
+                  const isSelected = gatewayRouterChoice === cohort.id;
+                  return (
+                    <button
+                      key={cohort.id}
+                      onClick={() => setGatewayRouterChoice(cohort.id)}
+                      className={`w-full text-left p-4 rounded-xl border transition-all flex items-start gap-4 ${cohort.color} ${
+                        isSelected ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-black border-transparent' : ''
+                      }`}
+                    >
+                      <CohortIcon size={20} className="mt-1 flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-bold text-sm tracking-wide text-white">{cohort.label}</p>
+                        <p className="text-zinc-400 text-[10px] mt-1 leading-relaxed">{cohort.desc}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {gatewayRouterChoice && (
+                <button
+                  onClick={() => handleGatewayChoice(gatewayRouterChoice as any)}
+                  className="w-full py-3 rounded-xl bg-onyx-accent-purple hover:bg-fuchsia-400 text-black font-bold uppercase tracking-widest transition-all mt-4 text-xs shadow-lg shadow-fuchsia-950/40"
+                >
+                  Confirm Classification
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Telemetry bottom bar */}
+      <div 
+        className={`fixed bottom-0 left-0 right-0 h-12 border-t flex items-center justify-between px-4 z-30 md:hidden cursor-pointer ${
+          isOnyx ? 'bg-[#09090b] border-[#27272a]' : 'bg-[#f4f4f5] border-[#e4e4e7]'
+        }`}
+        onClick={() => setIsMobileTerminalOpen(true)}
+      >
+        <div className="flex items-center gap-2">
+          <Activity size={12} className={`animate-pulse ${isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'}`} />
+          <span className={`text-[10px] font-mono font-bold uppercase tracking-wider ${isOnyx ? 'text-zinc-400' : 'text-zinc-600'}`}>Agent Matrix</span>
+        </div>
+        <span className={`text-[9px] font-mono font-bold ${isOnyx ? 'text-zinc-500' : 'text-zinc-600'}`}>
+          {filteredTerminalEntries.length} entries ↑
+        </span>
+      </div>
+
+      {/* Mobile Terminal Bottom Sheet */}
+      {isMobileTerminalOpen && (
+        <div className="fixed inset-0 z-50 md:hidden bg-black/60 backdrop-blur-sm" onClick={() => setIsMobileTerminalOpen(false)}>
+          <div 
+            className={`fixed bottom-0 left-0 right-0 h-[60vh] border-t flex flex-col rounded-t-2xl transition-all duration-300 ${
+              isOnyx ? 'bg-[#000000] border-[#27272a] text-[#fafafa]' : 'bg-[#ffffff] border-[#e4e4e7] text-[#09090b]'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={`px-4 py-3 border-b flex items-center justify-between ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
+              <div className="flex items-center gap-2">
+                <Activity size={14} className={isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'} />
+                <span className={`text-xs font-bold uppercase tracking-wider ${isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'}`}>
+                  Agent Command Matrix
+                </span>
+              </div>
+              <button 
+                onClick={() => setIsMobileTerminalOpen(false)}
+                className={`p-1 rounded-md border ${
+                  isOnyx ? 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-black'
+                }`}
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-2 font-mono">
+              {filteredTerminalEntries.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full gap-2 py-10">
+                  <Activity size={20} className="animate-pulse text-zinc-600" />
+                  <p className="text-[10px] text-zinc-500 font-mono">No active streams...</p>
+                </div>
+              ) : (
+                [...filteredTerminalEntries].reverse().map((entry) => (
+                  <ThoughtEntry key={entry.id} entry={entry} currentUser={currentUser} />
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
