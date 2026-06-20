@@ -23,6 +23,7 @@ import type {
   DbTableName,
   WalOperation,
   DbCommitEvent,
+  FinancialLedger,
 } from '../types/database';
 import type { TenantCompany, UserRole } from '../types/zeta';
 
@@ -94,28 +95,7 @@ const encryptPayload = async (plaintext: string): Promise<string> => {
 /**
  * Decrypt a base64-encoded AES-GCM ciphertext back to plaintext.
  */
-const decryptPayload = async (ciphertext: string): Promise<string> => {
-  try {
-    const key = await deriveKey();
-    const combined = Uint8Array.from(atob(ciphertext), (c) => c.charCodeAt(0));
-    const iv = combined.slice(0, 12);
-    const data = combined.slice(12);
-    const decrypted = await window.crypto.subtle.decrypt(
-      { name: 'AES-GCM', iv },
-      key,
-      data
-    );
-    return new TextDecoder().decode(decrypted);
-  } catch {
-    // Fallback: reverse the XOR-base64 obfuscation
-    try {
-      const reversed = ciphertext.split('').reverse().join('');
-      return decodeURIComponent(escape(atob(reversed)));
-    } catch {
-      return ''; // Corrupt blob — triggers re-seed
-    }
-  }
-};
+
 
 // ─── DEEP-FREEZE UTILITY ───────────────────────────────────────────────────
 
@@ -184,94 +164,104 @@ let _walSeq = 0;
 const _wal: WalEntry[] = [];
 let _initialized = false;
 
-// ─── HELPERS ───────────────────────────────────────────────────────────────
+// ─── HYBRID PERSISTENCE ENGINE CONFIG & LIFE CYCLE ──────────────────────────
 
-const generateUuid = (): string =>
-  'ST-' + Math.floor(100 + Math.random() * 900);
+const DOSSIERS_KEY = '_zeta_dossiers';
+const LEDGER_KEY = '_zeta_ledger';
+const TASKS_KEY = '_zeta_tasks';
 
-const generateTxHash = (): string => {
-  const chars = '0123456789abcdef';
-  let hash = '0x';
-  for (let i = 0; i < 64; i++) {
-    hash += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return hash;
-};
-
-const now = (): string => new Date().toISOString();
-
-// ─── WAL + PERSIST ─────────────────────────────────────────────────────────
-
-/**
- * Records a WAL entry and commits the entire in-memory state
- * to encrypted localStorage. Emits a commit event after success.
- */
-const walCommit = async (
-  table: DbTableName,
-  internId: string,
-  operation: WalOperation
-): Promise<void> => {
-  _walSeq += 1;
-  const txHash = generateTxHash();
-
-  const entry: WalEntry = {
-    wal_seq: _walSeq,
-    table_name: table,
-    intern_id: internId,
-    operation,
-    timestamp_iso: now(),
-    tx_hash: txHash,
-  };
-  _wal.push(entry);
-
-  // Serialize in-memory tables
-  const snapshot = {
-    intern_dossiers: Array.from(_db.intern_dossiers.values()),
-    work_history_logs: Array.from(_db.work_history_logs.values()),
-    wal_seq: _walSeq,
-  };
-
-  const encrypted = await encryptPayload(JSON.stringify(snapshot));
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(SEALED_DB_KEY, encrypted);
-  }
-
-  emitCommit({
-    wal_seq: _walSeq,
-    table_name: table,
-    intern_id: internId,
-    operation,
-    tx_hash: txHash,
-  });
-};
-
-// ─── ZERO-TRUST BOUNDARY CHECKER ──────────────────────────────────────────
-
-/** Custom error class for tenant access violations */
-class ZetaAccessViolation extends Error {
-  constructor(requestedTenant: TenantCompany, callerTenant: TenantCompany) {
-    super(
-      `[SECURITY HALT] Zero-Trust boundary violation. ` +
-      `Caller locked to tenant "${callerTenant}" attempted unauthorized access ` +
-      `to tenant "${requestedTenant}" data. Execution halted.`
-    );
-    this.name = 'ZetaAccessViolation';
-  }
+interface LedgerEntry {
+  intern_id: string;
+  financial_ledger: FinancialLedger;
 }
 
-const assertTenantBoundary = (
-  dossierTenant: TenantCompany,
-  callerRole: UserRole,
-  callerTenant: TenantCompany | undefined
-): void => {
-  if (callerRole === 'global_admin') return; // Admin sees all
-  if (callerRole === 'intern') return;        // Intern boundary enforced by internId check upstream
-  if (callerRole === 'tenant_rep' && callerTenant && callerTenant !== dossierTenant) {
-    throw new ZetaAccessViolation(dossierTenant, callerTenant);
+const broadcastUpdate = (): void => {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('zeta-db-update'));
   }
 };
 
-// ─── SEED DATA ─────────────────────────────────────────────────────────────
+const saveToStorageAll = (): void => {
+  if (typeof window === 'undefined') return;
+
+  const dossiers = Array.from(_db.intern_dossiers.values());
+  const ledgers: LedgerEntry[] = dossiers.map((d) => ({
+    intern_id: d.intern_id,
+    financial_ledger: d.financial_ledger,
+  }));
+  const tasks = Array.from(_db.work_history_logs.values());
+
+  try {
+    localStorage.setItem(DOSSIERS_KEY, JSON.stringify(dossiers));
+  } catch (e) {
+    console.error('[DB ENGINE] Failed to save dossiers to storage:', e);
+  }
+
+  try {
+    localStorage.setItem(LEDGER_KEY, JSON.stringify(ledgers));
+  } catch (e) {
+    console.error('[DB ENGINE] Failed to save ledger to storage:', e);
+  }
+
+  try {
+    localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+  } catch (e) {
+    console.error('[DB ENGINE] Failed to save tasks to storage:', e);
+  }
+
+  try {
+    localStorage.setItem('_zeta_wal_seq', _walSeq.toString());
+  } catch (e) {
+    console.error('[DB ENGINE] Failed to save WAL sequence to storage:', e);
+  }
+};
+
+const hydrateFromStorage = (): boolean => {
+  if (typeof window === 'undefined') return false;
+
+  const dossiersJson = localStorage.getItem(DOSSIERS_KEY);
+  const ledgerJson = localStorage.getItem(LEDGER_KEY);
+  const tasksJson = localStorage.getItem(TASKS_KEY);
+
+  if (dossiersJson && ledgerJson && tasksJson) {
+    try {
+      const dossiers = JSON.parse(dossiersJson) as DossierRecord[];
+      const ledgers = JSON.parse(ledgerJson) as LedgerEntry[];
+      const tasks = JSON.parse(tasksJson) as WorkLogRecord[];
+
+      _db.intern_dossiers.clear();
+      _db.work_history_logs.clear();
+
+      const ledgerMap = new Map<string, FinancialLedger>();
+      ledgers.forEach((l) => {
+        ledgerMap.set(l.intern_id, l.financial_ledger);
+      });
+
+      dossiers.forEach((d) => {
+        const ledger = ledgerMap.get(d.intern_id) || d.financial_ledger;
+        _db.intern_dossiers.set(d.intern_id, {
+          ...d,
+          financial_ledger: ledger,
+        });
+      });
+
+      tasks.forEach((t) => {
+        _db.work_history_logs.set(t.task_id, t);
+      });
+
+      const walSeqStr = localStorage.getItem('_zeta_wal_seq');
+      if (walSeqStr) {
+        _walSeq = parseInt(walSeqStr, 10) || 0;
+      }
+
+      _initialized = true;
+      return true;
+    } catch (e) {
+      console.error('[DB ENGINE] Hydration from storage failed, falling back to seed:', e);
+    }
+  }
+  return false;
+};
 
 const TASK_POOL: Array<Omit<WorkLogRecord, 'task_id' | 'intern_id' | 'timestamp_iso'>> = [
   { project_title: 'CRM Duplicate Scan Run', description: 'Audited lead files for matching email patterns, merging duplicate contacts.', efficiency_score: 95, reviewer_notes: 'Thorough and highly detailed duplicate report.' },
@@ -318,8 +308,10 @@ const SEED_POOL: Record<TenantCompany, SeedInternEntry[]> = {
   ],
 };
 
-/** Executes cold-start batch inserts — 15 rich dossiers across 5 divisions */
-const executeColdStartSeed = async (): Promise<void> => {
+const seedDatabase = (): void => {
+  _db.intern_dossiers.clear();
+  _db.work_history_logs.clear();
+
   const divisions: TenantCompany[] = ['skill_tank', 'vriddhi', 'tobofu', 'promtal', 'maceco'];
   let globalIdx = 1;
 
@@ -376,9 +368,126 @@ const executeColdStartSeed = async (): Promise<void> => {
     }
   }
 
-  // Single WAL commit for the full seed batch
-  await walCommit('intern_dossiers', 'SYSTEM', 'SEED');
+  saveToStorageAll();
 };
+
+const initEngine = (): void => {
+  if (typeof window === 'undefined') return;
+
+  const hasKeys =
+    localStorage.getItem(DOSSIERS_KEY) !== null &&
+    localStorage.getItem(LEDGER_KEY) !== null &&
+    localStorage.getItem(TASKS_KEY) !== null;
+
+  if (hasKeys) {
+    const success = hydrateFromStorage();
+    if (!success) {
+      seedDatabase();
+    }
+  } else {
+    seedDatabase();
+  }
+};
+
+// Immediately execute lifecycle method
+try {
+  initEngine();
+} catch (e) {
+  console.error('[DB ENGINE] Initialization lifecycle execution failed:', e);
+}
+
+// ─── HELPERS ───────────────────────────────────────────────────────────────
+
+const generateUuid = (): string =>
+  'ST-' + Math.floor(100 + Math.random() * 900);
+
+const generateTxHash = (): string => {
+  const chars = '0123456789abcdef';
+  let hash = '0x';
+  for (let i = 0; i < 64; i++) {
+    hash += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return hash;
+};
+
+const now = (): string => new Date().toISOString();
+
+// ─── WAL + PERSIST ─────────────────────────────────────────────────────────
+
+/**
+ * Records a WAL entry and commits the entire in-memory state
+ * to encrypted localStorage. Emits a commit event after success.
+ */
+const walCommit = async (
+  table: DbTableName,
+  internId: string,
+  operation: WalOperation
+): Promise<void> => {
+  _walSeq += 1;
+  const txHash = generateTxHash();
+
+  const entry: WalEntry = {
+    wal_seq: _walSeq,
+    table_name: table,
+    intern_id: internId,
+    operation,
+    timestamp_iso: now(),
+    tx_hash: txHash,
+  };
+  _wal.push(entry);
+
+  // Serialize in-memory tables
+  const snapshot = {
+    intern_dossiers: Array.from(_db.intern_dossiers.values()),
+    work_history_logs: Array.from(_db.work_history_logs.values()),
+    wal_seq: _walSeq,
+  };
+
+  try {
+    const encrypted = await encryptPayload(JSON.stringify(snapshot));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(SEALED_DB_KEY, encrypted);
+    }
+  } catch (e) {
+    console.error('[DB ENGINE] Encrypted WAL commit failed:', e);
+  }
+
+  emitCommit({
+    wal_seq: _walSeq,
+    table_name: table,
+    intern_id: internId,
+    operation,
+    tx_hash: txHash,
+  });
+};
+
+// ─── ZERO-TRUST BOUNDARY CHECKER ──────────────────────────────────────────
+
+/** Custom error class for tenant access violations */
+class ZetaAccessViolation extends Error {
+  constructor(requestedTenant: TenantCompany, callerTenant: TenantCompany) {
+    super(
+      `[SECURITY HALT] Zero-Trust boundary violation. ` +
+      `Caller locked to tenant "${callerTenant}" attempted unauthorized access ` +
+      `to tenant "${requestedTenant}" data. Execution halted.`
+    );
+    this.name = 'ZetaAccessViolation';
+  }
+}
+
+const assertTenantBoundary = (
+  dossierTenant: TenantCompany,
+  callerRole: UserRole,
+  callerTenant: TenantCompany | undefined
+): void => {
+  if (callerRole === 'global_admin') return; // Admin sees all
+  if (callerRole === 'intern') return;        // Intern boundary enforced by internId check upstream
+  if (callerRole === 'tenant_rep' && callerTenant && callerTenant !== dossierTenant) {
+    throw new ZetaAccessViolation(dossierTenant, callerTenant);
+  }
+};
+
+
 
 // ─── PUBLIC API ─────────────────────────────────────────────────────────────
 
@@ -394,27 +503,11 @@ export const initializeDatabase = async (): Promise<void> => {
 
   if (typeof window === 'undefined') return;
 
-  const sealed = localStorage.getItem(SEALED_DB_KEY);
-  if (sealed) {
-    try {
-      const json = await decryptPayload(sealed);
-      if (json) {
-        const snapshot = JSON.parse(json) as {
-          intern_dossiers: DossierRecord[];
-          work_history_logs: WorkLogRecord[];
-          wal_seq: number;
-        };
-        snapshot.intern_dossiers.forEach((d) => _db.intern_dossiers.set(d.intern_id, d));
-        snapshot.work_history_logs.forEach((l) => _db.work_history_logs.set(l.task_id, l));
-        _walSeq = snapshot.wal_seq ?? 0;
-        return;
-      }
-    } catch {
-      // Corrupt blob — fall through to re-seed
-    }
+  const success = hydrateFromStorage();
+  if (!success) {
+    seedDatabase();
+    await walCommit('intern_dossiers', 'SYSTEM', 'SEED');
   }
-
-  await executeColdStartSeed();
 };
 
 /**
@@ -470,6 +563,10 @@ export const createInternDossier = (
   };
 
   _db.intern_dossiers.set(internId, dossier);
+  
+  saveToStorageAll();
+  broadcastUpdate();
+  
   void walCommit('intern_dossiers', internId, 'INSERT');
 
   return _dossierToLegacy(dossier);
@@ -506,6 +603,9 @@ export const appendWorkLog = (
     _db.intern_dossiers.set(internId, { ...dossier, updated_at: now() });
   }
 
+  saveToStorageAll();
+  broadcastUpdate();
+
   void walCommit('work_history_logs', internId, 'INSERT');
 };
 
@@ -534,6 +634,10 @@ export const updateStipendOrPayout = (
   };
 
   _db.intern_dossiers.set(internId, updated);
+
+  saveToStorageAll();
+  broadcastUpdate();
+
   void walCommit('intern_dossiers', internId, 'UPDATE');
 };
 

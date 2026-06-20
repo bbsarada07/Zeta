@@ -1074,3 +1074,11 @@ export const useZetaStore = create<ZetaState>((set, get) => ({
   }
 }));
 
+if (typeof window !== 'undefined') {
+  window.addEventListener('zeta-db-update', () => {
+    const updatedDossiers = loadDossiers();
+    useZetaStore.setState({ internDossiers: updatedDossiers });
+  });
+}
+
+

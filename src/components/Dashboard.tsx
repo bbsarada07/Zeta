@@ -6,6 +6,8 @@ import {
   FileText,
   Star,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   TrendingUp,
   AlertTriangle,
   DollarSign,
@@ -130,24 +132,24 @@ const KpiCard = ({
   const themeProfile = useZetaStore((s) => s.themeProfile);
   const isOnyx = themeProfile === 'ONYX';
   return (
-    <div className={`border rounded-lg p-4 flex flex-col gap-3 transition-colors duration-200 ${
+    <div className={`border rounded-xl p-6 flex flex-col gap-4 shadow-2xl transition-all duration-200 ${
       isOnyx 
-        ? 'bg-[#09090b] text-[#fafafa] border-[#27272a] hover:border-zinc-600' 
-        : 'bg-[#f4f4f5] text-[#09090b] border-[#e4e4e7] hover:border-zinc-400'
+        ? 'bg-[#09090b] text-[#fafafa] border-[#27272a] hover:border-zinc-500 shadow-zinc-950/50' 
+        : 'bg-[#f4f4f5] text-[#09090b] border-[#e4e4e7] hover:border-zinc-300 shadow-zinc-200'
     }`}>
       <div className="flex items-center justify-between">
-        <span className={`text-xs font-medium tracking-widest uppercase ${
+        <span className={`text-sm font-semibold tracking-wider uppercase ${
           isOnyx ? 'text-zinc-400' : 'text-zinc-600'
         }`}>{label}</span>
-        <div className={`p-1.5 rounded-md ${color}`}>
-          <Icon size={14} />
+        <div className={`p-2 rounded-lg ${color}`}>
+          <Icon size={16} />
         </div>
       </div>
-      <div className={`text-2xl font-bold tracking-tight ${
+      <div className={`text-3xl font-bold tracking-tight ${
         isOnyx ? 'text-[#fafafa]' : 'text-black'
       }`}>{value}</div>
-      {sub && <div className={`text-xs ${
-        isOnyx ? 'text-zinc-500' : 'text-zinc-700'
+      {sub && <div className={`text-xs font-medium ${
+        isOnyx ? 'text-zinc-500' : 'text-zinc-600'
       }`}>{sub}</div>}
     </div>
   );
@@ -159,30 +161,30 @@ const LeadCard = ({ lead, onClick }: { lead: Lead; onClick: () => void }) => {
   return (
     <div 
       onClick={onClick}
-      className={`border rounded-md p-3 mb-2 transition-all duration-150 group cursor-pointer ${
+      className={`border rounded-xl p-5 mb-3 min-h-[90px] shadow-md transition-all duration-150 group cursor-pointer ${
         isOnyx 
-          ? 'bg-[#000000] border-[#27272a] hover:border-zinc-500 text-[#fafafa]' 
-          : 'bg-[#ffffff] border-[#e4e4e7] hover:border-zinc-400 text-[#09090b]'
+          ? 'bg-[#000000] border-[#27272a] hover:border-zinc-400 text-[#fafafa] hover:bg-zinc-900/10' 
+          : 'bg-[#ffffff] border-[#e4e4e7] hover:border-zinc-300 text-[#09090b] hover:bg-zinc-50'
       }`}
     >
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex items-start justify-between gap-2.5">
         <div className="min-w-0">
-          <p className={`text-xs font-semibold group-hover:text-onyx-accent-green transition-colors truncate ${
+          <p className={`text-sm font-semibold group-hover:text-onyx-accent-green transition-colors truncate ${
             isOnyx ? 'text-[#fafafa]' : 'text-black'
           }`}>{lead.name}</p>
-          <p className={`text-[10px] truncate mt-0.5 ${
+          <p className={`text-xs truncate mt-1 ${
             isOnyx ? 'text-zinc-400' : 'text-zinc-600'
           }`}>{lead.companyName}</p>
         </div>
-        <span className={`text-[10px] font-mono whitespace-nowrap ${isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'}`}>
+        <span className={`text-sm font-bold font-mono whitespace-nowrap ${isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'}`}>
           ${lead.potentialValue.toLocaleString()}
         </span>
       </div>
-      <div className="mt-2 flex items-center gap-1.5">
-        <span className={`text-[9px] font-mono ${
+      <div className="mt-3 flex items-center gap-2">
+        <span className={`text-xs font-mono font-bold ${
           isOnyx ? 'text-zinc-500' : 'text-zinc-600'
         }`}>D{lead.dealVelocity}</span>
-        <div className={`h-1 flex-1 rounded-full overflow-hidden ${isOnyx ? 'bg-[#27272a]' : 'bg-[#e4e4e7]'}`}>
+        <div className={`h-1.5 flex-1 rounded-full overflow-hidden ${isOnyx ? 'bg-[#27272a]' : 'bg-[#e4e4e7]'}`}>
           <div
             className={`h-full rounded-full transition-all ${
               isOnyx
@@ -301,6 +303,7 @@ export default function Dashboard() {
       : 'global'
   );
   const [tenantDropOpen, setTenantDropOpen] = useState(false);
+  const [isTerminalCollapsed, setIsTerminalCollapsed] = useState(false);
   const terminalRef = useRef<HTMLDivElement>(null);
   const terminalEndRef = useRef<HTMLDivElement>(null);
 
@@ -791,30 +794,30 @@ export default function Dashboard() {
         </section>
 
         {/* Dynamic Panel Renderer */}
-        <div className="flex-1 overflow-auto p-4 min-h-0">
+        <div className="flex-1 overflow-auto p-6 min-h-0">
           
           {/* 1. Dashboard Tab */}
           {activeNav === 'dashboard' && (
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 h-full">
-              <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 h-full">
+              <div className="flex flex-col gap-6">
                 
                 {/* Pipeline Stages widget */}
-                <div className={`border rounded-lg p-4 flex flex-col gap-3 ${isOnyx ? 'bg-[#09090b] border-[#27272a]' : 'bg-[#f4f4f5] border-[#e4e4e7]'}`}>
-                  <div className={`flex justify-between items-center border-b pb-2 ${isOnyx ? 'border-[#27272a]/50' : 'border-[#e4e4e7]'}`}>
-                    <h3 className={`text-xs font-bold font-mono tracking-wider uppercase ${isOnyx ? 'text-onyx-accent-cyan' : 'text-cyan-700'}`}>Pipeline Stages Distribution</h3>
-                    <button onClick={() => setActiveNav('crm')} className={`text-[10px] hover:underline font-mono ${isOnyx ? 'text-onyx-accent-cyan' : 'text-cyan-700'}`}>View Kanban</button>
+                <div className={`border rounded-xl p-6 flex flex-col gap-4 shadow-2xl ${isOnyx ? 'bg-[#09090b] border-[#27272a] shadow-zinc-950/40' : 'bg-[#f4f4f5] border-[#e4e4e7] shadow-zinc-200'}`}>
+                  <div className={`flex justify-between items-center border-b pb-3 ${isOnyx ? 'border-[#27272a]/50' : 'border-[#e4e4e7]'}`}>
+                    <h3 className={`text-lg font-semibold tracking-wide uppercase ${isOnyx ? 'text-onyx-accent-cyan' : 'text-cyan-700'}`}>Pipeline Stages Distribution</h3>
+                    <button onClick={() => setActiveNav('crm')} className={`text-sm hover:underline font-semibold ${isOnyx ? 'text-onyx-accent-cyan' : 'text-cyan-700'}`}>View Kanban</button>
                   </div>
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {PIPELINE_STAGES.map(stage => {
                       const count = filteredLeads.filter(l => l.pipelineStage === stage).length;
                       const percent = filteredLeads.length > 0 ? (count / filteredLeads.length) * 100 : 0;
                       return (
-                        <div key={stage} className="space-y-1">
-                          <div className="flex justify-between text-[10px] font-mono">
+                        <div key={stage} className="space-y-2">
+                          <div className="flex justify-between text-sm font-semibold">
                             <span className={isOnyx ? 'text-zinc-300' : 'text-zinc-700'}>{stage.replace('_', ' ')}</span>
-                            <span className={`${isOnyx ? 'text-zinc-500' : 'text-zinc-500'} font-bold`}>{count} ({percent.toFixed(0)}%)</span>
+                            <span className={`${isOnyx ? 'text-zinc-400' : 'text-zinc-600'} font-bold`}>{count} ({percent.toFixed(0)}%)</span>
                           </div>
-                          <div className={`h-1.5 w-full border rounded overflow-hidden ${isOnyx ? 'bg-[#000000] border-[#27272a]' : 'bg-[#ffffff] border-[#e4e4e7]'}`}>
+                          <div className={`h-2.5 w-full border rounded overflow-hidden ${isOnyx ? 'bg-[#000000] border-[#27272a]' : 'bg-[#ffffff] border-[#e4e4e7]'}`}>
                             <div 
                               className={`h-full rounded transition-all duration-300 ${
                                 isOnyx
@@ -831,11 +834,11 @@ export default function Dashboard() {
                 </div>
 
                 {/* Stuck & High-Value Deals Widget */}
-                <div className={`border rounded-lg p-4 flex flex-col gap-3 ${isOnyx ? 'bg-[#09090b] border-[#27272a]' : 'bg-[#f4f4f5] border-[#e4e4e7]'}`}>
-                  <h3 className={`text-xs font-bold font-mono tracking-wider uppercase border-b pb-2 ${isOnyx ? 'text-onyx-accent-rose border-[#27272a]/50' : 'text-rose-700 border-[#e4e4e7]'}`}>Stuck & High-Value Deals</h3>
-                  <div className="max-h-[220px] overflow-y-auto space-y-2 pr-1">
+                <div className={`border rounded-xl p-6 flex flex-col gap-4 shadow-2xl ${isOnyx ? 'bg-[#09090b] border-[#27272a] shadow-zinc-950/40' : 'bg-[#f4f4f5] border-[#e4e4e7] shadow-zinc-200'}`}>
+                  <h3 className={`text-lg font-semibold tracking-wide uppercase border-b pb-2 ${isOnyx ? 'text-onyx-accent-rose border-[#27272a]/50' : 'text-rose-700 border-[#e4e4e7]'}`}>Stuck & High-Value Deals</h3>
+                  <div className="max-h-[220px] overflow-y-auto space-y-3 pr-1">
                     {filteredLeads.filter(l => (l.potentialValue >= 10000) || (l.pipelineStage === 'PROPOSAL' || l.pipelineStage === 'NEGOTIATION')).length === 0 ? (
-                      <div className={`text-center py-6 text-xs font-mono border border-dashed rounded ${isOnyx ? 'text-zinc-500 border-[#27272a]' : 'text-zinc-500 border-[#e4e4e7]'}`}>
+                      <div className={`text-center py-6 text-sm font-mono border border-dashed rounded ${isOnyx ? 'text-zinc-500 border-[#27272a]' : 'text-zinc-500 border-[#e4e4e7]'}`}>
                         No high-value/stuck opportunities logged.
                       </div>
                     ) : (
@@ -843,16 +846,16 @@ export default function Dashboard() {
                         .filter(l => (l.potentialValue >= 10000) || (l.pipelineStage === 'PROPOSAL' || l.pipelineStage === 'NEGOTIATION'))
                         .slice(0, 5)
                         .map(lead => (
-                          <div key={lead.id} className={`flex justify-between items-center border p-2.5 rounded transition-all ${isOnyx ? 'bg-[#000000] border-[#27272a]/40 hover:border-zinc-700' : 'bg-[#ffffff] border-[#e4e4e7] hover:border-zinc-400'}`}>
+                          <div key={lead.id} className={`flex justify-between items-center border p-3 rounded-lg transition-all ${isOnyx ? 'bg-[#000000] border-[#27272a]/40 hover:border-zinc-700' : 'bg-[#ffffff] border-[#e4e4e7] hover:border-zinc-400'}`}>
                             <div className="min-w-0">
-                              <p className={`text-xs font-bold truncate ${isOnyx ? 'text-[#fafafa]' : 'text-black'}`}>{lead.name}</p>
-                              <p className={`text-[10px] truncate ${isOnyx ? 'text-zinc-400' : 'text-zinc-600'}`}>{lead.companyName}</p>
+                              <p className={`text-sm font-bold truncate ${isOnyx ? 'text-[#fafafa]' : 'text-black'}`}>{lead.name}</p>
+                              <p className={`text-xs truncate ${isOnyx ? 'text-zinc-400' : 'text-zinc-600'}`}>{lead.companyName}</p>
                             </div>
-                            <div className="flex items-center gap-2 font-mono">
-                              <span className="text-[10px] text-onyx-accent-green font-bold">${lead.potentialValue.toLocaleString()}</span>
+                            <div className="flex items-center gap-3 font-mono">
+                              <span className="text-xs text-onyx-accent-green font-bold">${lead.potentialValue.toLocaleString()}</span>
                               <button 
                                 onClick={() => setActiveLeadForModal(lead)}
-                                className={`text-[9px] border px-2 py-0.5 rounded uppercase ${
+                                className={`text-xs font-bold border px-3 py-1.5 rounded uppercase ${
                                   isOnyx 
                                     ? 'bg-onyx-accent-cyan/15 hover:bg-onyx-accent-cyan/25 border-onyx-accent-cyan/30 text-onyx-accent-cyan' 
                                     : 'bg-cyan-600/10 hover:bg-cyan-600/20 border-cyan-600/30 text-cyan-700'
@@ -869,17 +872,17 @@ export default function Dashboard() {
 
               </div>
               
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-6">
                 
                 {/* Low Stock Alerts widget */}
-                <div className={`border rounded-lg p-4 flex flex-col gap-3 ${isOnyx ? 'bg-[#09090b] border-[#27272a]' : 'bg-[#f4f4f5] border-[#e4e4e7]'}`}>
+                <div className={`border rounded-xl p-6 flex flex-col gap-4 shadow-2xl ${isOnyx ? 'bg-[#09090b] border-[#27272a] shadow-zinc-950/40' : 'bg-[#f4f4f5] border-[#e4e4e7] shadow-zinc-200'}`}>
                   <div className={`flex justify-between items-center border-b pb-2 ${isOnyx ? 'border-[#27272a]/50' : 'border-[#e4e4e7]'}`}>
-                    <h3 className={`text-xs font-bold font-mono tracking-wider uppercase ${isOnyx ? 'text-onyx-accent-amber' : 'text-amber-700'}`}>Critical Warehouse Deficits</h3>
-                    <button onClick={() => setActiveNav('erp')} className={`text-[10px] hover:underline font-mono ${isOnyx ? 'text-onyx-accent-amber' : 'text-amber-700'}`}>View ERP</button>
+                    <h3 className={`text-lg font-semibold tracking-wide uppercase ${isOnyx ? 'text-onyx-accent-amber' : 'text-amber-700'}`}>Critical Warehouse Deficits</h3>
+                    <button onClick={() => setActiveNav('erp')} className={`text-sm hover:underline font-semibold ${isOnyx ? 'text-onyx-accent-amber' : 'text-amber-700'}`}>View ERP</button>
                   </div>
-                  <div className="max-h-[220px] overflow-y-auto space-y-2 pr-1">
+                  <div className="max-h-[220px] overflow-y-auto space-y-3 pr-1">
                     {getLowStockAssets().length === 0 ? (
-                      <div className={`text-center py-6 text-xs font-mono border border-dashed rounded flex flex-col items-center justify-center gap-1.5 ${
+                      <div className={`text-center py-6 text-sm font-mono border border-dashed rounded flex flex-col items-center justify-center gap-1.5 ${
                         isOnyx 
                           ? 'text-onyx-accent-green border-onyx-accent-green/20 bg-onyx-accent-green/5' 
                           : 'text-emerald-800 border-emerald-800/20 bg-emerald-800/5'
@@ -889,19 +892,19 @@ export default function Dashboard() {
                       </div>
                     ) : (
                       getLowStockAssets().map(asset => (
-                        <div key={asset.id} className={`flex justify-between items-center border p-2.5 rounded transition-all ${isOnyx ? 'bg-[#000000] border-[#27272a]/40 hover:border-zinc-700' : 'bg-[#ffffff] border-[#e4e4e7] hover:border-zinc-400'}`}>
+                        <div key={asset.id} className={`flex justify-between items-center border p-3 rounded-lg transition-all ${isOnyx ? 'bg-[#000000] border-[#27272a]/40 hover:border-zinc-700' : 'bg-[#ffffff] border-[#e4e4e7] hover:border-zinc-400'}`}>
                           <div className="min-w-0">
-                            <p className={`text-xs font-bold truncate ${isOnyx ? 'text-[#fafafa]' : 'text-black'}`}>{asset.name}</p>
-                            <p className={`text-[9px] font-mono ${isOnyx ? 'text-zinc-400' : 'text-zinc-600'}`}>{asset.skuCode} · Location: {asset.warehouseLocation}</p>
+                            <p className={`text-sm font-bold truncate ${isOnyx ? 'text-[#fafafa]' : 'text-black'}`}>{asset.name}</p>
+                            <p className={`text-xs ${isOnyx ? 'text-zinc-400' : 'text-zinc-600'}`}>{asset.skuCode} · Location: {asset.warehouseLocation}</p>
                           </div>
                           <div className="flex items-center gap-3">
-                            <span className="text-xs font-bold font-mono text-onyx-accent-rose tabular-nums">{asset.quantity} / {asset.restockThreshold}</span>
+                            <span className="text-sm font-bold font-mono text-onyx-accent-rose tabular-nums">{asset.quantity} / {asset.restockThreshold}</span>
                             <button 
                               onClick={() => {
                                 restockSKU(asset.skuCode);
                                 alert(`Restocked ${asset.skuCode} to safety threshold.`);
                               }}
-                              className={`text-[9px] border px-2.5 py-1 rounded font-mono font-bold uppercase transition-colors ${
+                              className={`text-xs border px-3 py-1.5 rounded font-bold uppercase transition-colors ${
                                 isOnyx
                                   ? 'bg-onyx-accent-amber/15 hover:bg-onyx-accent-amber/25 border-onyx-accent-amber/30 text-onyx-accent-amber'
                                   : 'bg-amber-600/10 hover:bg-amber-600/20 border-amber-600/30 text-amber-700'
@@ -915,14 +918,14 @@ export default function Dashboard() {
                     )}
                   </div>
                 </div>
-
+ 
                 {/* Dashboard live terminal stream */}
-                <div className={`border rounded-lg p-4 flex flex-col gap-2 flex-1 min-h-[200px] ${isOnyx ? 'bg-[#09090b] border-[#27272a]' : 'bg-[#f4f4f5] border-[#e4e4e7]'}`}>
+                <div className={`border rounded-xl p-6 flex flex-col gap-4 flex-1 min-h-[200px] shadow-2xl ${isOnyx ? 'bg-[#09090b] border-[#27272a] shadow-zinc-950/40' : 'bg-[#f4f4f5] border-[#e4e4e7] shadow-zinc-200'}`}>
                   <div className={`flex items-center justify-between border-b pb-2 ${isOnyx ? 'border-[#27272a]/50' : 'border-[#e4e4e7]'}`}>
-                    <h3 className={`text-[10px] font-bold font-mono tracking-wider uppercase ${isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'}`}>Live Agent Diagnostics Stream</h3>
-                    <span className={`text-[8px] font-mono ${isOnyx ? 'text-zinc-600' : 'text-zinc-500'}`}>{filteredTerminalEntries.length} entries</span>
+                    <h3 className={`text-lg font-semibold tracking-wide uppercase ${isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'}`}>Live Agent Diagnostics Stream</h3>
+                    <span className={`text-xs font-semibold ${isOnyx ? 'text-zinc-400' : 'text-zinc-500'}`}>{filteredTerminalEntries.length} entries</span>
                   </div>
-                  <div className={`flex-1 rounded p-3 font-mono text-[9px] overflow-y-auto max-h-[250px] space-y-2 border ${
+                  <div className={`flex-1 rounded-lg p-4 font-mono text-sm overflow-y-auto max-h-[250px] space-y-2 border ${
                     isOnyx ? 'bg-[#000000] text-zinc-400 border-[#27272a]' : 'bg-[#ffffff] text-zinc-800 border-[#e4e4e7]'
                   }`} ref={terminalRef}>
                     {filteredTerminalEntries.length === 0 ? (
@@ -938,7 +941,7 @@ export default function Dashboard() {
                             isOnyx ? 'border-zinc-900/50' : 'border-zinc-200'
                           } ${isWal ? 'bg-emerald-950/10 -mx-3 px-3 border-l-2 border-l-emerald-800/40' : ''}`}>
                             <div className="flex gap-2 mb-1 items-center flex-wrap">
-                              <span className={`px-1.5 py-0.5 rounded uppercase font-bold text-[7px] ${
+                              <span className={`px-2 py-1 rounded uppercase font-bold text-[10px] ${
                                 (() => {
                                   const key = (entry.agentName || '').toLowerCase();
                                   const style = AGENT_BADGE_STYLES[key];
@@ -950,16 +953,16 @@ export default function Dashboard() {
                                 {entry.agentName}
                               </span>
                               {isWal && (
-                                <span className="text-[7px] font-black text-emerald-600 uppercase tracking-widest">WAL</span>
+                                <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">WAL</span>
                               )}
-                              <span className={`text-[8px] ${isOnyx ? 'text-zinc-700' : 'text-zinc-400'}`}>{new Date(entry.timestamp).toLocaleTimeString()}</span>
+                              <span className={`text-xs ${isOnyx ? 'text-zinc-600' : 'text-zinc-500'}`}>{new Date(entry.timestamp).toLocaleTimeString()}</span>
                               {entry.tx_hash && (
-                                <span className={`text-[7px] font-mono ml-auto ${isOnyx ? 'text-zinc-700' : 'text-zinc-400'}`} title={entry.tx_hash}>
+                                <span className={`text-[10px] font-mono ml-auto ${isOnyx ? 'text-zinc-600' : 'text-zinc-500'}`} title={entry.tx_hash}>
                                   {entry.tx_hash.slice(0, 14)}...
                                 </span>
                               )}
                             </div>
-                            <p className={`leading-relaxed text-[8px] break-words whitespace-pre-wrap ${isOnyx ? 'text-zinc-400' : 'text-zinc-700'}`}>{displayText}</p>
+                            <p className={`leading-relaxed text-xs break-words whitespace-pre-wrap ${isOnyx ? 'text-zinc-300' : 'text-zinc-700'}`}>{displayText}</p>
                           </div>
                         );
                       })
@@ -967,7 +970,7 @@ export default function Dashboard() {
                     <div ref={terminalEndRef} />
                   </div>
                 </div>
-
+ 
               </div>
             </div>
           )}
@@ -998,18 +1001,18 @@ export default function Dashboard() {
               </div>
 
               {/* Kanban Board */}
-              <div className="flex gap-3 h-full overflow-x-auto pb-2 min-h-0 flex-1">
+              <div className="flex gap-4 h-full overflow-x-auto pb-4 min-h-0 flex-1">
                 {PIPELINE_STAGES.map((stage) => {
                   const stageLeads = filteredLeads.filter((l) => l.pipelineStage === stage);
                   return (
-                    <div key={stage} className="flex-shrink-0 w-64 bg-onyx-panel/40 border border-onyx-border rounded-lg p-2.5 flex flex-col max-h-full">
-                      <div className={`px-2 py-1.5 rounded-t border-b text-[10px] font-bold tracking-widest uppercase mb-2.5 flex justify-between items-center ${STAGE_COLORS[stage]}`}>
+                    <div key={stage} className="flex-shrink-0 w-72 min-w-[280px] bg-onyx-panel/40 border border-onyx-border rounded-xl p-4 shadow-xl flex flex-col max-h-full">
+                      <div className={`px-3 py-2 rounded-t border-b text-sm font-bold tracking-widest uppercase mb-3 flex justify-between items-center ${STAGE_COLORS[stage]}`}>
                         <span>{stage.replace('_', ' ')}</span>
                         <span className="opacity-70 font-mono">({stageLeads.length})</span>
                       </div>
-                      <div className="overflow-y-auto flex-1 min-h-0">
+                      <div className="overflow-y-auto flex-1 min-h-0 space-y-3">
                         {stageLeads.length === 0 ? (
-                          <div className="text-center text-[10px] text-onyx-muted py-8 border border-dashed border-onyx-border rounded">
+                          <div className="text-center text-xs text-onyx-muted py-10 border border-dashed border-onyx-border rounded-xl">
                             Empty stage
                           </div>
                         ) : (
@@ -1033,30 +1036,30 @@ export default function Dashboard() {
           {activeNav === 'erp' && (
             <div className="flex flex-col gap-4 h-full">
               {/* Toolbar */}
-              <div className="flex justify-between items-center flex-wrap gap-2">
-                <div className="flex gap-2">
-                  <div className="relative w-64">
-                    <span className="absolute left-2.5 top-2.5 text-onyx-muted">
-                      <Search size={14} />
+              <div className="flex justify-between items-center flex-wrap gap-4">
+                <div className="flex gap-3">
+                  <div className="relative w-72">
+                    <span className="absolute left-3.5 top-3.5 text-onyx-muted">
+                      <Search size={16} />
                     </span>
                     <input
                       type="text"
                       placeholder="Search SKU or name..."
                       value={erpSearch}
                       onChange={(e) => setErpSearch(e.target.value)}
-                      className="w-full text-xs bg-onyx-panel border border-onyx-border rounded pl-8 pr-3 py-2 text-onyx-bright placeholder-onyx-muted focus:outline-none focus:border-zinc-500 transition-colors font-mono"
+                      className="w-full h-12 text-sm bg-onyx-panel border border-onyx-border rounded-lg pl-10 pr-4 text-onyx-bright placeholder-onyx-muted focus:outline-none focus:border-zinc-500 transition-colors font-mono"
                     />
                   </div>
-                  <div className="flex border border-onyx-border rounded overflow-hidden text-xs font-semibold font-mono">
+                  <div className="flex border border-onyx-border rounded-lg overflow-hidden text-sm font-semibold font-mono h-12">
                     <button 
                       onClick={() => setErpFilter('all')}
-                      className={`px-3 py-2 transition-colors ${erpFilter === 'all' ? 'bg-onyx-accent-amber/25 text-onyx-accent-amber border-r border-onyx-border' : 'bg-onyx-panel text-onyx-muted hover:text-zinc-300 border-r border-onyx-border'}`}
+                      className={`px-4 h-full transition-colors ${erpFilter === 'all' ? 'bg-onyx-accent-amber/25 text-onyx-accent-amber border-r border-onyx-border' : 'bg-onyx-panel text-onyx-muted hover:text-zinc-300 border-r border-onyx-border'}`}
                     >
                       All Assets
                     </button>
                     <button 
                       onClick={() => setErpFilter('low')}
-                      className={`px-3 py-2 transition-colors ${erpFilter === 'low' ? 'bg-onyx-accent-rose/25 text-onyx-accent-rose' : 'bg-onyx-panel text-onyx-muted hover:text-zinc-300'}`}
+                      className={`px-4 h-full transition-colors ${erpFilter === 'low' ? 'bg-onyx-accent-rose/25 text-onyx-accent-rose' : 'bg-onyx-panel text-onyx-muted hover:text-zinc-300'}`}
                     >
                       Low Stock ({lowStockCount})
                     </button>
@@ -1065,45 +1068,45 @@ export default function Dashboard() {
               </div>
 
               {/* Table Ledger */}
-              <div className="bg-onyx-panel border border-onyx-border rounded-lg overflow-hidden flex-1 min-h-0 overflow-y-auto">
-                <table className="w-full text-xs border-collapse">
+              <div className="bg-onyx-panel border border-onyx-border rounded-xl shadow-2xl overflow-hidden flex-1 min-h-0 overflow-y-auto">
+                <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="border-b border-onyx-border bg-onyx-panel/80">
                       {['SKU', 'Item Name', 'Location', 'Current Stock', 'Threshold', 'Unit Price', 'Status', 'Replenish Code', 'Action'].map((h) => (
-                        <th key={h} className="text-left text-[10px] font-bold tracking-widest uppercase text-onyx-muted py-3 px-4 whitespace-nowrap">{h}</th>
+                        <th key={h} className="text-left text-xs font-bold tracking-wider uppercase text-onyx-muted py-4 px-6 whitespace-nowrap">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {filteredAssets.length === 0 ? (
                       <tr>
-                        <td colSpan={9} className="text-center py-12 text-onyx-muted font-mono">No inventory records resolved.</td>
+                        <td colSpan={9} className="text-center py-12 text-onyx-muted font-mono text-sm">No inventory records resolved.</td>
                       </tr>
                     ) : (
                       filteredAssets.map((asset, idx) => (
                         <tr key={asset.id} className={`border-b border-onyx-border/30 hover:bg-onyx-panel/60 transition-colors ${idx % 2 === 0 ? 'bg-onyx-canvas/60' : 'bg-onyx-panel/40'}`}>
-                          <td className="py-3 px-4 font-mono text-onyx-accent-cyan text-[10px]">{asset.skuCode}</td>
-                          <td className="py-3 px-4 text-onyx-bright font-semibold">{asset.name}</td>
-                          <td className="py-3 px-4 text-onyx-muted font-mono text-[10px]">{asset.warehouseLocation ?? '—'}</td>
-                          <td className="py-3 px-4">
-                            <span className={`font-bold tabular-nums ${asset.isBelowThreshold ? 'text-onyx-accent-rose' : 'text-onyx-bright'}`}>
+                          <td className="py-4 px-6 font-mono text-onyx-accent-cyan text-sm font-semibold">{asset.skuCode}</td>
+                          <td className="py-4 px-6 text-onyx-bright font-semibold">{asset.name}</td>
+                          <td className="py-4 px-6 text-onyx-muted font-mono text-sm">{asset.warehouseLocation ?? '—'}</td>
+                          <td className="py-4 px-6">
+                            <span className={`font-bold tabular-nums text-sm ${asset.isBelowThreshold ? 'text-onyx-accent-rose' : 'text-onyx-bright'}`}>
                               {asset.quantity}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-onyx-muted font-mono">{asset.restockThreshold}</td>
-                          <td className="py-3 px-4 text-onyx-accent-green font-mono">${asset.unitPrice.toFixed(2)}</td>
-                          <td className="py-3 px-4">
+                          <td className="py-4 px-6 text-onyx-muted font-mono text-sm font-semibold">{asset.restockThreshold}</td>
+                          <td className="py-4 px-6 text-onyx-accent-green font-mono text-sm font-semibold">${asset.unitPrice.toFixed(2)}</td>
+                          <td className="py-4 px-6">
                             {asset.isBelowThreshold ? (
-                              <span className="inline-flex items-center gap-1 text-[9px] font-bold text-onyx-accent-rose bg-onyx-accent-rose/10 border border-onyx-accent-rose/20 px-2 py-0.5 rounded">
-                                <AlertTriangle size={8} /> LOW STOCK
+                              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-onyx-accent-rose bg-onyx-accent-rose/10 border border-onyx-accent-rose/20 px-2.5 py-1 rounded-md">
+                                <AlertTriangle size={10} /> LOW STOCK
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 text-[9px] font-bold text-onyx-accent-green bg-onyx-accent-green/10 border border-onyx-accent-green/20 px-2 py-0.5 rounded">
+                              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-onyx-accent-green bg-onyx-accent-green/10 border border-onyx-accent-green/20 px-2.5 py-1 rounded-md">
                                 HEALTHY
                               </span>
                             )}
                           </td>
-                          <td className="py-3 px-4">
+                          <td className="py-4 px-6">
                             <div className="flex items-center gap-2">
                               <input 
                                 type="number" 
@@ -1114,27 +1117,27 @@ export default function Dashboard() {
                                   const val = parseInt(e.target.value);
                                   setManualRestockQty(prev => ({ ...prev, [asset.skuCode]: isNaN(val) ? 0 : val }));
                                 }}
-                                className="w-12 text-center bg-onyx-canvas border border-onyx-border rounded p-1 text-[10px] text-onyx-bright font-mono focus:outline-none focus:border-zinc-500"
+                                className="w-16 h-10 text-center bg-onyx-canvas border border-onyx-border rounded-lg text-sm text-onyx-bright font-mono focus:outline-none focus:border-zinc-500"
                               />
                               <button 
                                 onClick={() => handleManualRestock(asset.skuCode)}
-                                className="text-[9px] bg-onyx-accent-amber/10 hover:bg-onyx-accent-amber/20 border border-onyx-accent-amber/30 px-2 py-1 rounded text-onyx-accent-amber font-mono font-bold uppercase transition-all"
+                                className="text-xs bg-onyx-accent-amber/10 hover:bg-onyx-accent-amber/20 border border-onyx-accent-amber/30 px-3 py-2 rounded-lg text-onyx-accent-amber font-mono font-bold uppercase transition-all h-10"
                               >
                                 Set
                               </button>
                             </div>
                           </td>
-                          <td className="py-3 px-4 flex items-center gap-2">
+                          <td className="py-4 px-6 flex items-center gap-2">
                             <button
                               onClick={() => openInvoiceComposer(asset)}
                               disabled={asset.quantity === 0}
-                              className={`text-[9px] font-bold uppercase tracking-wider px-2.5 py-1.5 rounded transition-all whitespace-nowrap flex items-center gap-1 ${
+                              className={`text-xs font-bold uppercase tracking-wider px-4 py-2.5 rounded-lg transition-all whitespace-nowrap flex items-center gap-1.5 ${
                                 asset.quantity === 0
                                   ? 'bg-zinc-800 text-zinc-500 border border-zinc-700 cursor-not-allowed'
-                                  : 'text-onyx-accent-cyan bg-onyx-accent-cyan/10 border border-onyx-accent-cyan/30 hover:bg-onyx-accent-cyan/25'
+                                  : 'text-onyx-accent-cyan bg-onyx-accent-cyan/10 border border-onyx-accent-cyan/30 hover:bg-onyx-accent-cyan/25 shadow-sm'
                               }`}
                             >
-                              <FileSignature size={10} /> Bill Lead
+                              <FileSignature size={12} /> Bill Lead
                             </button>
                           </td>
                         </tr>
@@ -1150,26 +1153,26 @@ export default function Dashboard() {
           {activeNav === 'invoices' && (
             <div className="flex flex-col gap-4 h-full">
               {/* Toolbar */}
-              <div className="flex justify-between items-center flex-wrap gap-2">
-                <div className="flex gap-2">
-                  <div className="relative w-64">
-                    <span className="absolute left-2.5 top-2.5 text-onyx-muted">
-                      <Search size={14} />
+              <div className="flex justify-between items-center flex-wrap gap-4">
+                <div className="flex gap-3">
+                  <div className="relative w-72">
+                    <span className="absolute left-3.5 top-3.5 text-onyx-muted">
+                      <Search size={16} />
                     </span>
                     <input
                       type="text"
                       placeholder="Search Invoice number or customer..."
                       value={invoiceSearch}
                       onChange={(e) => setInvoiceSearch(e.target.value)}
-                      className="w-full text-xs bg-onyx-panel border border-onyx-border rounded pl-8 pr-3 py-2 text-onyx-bright placeholder-onyx-muted focus:outline-none focus:border-zinc-500 transition-colors font-mono"
+                      className="w-full h-12 text-sm bg-onyx-panel border border-onyx-border rounded-lg pl-10 pr-4 text-onyx-bright placeholder-onyx-muted focus:outline-none focus:border-zinc-500 transition-colors font-mono"
                     />
                   </div>
-                  <div className="flex flex-wrap border border-onyx-border rounded overflow-hidden text-xs font-semibold font-mono">
+                  <div className="flex flex-wrap border border-onyx-border rounded-lg overflow-hidden text-sm font-semibold font-mono h-12 items-center">
                     {(['ALL', 'SENT', 'PAID', 'OVERDUE', 'VOID'] as const).map(status => (
                       <button 
                         key={status}
                         onClick={() => setInvoiceStatusFilter(status)}
-                        className={`px-3 py-2 transition-colors border-r last:border-r-0 border-onyx-border ${invoiceStatusFilter === status ? 'bg-onyx-accent-cyan/20 text-onyx-accent-cyan' : 'bg-onyx-panel text-onyx-muted hover:text-zinc-300'}`}
+                        className={`px-4 h-full transition-colors border-r last:border-r-0 border-onyx-border ${invoiceStatusFilter === status ? 'bg-onyx-accent-cyan/20 text-onyx-accent-cyan' : 'bg-onyx-panel text-onyx-muted hover:text-zinc-300'}`}
                       >
                         {status}
                       </button>
@@ -1179,32 +1182,32 @@ export default function Dashboard() {
               </div>
 
               {/* Invoices Table */}
-              <div className="bg-onyx-panel border border-onyx-border rounded-lg overflow-hidden flex-1 min-h-0 overflow-y-auto">
-                <table className="w-full text-xs border-collapse">
+              <div className="bg-onyx-panel border border-onyx-border rounded-xl shadow-2xl overflow-hidden flex-1 min-h-0 overflow-y-auto">
+                <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="border-b border-onyx-border bg-onyx-panel/80">
                       {['Invoice #', 'Customer', 'Issue Date', 'Subtotal', 'Discount', 'Tax', 'Total', 'Status', 'Ambassador', 'Action'].map((h) => (
-                        <th key={h} className="text-left text-[10px] font-bold tracking-widest uppercase text-onyx-muted py-3 px-4">{h}</th>
+                        <th key={h} className="text-left text-xs font-bold tracking-wider uppercase text-onyx-muted py-4 px-6">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {filteredInvoices.length === 0 ? (
                       <tr>
-                        <td colSpan={10} className="text-center py-12 text-onyx-muted font-mono">No transactional receipts generated.</td>
+                        <td colSpan={10} className="text-center py-12 text-onyx-muted font-mono text-sm">No transactional receipts generated.</td>
                       </tr>
                     ) : (
                       filteredInvoices.map((invoice, idx) => (
                         <tr key={invoice.id} className={`border-b border-onyx-border/30 hover:bg-onyx-panel/60 transition-colors ${idx % 2 === 0 ? 'bg-onyx-canvas/60' : 'bg-onyx-panel/40'}`}>
-                          <td className="py-3 px-4 font-mono text-onyx-accent-cyan text-[10px] font-bold">{invoice.invoiceNumber}</td>
-                          <td className="py-3 px-4 text-onyx-bright font-semibold">{invoice.customerName}</td>
-                          <td className="py-3 px-4 text-onyx-muted font-mono">{new Date(invoice.issueDate).toLocaleDateString()}</td>
-                          <td className="py-3 px-4 font-mono">${invoice.subtotal.toFixed(2)}</td>
-                          <td className="py-3 px-4 font-mono text-onyx-accent-rose">-${invoice.discount.toFixed(2)}</td>
-                          <td className="py-3 px-4 font-mono">${invoice.taxAmount.toFixed(2)}</td>
-                          <td className="py-3 px-4 font-mono text-onyx-accent-green font-bold">${invoice.total.toFixed(2)}</td>
-                          <td className="py-3 px-4">
-                            <span className={`inline-block text-[9px] font-bold px-2.5 py-0.5 rounded tracking-wide font-mono ${
+                          <td className="py-4 px-6 font-mono text-onyx-accent-cyan text-sm font-bold">{invoice.invoiceNumber}</td>
+                          <td className="py-4 px-6 text-onyx-bright font-semibold">{invoice.customerName}</td>
+                          <td className="py-4 px-6 text-onyx-muted font-mono text-sm font-semibold">{new Date(invoice.issueDate).toLocaleDateString()}</td>
+                          <td className="py-4 px-6 font-mono text-sm font-semibold">${invoice.subtotal.toFixed(2)}</td>
+                          <td className="py-4 px-6 font-mono text-sm text-onyx-accent-rose font-bold">-${invoice.discount.toFixed(2)}</td>
+                          <td className="py-4 px-6 font-mono text-sm font-semibold">${invoice.taxAmount.toFixed(2)}</td>
+                          <td className="py-4 px-6 font-mono text-sm text-onyx-accent-green font-bold">${invoice.total.toFixed(2)}</td>
+                          <td className="py-4 px-6">
+                            <span className={`inline-block text-xs font-bold px-3 py-1 rounded-md tracking-wider font-mono ${
                               invoice.status === 'PAID' ? 'bg-onyx-accent-green/10 text-onyx-accent-green border border-onyx-accent-green/20' :
                               invoice.status === 'SENT' ? 'bg-onyx-accent-cyan/10 text-onyx-accent-cyan border border-onyx-accent-cyan/20' :
                               invoice.status === 'OVERDUE' ? 'bg-onyx-accent-amber/10 text-onyx-accent-amber border border-onyx-accent-amber/20' :
@@ -1213,11 +1216,11 @@ export default function Dashboard() {
                               {invoice.status}
                             </span>
                           </td>
-                          <td className="py-3 px-4 font-mono text-onyx-accent-purple font-semibold">{invoice.ambassadorCode ?? '—'}</td>
-                          <td className="py-3 px-4">
+                          <td className="py-4 px-6 font-mono text-onyx-accent-purple text-sm font-semibold">{invoice.ambassadorCode ?? '—'}</td>
+                          <td className="py-4 px-6">
                             <button
                               onClick={() => setActiveInvoiceForModal(invoice)}
-                              className="text-[9px] font-bold uppercase tracking-wider bg-onyx-accent-cyan/10 border border-onyx-accent-cyan/30 text-onyx-accent-cyan hover:bg-onyx-accent-cyan/25 px-2.5 py-1.5 rounded transition-all"
+                              className="text-xs font-bold uppercase tracking-wider bg-onyx-accent-cyan/10 border border-onyx-accent-cyan/30 text-onyx-accent-cyan hover:bg-onyx-accent-cyan/25 px-4 py-2.5 rounded-lg transition-all"
                             >
                               Receipt
                             </button>
@@ -1235,39 +1238,39 @@ export default function Dashboard() {
           {activeNav === 'ambassadors' && (
             <div className="flex flex-col gap-4 h-full">
               {/* Header metrics & action */}
-              <div className="flex justify-between items-center flex-wrap gap-2">
-                <div className="text-xs text-onyx-muted font-mono">
+              <div className="flex justify-between items-center flex-wrap gap-4">
+                <div className="text-sm text-onyx-muted font-mono font-medium">
                   Seeded and registered ambassador discount codes for sales referral velocity.
                 </div>
                 <button 
                   onClick={() => setIsAddAmbassadorModalOpen(true)}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-onyx-canvas bg-onyx-accent-purple hover:bg-fuchsia-400 px-3.5 py-2 rounded shadow-glow-purple transition-all"
+                  className="flex items-center gap-2 text-sm font-bold text-onyx-canvas bg-onyx-accent-purple hover:bg-fuchsia-400 px-5 py-3 rounded-xl shadow-glow-purple transition-all h-12"
                 >
-                  <PlusCircle size={14} /> Register Partner
+                  <PlusCircle size={16} /> Register Partner
                 </button>
               </div>
 
               {/* Ambassadors table list */}
-              <div className="bg-onyx-panel border border-onyx-border rounded-lg overflow-hidden flex-1 min-h-0 overflow-y-auto">
-                <table className="w-full text-xs border-collapse">
+              <div className="bg-onyx-panel border border-onyx-border rounded-xl shadow-2xl overflow-hidden flex-1 min-h-0 overflow-y-auto">
+                <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="border-b border-onyx-border bg-onyx-panel/80">
                       {['Ambassador Code', 'Partner Name', 'Tenant Context', 'Total Referrals', 'Total Revenue Generated', 'Total Discounts Paid', 'Status'].map((h) => (
-                        <th key={h} className="text-left text-[10px] font-bold tracking-widest uppercase text-onyx-muted py-3 px-4">{h}</th>
+                        <th key={h} className="text-left text-xs font-bold tracking-wider uppercase text-onyx-muted py-4 px-6">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {ambassadorStats.map((amb, idx) => (
                       <tr key={amb.id} className={`border-b border-onyx-border/30 hover:bg-onyx-panel/60 transition-colors ${idx % 2 === 0 ? 'bg-onyx-canvas/60' : 'bg-onyx-panel/40'}`}>
-                        <td className="py-3 px-4 font-mono text-onyx-accent-purple text-[10px] font-bold">{amb.code}</td>
-                        <td className="py-3 px-4 text-onyx-bright font-semibold">{amb.name}</td>
-                        <td className="py-3 px-4 text-onyx-muted font-mono">{amb.tenant_company ? TENANT_LABELS[amb.tenant_company] : 'GLOBAL'}</td>
-                        <td className="py-3 px-4 font-mono font-bold text-center tabular-nums">{amb.referrals}</td>
-                        <td className="py-3 px-4 font-mono text-onyx-accent-green font-semibold">${amb.salesGenerated.toFixed(2)}</td>
-                        <td className="py-3 px-4 font-mono text-onyx-accent-rose font-semibold">${amb.discountsEarned.toFixed(2)}</td>
-                        <td className="py-3 px-4">
-                          <span className="inline-flex items-center gap-1 text-[9px] font-bold text-onyx-accent-green bg-onyx-accent-green/10 border border-onyx-accent-green/20 px-2 py-0.5 rounded font-mono">
+                        <td className="py-4 px-6 font-mono text-onyx-accent-purple text-sm font-bold">{amb.code}</td>
+                        <td className="py-4 px-6 text-onyx-bright font-semibold">{amb.name}</td>
+                        <td className="py-4 px-6 text-onyx-muted font-mono text-sm font-semibold">{amb.tenant_company ? TENANT_LABELS[amb.tenant_company] : 'GLOBAL'}</td>
+                        <td className="py-4 px-6 font-mono font-bold text-center tabular-nums text-sm">{amb.referrals}</td>
+                        <td className="py-4 px-6 font-mono text-onyx-accent-green font-bold text-sm">${amb.salesGenerated.toFixed(2)}</td>
+                        <td className="py-4 px-6 font-mono text-onyx-accent-rose font-bold text-sm">${amb.discountsEarned.toFixed(2)}</td>
+                        <td className="py-4 px-6">
+                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-onyx-accent-green bg-onyx-accent-green/10 border border-onyx-accent-green/20 px-2.5 py-1 rounded-md font-mono">
                             ACTIVE
                           </span>
                         </td>
@@ -1295,87 +1298,162 @@ export default function Dashboard() {
       </main>
 
       {/* ── Right Panel — Agent Activity Matrix ──────────────────────────── */}
-      <aside className={`hidden lg:flex w-80 xl:w-96 flex-shrink-0 flex-col border-l ${
+      <aside className={`hidden lg:flex flex-shrink-0 flex-col border-l transition-all duration-300 ${
+        isTerminalCollapsed ? 'w-16' : 'w-80 xl:w-96'
+      } ${
         isOnyx ? 'bg-[#09090b] border-[#27272a]' : 'bg-[#f4f4f5] border-[#e4e4e7]'
       }`}>
-        {/* Header */}
-        <div className={`px-4 py-3 border-b flex-shrink-0 ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="relative w-2.5 h-2.5 flex-shrink-0">
-              <div className={`absolute inset-0 rounded-full animate-ping opacity-50 ${isOnyx ? 'bg-[#22c55e]' : 'bg-emerald-800'}`} />
-              <div className={`absolute inset-0 rounded-full ${isOnyx ? 'bg-[#22c55e]' : 'bg-emerald-800'}`} />
+        {isTerminalCollapsed ? (
+          <>
+            {/* Collapsed Header */}
+            <div className={`px-2 py-4 border-b flex-shrink-0 flex flex-col items-center gap-3 ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
+              <button
+                onClick={() => setIsTerminalCollapsed(false)}
+                className={`p-1.5 rounded-lg border transition-all ${
+                  isOnyx 
+                    ? 'bg-zinc-950 border-zinc-800 text-onyx-accent-green hover:border-zinc-600' 
+                    : 'bg-white border-zinc-200 text-emerald-800 hover:border-zinc-400'
+                }`}
+                title="Expand Agent Command Matrix"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <div className={`h-4 w-px my-1 ${isOnyx ? 'bg-zinc-800' : 'bg-zinc-300'}`} />
+              <span className={`text-[10px] font-bold font-mono tracking-widest uppercase rotate-90 my-10 whitespace-nowrap ${
+                isOnyx ? 'text-zinc-500' : 'text-zinc-600'
+              }`}>
+                TELEMETRY
+              </span>
             </div>
-            <h2 className={`text-xs font-bold tracking-widest uppercase ${isOnyx ? 'text-[#22c55e]' : 'text-emerald-800'}`}>
-              Agent Command Matrix
-            </h2>
-          </div>
-          <p className={`text-[10px] ml-5 font-mono ${isOnyx ? 'text-zinc-500' : 'text-zinc-600'}`}>
-            {filteredTerminalEntries.length} log entries · live stream
-          </p>
-        </div>
 
-        {/* Agent Legend */}
-        <div className={`flex-shrink-0 px-4 py-2.5 border-b flex gap-2 flex-wrap ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
-          {(['GrowthAgent', 'LogisticsAgent', 'NetworkAgent', 'DirectorAgent', 'SecurityAlert'] as const).map((agent) => (
-            <span key={agent} className={`text-[9px] font-bold px-2 py-0.5 rounded tracking-widest uppercase ${
-              (() => {
-                const key = (agent || '').toLowerCase();
-                const style = AGENT_BADGE_STYLES[key];
-                return style
-                  ? (themeProfile === 'ALABASTER' ? style.alabaster : style.onyx)
-                  : (themeProfile === 'ALABASTER' ? 'text-zinc-600 bg-zinc-100 border border-zinc-300' : 'text-zinc-400 bg-zinc-800 border border-zinc-700');
-              })()
+            {/* Collapsed Stream */}
+            <div className={`flex-1 overflow-y-auto px-2 py-4 flex flex-col items-center gap-3 min-h-0 ${
+              isOnyx ? 'bg-[#000000]' : 'bg-[#ffffff]'
             }`}>
-              {agent}
-            </span>
-          ))}
-        </div>
-
-        {/* Streaming Terminal */}
-        <div
-          id="agent-terminal"
-          ref={terminalRef}
-          className={`flex-1 overflow-y-auto px-4 py-2 min-h-0 relative ${
-            isOnyx ? 'bg-[#000000]' : 'bg-[#ffffff]'
-          }`}
-        >
-          {filteredTerminalEntries.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full gap-3">
-              <Activity size={24} className={`animate-pulse ${isOnyx ? 'text-zinc-700' : 'text-zinc-300'}`} />
-              <p className={`text-[10px] text-center font-mono ${isOnyx ? 'text-zinc-500' : 'text-zinc-600'}`}>
-                Initializing agent protocols...
-              </p>
+              {filteredTerminalEntries.slice(0, 15).map((entry) => {
+                const colorClass = (() => {
+                  const agent = (entry.agentName || '').toLowerCase();
+                  if (agent === 'growthagent') return 'bg-sky-500';
+                  if (agent === 'logisticsagent') return 'bg-amber-500';
+                  if (agent === 'networkagent') return 'bg-purple-500';
+                  if (agent === 'securityalert') return 'bg-rose-500';
+                  return 'bg-emerald-500';
+                })();
+                return (
+                  <div
+                    key={entry.id}
+                    className={`w-3.5 h-3.5 rounded-full ${colorClass} shadow-lg animate-pulse cursor-pointer`}
+                    title={`${entry.agentName} (${new Date(entry.timestamp).toLocaleTimeString()}): ${entry.thoughtProcess}`}
+                  />
+                );
+              })}
             </div>
-          ) : (
-            <>
-              {[...filteredTerminalEntries].reverse().map((entry) => (
-                <ThoughtEntry key={entry.id} entry={entry} currentUser={currentUser} />
-              ))}
-              <div ref={terminalEndRef} className="h-0 w-0 opacity-0 pointer-events-none" />
-            </>
-          )}
-        </div>
 
-        {/* Footer stats */}
-        <div className={`flex-shrink-0 border-t px-4 py-2.5 grid grid-cols-4 gap-1 text-center ${
-          isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'
-        }`}>
-          {(['GrowthAgent', 'LogisticsAgent', 'NetworkAgent', 'DirectorAgent'] as const).map((agent) => {
-            const count = filteredTerminalEntries.filter((e) => e.agentName === agent).length;
-            const colorClass = (() => {
-              if (agent === 'GrowthAgent') return isOnyx ? 'text-sky-400' : 'text-blue-700';
-              if (agent === 'LogisticsAgent') return isOnyx ? 'text-amber-400' : 'text-amber-700';
-              if (agent === 'NetworkAgent') return isOnyx ? 'text-purple-400' : 'text-purple-700';
-              return isOnyx ? 'text-[#22c55e]' : 'text-emerald-800';
-            })();
-            return (
-              <div key={agent}>
-                <p className={`text-sm font-bold ${colorClass}`}>{count}</p>
-                <p className={`text-[7px] truncate font-mono ${isOnyx ? 'text-zinc-500' : 'text-zinc-600'}`}>{agent}</p>
+            {/* Collapsed Footer */}
+            <div className={`flex-shrink-0 border-t py-3 flex flex-col items-center justify-center font-mono ${
+              isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'
+            }`}>
+              <span className={`text-xs font-bold ${isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'}`}>
+                {filteredTerminalEntries.length}
+              </span>
+              <span className="text-[7px] text-zinc-500 uppercase tracking-widest">LOGS</span>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Header */}
+            <div className={`px-4 py-3 border-b flex-shrink-0 flex items-center justify-between gap-4 ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="relative w-2.5 h-2.5 flex-shrink-0">
+                    <div className={`absolute inset-0 rounded-full animate-ping opacity-50 ${isOnyx ? 'bg-[#22c55e]' : 'bg-emerald-800'}`} />
+                    <div className={`absolute inset-0 rounded-full ${isOnyx ? 'bg-[#22c55e]' : 'bg-emerald-800'}`} />
+                  </div>
+                  <h2 className={`text-sm font-bold tracking-wider uppercase ${isOnyx ? 'text-[#22c55e]' : 'text-emerald-800'}`}>
+                    Agent Command Matrix
+                  </h2>
+                </div>
+                <p className={`text-[10px] ml-5 font-mono ${isOnyx ? 'text-zinc-500' : 'text-zinc-600'}`}>
+                  {filteredTerminalEntries.length} log entries · live stream
+                </p>
               </div>
-            );
-          })}
-        </div>
+              <button
+                onClick={() => setIsTerminalCollapsed(true)}
+                className={`p-1.5 rounded-lg border transition-all ${
+                  isOnyx 
+                    ? 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600' 
+                    : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-800 hover:border-zinc-400'
+                }`}
+                title="Collapse Agent Command Matrix"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+
+            {/* Agent Legend */}
+            <div className={`flex-shrink-0 px-4 py-2.5 border-b flex gap-2 flex-wrap ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
+              {(['GrowthAgent', 'LogisticsAgent', 'NetworkAgent', 'DirectorAgent', 'SecurityAlert'] as const).map((agent) => (
+                <span key={agent} className={`text-[9px] font-bold px-2 py-0.5 rounded tracking-widest uppercase ${
+                  (() => {
+                    const key = (agent || '').toLowerCase();
+                    const style = AGENT_BADGE_STYLES[key];
+                    return style
+                      ? (themeProfile === 'ALABASTER' ? style.alabaster : style.onyx)
+                      : (themeProfile === 'ALABASTER' ? 'text-zinc-600 bg-zinc-100 border border-zinc-300' : 'text-zinc-400 bg-zinc-800 border border-zinc-700');
+                  })()
+                }`}>
+                  {agent}
+                </span>
+              ))}
+            </div>
+
+            {/* Streaming Terminal */}
+            <div
+              id="agent-terminal"
+              ref={terminalRef}
+              className={`flex-1 overflow-y-auto px-4 py-2 min-h-0 relative ${
+                isOnyx ? 'bg-[#000000]' : 'bg-[#ffffff]'
+              }`}
+            >
+              {filteredTerminalEntries.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full gap-3">
+                  <Activity size={24} className={`animate-pulse ${isOnyx ? 'text-zinc-700' : 'text-zinc-300'}`} />
+                  <p className={`text-[10px] text-center font-mono ${isOnyx ? 'text-zinc-500' : 'text-zinc-600'}`}>
+                    Initializing agent protocols...
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {[...filteredTerminalEntries].reverse().map((entry) => (
+                    <ThoughtEntry key={entry.id} entry={entry} currentUser={currentUser} />
+                  ))}
+                  <div ref={terminalEndRef} className="h-0 w-0 opacity-0 pointer-events-none" />
+                </>
+              )}
+            </div>
+
+            {/* Footer stats */}
+            <div className={`flex-shrink-0 border-t px-4 py-2.5 grid grid-cols-4 gap-1 text-center ${
+              isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'
+            }`}>
+              {(['GrowthAgent', 'LogisticsAgent', 'NetworkAgent', 'DirectorAgent'] as const).map((agent) => {
+                const count = filteredTerminalEntries.filter((e) => e.agentName === agent).length;
+                const colorClass = (() => {
+                  if (agent === 'GrowthAgent') return isOnyx ? 'text-sky-400' : 'text-blue-700';
+                  if (agent === 'LogisticsAgent') return isOnyx ? 'text-amber-400' : 'text-amber-700';
+                  if (agent === 'NetworkAgent') return isOnyx ? 'text-purple-400' : 'text-purple-700';
+                  return isOnyx ? 'text-[#22c55e]' : 'text-emerald-800';
+                })();
+                return (
+                  <div key={agent}>
+                    <p className={`text-sm font-bold ${colorClass}`}>{count}</p>
+                    <p className={`text-[7px] truncate font-mono ${isOnyx ? 'text-zinc-500' : 'text-zinc-600'}`}>{agent}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
       </aside>
 
       {/* ── MODALS & DIALOGS ────────────────────────────────────────────────── */}
