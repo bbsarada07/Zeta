@@ -148,28 +148,23 @@ const KpiCard = ({
   const themeProfile = useZetaStore((s) => s.themeProfile);
   const isOnyx = themeProfile === 'ONYX';
   return (
-    <div className={`snap-center flex-shrink-0 ${
-      hiddenMobile ? 'hidden max-md:hidden md:flex' : 'flex'
-    } min-w-[150px] max-w-[150px] h-16 p-2 flex flex-col justify-center bg-[#09090b]/50 border border-zinc-800 rounded-lg transition-all duration-200 ${
-      isOnyx 
-        ? 'md:bg-[#09090b] md:text-[#fafafa] md:border-[#27272a] md:hover:border-zinc-500 md:shadow-zinc-950/50' 
+    <div className={`snap-center flex-shrink-0 ${hiddenMobile ? 'hidden max-md:hidden md:flex' : 'flex'
+      } min-w-[150px] max-w-[150px] h-16 p-2 flex flex-col justify-center bg-[#09090b]/50 border border-zinc-800 rounded-lg transition-all duration-200 ${isOnyx
+        ? 'md:bg-[#09090b] md:text-[#fafafa] md:border-[#27272a] md:hover:border-zinc-500 md:shadow-zinc-950/50'
         : 'md:bg-[#f4f4f5] md:text-[#09090b] md:border-[#e4e4e7] md:hover:border-zinc-300 md:shadow-zinc-200'
-    } md:p-6 md:min-w-0 md:max-w-none md:h-auto md:flex-1 md:border md:rounded-xl md:shadow-2xl md:gap-4 md:bg-inherit`}>
+      } md:p-6 md:min-w-0 md:max-w-none md:h-auto md:flex-1 md:border md:rounded-xl md:shadow-2xl md:gap-4 md:bg-inherit`}>
       <div className="flex items-center justify-between gap-1">
-        <span className={`text-[9px] md:text-sm font-semibold tracking-wider uppercase truncate ${
-          isOnyx ? 'text-zinc-400' : 'text-zinc-600'
-        }`}>{label}</span>
+        <span className={`text-[9px] md:text-sm font-semibold tracking-wider uppercase truncate ${isOnyx ? 'text-zinc-400' : 'text-zinc-600'
+          }`}>{label}</span>
         <div className={`p-1 md:p-2 rounded-lg ${color} flex-shrink-0`}>
           <Icon size={12} className="md:hidden" />
           <Icon size={16} className="hidden md:block" />
         </div>
       </div>
-      <div className={`text-sm md:text-3xl font-bold tracking-tight truncate ${
-        isOnyx ? 'text-[#fafafa]' : 'text-black'
-      }`}>{value}</div>
-      {sub && <div className={`hidden md:block text-xs font-medium ${
-        isOnyx ? 'text-zinc-500' : 'text-zinc-600'
-      }`}>{sub}</div>}
+      <div className={`text-sm md:text-3xl font-bold tracking-tight truncate ${isOnyx ? 'text-[#fafafa]' : 'text-black'
+        }`}>{value}</div>
+      {sub && <div className={`hidden md:block text-xs font-medium ${isOnyx ? 'text-zinc-500' : 'text-zinc-600'
+        }`}>{sub}</div>}
     </div>
   );
 };
@@ -192,38 +187,33 @@ const LeadCard = ({ lead, onClick }: { lead: Lead; onClick: () => void }) => {
   const isOnyx = themeProfile === 'ONYX';
   const nextAction = getNextAction(lead);
   return (
-    <div 
+    <div
       onClick={onClick}
-      className={`border rounded-xl p-5 mb-3 min-h-[90px] shadow-md transition-all duration-150 group cursor-pointer ${
-        isOnyx 
-          ? 'bg-[#000000] border-[#27272a] hover:border-zinc-400 text-[#fafafa] hover:bg-zinc-900/10' 
+      className={`border rounded-xl p-5 mb-3 min-h-[90px] shadow-md transition-all duration-150 group cursor-pointer ${isOnyx
+          ? 'bg-[#000000] border-[#27272a] hover:border-zinc-400 text-[#fafafa] hover:bg-zinc-900/10'
           : 'bg-[#ffffff] border-[#e4e4e7] hover:border-zinc-300 text-[#09090b] hover:bg-zinc-50'
-      }`}
+        }`}
     >
       <div className="flex items-start justify-between gap-2.5">
         <div className="min-w-0">
-          <p className={`text-sm font-semibold group-hover:text-onyx-accent-green transition-colors truncate ${
-            isOnyx ? 'text-[#fafafa]' : 'text-black'
-          }`}>{lead.name}</p>
-          <p className={`text-xs truncate mt-1 ${
-            isOnyx ? 'text-zinc-400' : 'text-zinc-600'
-          }`}>{lead.companyName}</p>
+          <p className={`text-sm font-semibold group-hover:text-onyx-accent-green transition-colors truncate ${isOnyx ? 'text-[#fafafa]' : 'text-black'
+            }`}>{lead.name}</p>
+          <p className={`text-xs truncate mt-1 ${isOnyx ? 'text-zinc-400' : 'text-zinc-600'
+            }`}>{lead.companyName}</p>
         </div>
         <span className={`text-sm font-bold font-mono whitespace-nowrap ${isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'}`}>
           ${lead.potentialValue.toLocaleString()}
         </span>
       </div>
       <div className="mt-3 flex items-center gap-2">
-        <span className={`text-xs font-mono font-bold ${
-          isOnyx ? 'text-zinc-500' : 'text-zinc-600'
-        }`}>D{lead.dealVelocity}</span>
+        <span className={`text-xs font-mono font-bold ${isOnyx ? 'text-zinc-500' : 'text-zinc-600'
+          }`}>D{lead.dealVelocity}</span>
         <div className={`h-1.5 flex-1 rounded-full overflow-hidden ${isOnyx ? 'bg-[#27272a]' : 'bg-[#e4e4e7]'}`}>
           <div
-            className={`h-full rounded-full transition-all ${
-              isOnyx
+            className={`h-full rounded-full transition-all ${isOnyx
                 ? 'bg-gradient-to-r from-onyx-accent-cyan to-onyx-accent-purple opacity-90'
                 : 'bg-gradient-to-r from-cyan-600 to-purple-600 opacity-100'
-            }`}
+              }`}
             style={{ width: `${Math.min((lead.dealVelocity / 30) * 100, 100)}%` }}
           />
         </div>
@@ -258,22 +248,20 @@ const ThoughtEntry = ({ entry, currentUser }: { entry: ThoughtLedgerEntry; curre
   const rawText = entry.thoughtProcess || '';
 
   return (
-    <div className={`py-2 border-b flex gap-2.5 items-start ${
-      isOnyx ? 'border-[#27272a]/30' : 'border-[#e4e4e7]'
-    } ${isWalCommit ? 'bg-emerald-950/10 border-l-2 border-l-emerald-800/40 -ml-4 pl-4' : ''}`}>
+    <div className={`py-2 border-b flex gap-2.5 items-start ${isOnyx ? 'border-[#27272a]/30' : 'border-[#e4e4e7]'
+      } ${isWalCommit ? 'bg-emerald-950/10 border-l-2 border-l-emerald-800/40 -ml-4 pl-4' : ''}`}>
       <div className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${STATUS_DOT[entry.status] ?? 'bg-zinc-600'}`} />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 mb-1 flex-wrap">
           <span
-            className={`text-[9px] font-bold px-1.5 py-0.5 rounded tracking-widest uppercase ${
-              (() => {
+            className={`text-[9px] font-bold px-1.5 py-0.5 rounded tracking-widest uppercase ${(() => {
                 const key = (entry.agentName || '').toLowerCase();
                 const style = AGENT_BADGE_STYLES[key];
                 return style
                   ? (themeProfile === 'ALABASTER' ? style.alabaster : style.onyx)
                   : (themeProfile === 'ALABASTER' ? 'text-zinc-600 bg-zinc-100 border border-zinc-300' : 'text-zinc-400 bg-zinc-800 border border-zinc-700');
               })()
-            }`}
+              }`}
           >
             {entry.agentName}
           </span>
@@ -299,9 +287,8 @@ const ThoughtEntry = ({ entry, currentUser }: { entry: ThoughtLedgerEntry; curre
             </button>
           )}
         </div>
-        <p className={`text-[10px] font-mono leading-relaxed whitespace-pre-wrap break-words ${
-          isOnyx ? 'text-zinc-300' : 'text-zinc-700'
-        }`}>
+        <p className={`text-[10px] font-mono leading-relaxed whitespace-pre-wrap break-words ${isOnyx ? 'text-zinc-300' : 'text-zinc-700'
+          }`}>
           {!isGlobalAdmin ? (
             redactedText
           ) : shouldScramble ? (
@@ -744,14 +731,14 @@ export default function Dashboard() {
   }, []);
 
   // Lock scroll when any mobile menu or modal is active
-  const isAnyOverlayOpen = 
-    isMobileDrawerOpen || 
-    showGatewayRouter || 
-    isMobileTerminalOpen || 
-    !!activeLeadForModal || 
-    isAddLeadModalOpen || 
-    !!assetForInvoiceModal || 
-    isAddDossierMobileOpen || 
+  const isAnyOverlayOpen =
+    isMobileDrawerOpen ||
+    showGatewayRouter ||
+    isMobileTerminalOpen ||
+    !!activeLeadForModal ||
+    isAddLeadModalOpen ||
+    !!assetForInvoiceModal ||
+    isAddDossierMobileOpen ||
     isDispatchMobileOpen;
 
   useEffect(() => {
@@ -887,10 +874,10 @@ export default function Dashboard() {
       alert('Please fill out Lead Name, Company, and Email.');
       return;
     }
-    
+
     // Auto tenant bind
-    const leadTenant = currentUser?.role === 'tenant_rep' && currentUser?.tenantLock 
-      ? currentUser.tenantLock 
+    const leadTenant = currentUser?.role === 'tenant_rep' && currentUser?.tenantLock
+      ? currentUser.tenantLock
       : newLeadTenant;
 
     addLead({
@@ -979,7 +966,7 @@ export default function Dashboard() {
 
   const handleGatewayChoice = (choice: 'student' | 'enterprise' | 'coordinator') => {
     setGatewayRouterChoice(choice);
-    
+
     let targetVenture = '';
     let msg = '';
     if (choice === 'student') {
@@ -992,17 +979,17 @@ export default function Dashboard() {
       targetVenture = 'Promtal';
       msg = 'Forwarding college coordinator registration to Promtal...';
     }
-    
+
     const newToast: FlywheelToast = {
       id: `gateway_${Date.now()}`,
       leadName: `User (${choice.toUpperCase()})`,
       tenant: targetVenture.toUpperCase().replace(' ', '_'),
       visible: true
     };
-    
+
     setFlywheelToasts(prev => [newToast, ...prev]);
     alert(`${msg}\nCross-sell matching initiated for ${targetVenture}.`);
-    
+
     setTimeout(() => {
       setShowGatewayRouter(false);
       setGatewayRouterChoice(null);
@@ -1050,27 +1037,24 @@ export default function Dashboard() {
   }, [currentUser]);
 
   return (
-    <div className={`flex flex-col min-h-screen max-w-full overflow-hidden font-sans select-none relative md:flex-row md:h-screen md:w-screen ${
-      isOnyx ? 'bg-[#000000] text-[#fafafa] border-[#27272a]' : 'bg-[#ffffff] text-[#09090b] border-[#e4e4e7]'
-    }`}>
+    <div className={`flex flex-col min-h-screen max-w-full overflow-hidden font-sans select-none relative md:flex-row md:h-screen md:w-screen ${isOnyx ? 'bg-[#000000] text-[#fafafa] border-[#27272a]' : 'bg-[#ffffff] text-[#09090b] border-[#e4e4e7]'
+      }`}>
       <header className="w-full h-14 flex items-center justify-between px-3 bg-zinc-950 border-b border-zinc-900 fixed top-0 z-40 md:hidden">
         <div className="flex items-center gap-2">
-          <div className={`w-6 h-6 rounded flex items-center justify-center border ${
-            isOnyx ? 'bg-onyx-accent-green/10 border-onyx-accent-green/30' : 'bg-emerald-800/10 border-emerald-800/30'
-          }`}>
+          <div className={`w-6 h-6 rounded flex items-center justify-center border ${isOnyx ? 'bg-onyx-accent-green/10 border-onyx-accent-green/30' : 'bg-emerald-800/10 border-emerald-800/30'
+            }`}>
             <Zap size={12} className={isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'} />
           </div>
           <span className="text-xs font-bold tracking-tight text-white">ZETA</span>
         </div>
-        
+
         <div className="flex items-center gap-1.5">
           <button
             onClick={() => setIsMobileTerminalOpen(true)}
-            className={`flex items-center gap-1 px-2 py-1 border rounded-full text-[10px] font-bold font-mono tracking-wider transition-all ${
-              isOnyx
+            className={`flex items-center gap-1 px-2 py-1 border rounded-full text-[10px] font-bold font-mono tracking-wider transition-all ${isOnyx
                 ? 'bg-onyx-accent-green/10 border-onyx-accent-green/20 text-onyx-accent-green'
                 : 'bg-emerald-50 border-emerald-200 text-emerald-800'
-            }`}
+              }`}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
             <span>Sync</span>
@@ -1078,21 +1062,19 @@ export default function Dashboard() {
 
           <button
             onClick={() => setShowGatewayRouter(true)}
-            className={`flex items-center justify-center gap-1 px-2 py-1 border rounded-full text-[10px] font-bold uppercase transition-all tracking-wider ${
-              isOnyx
+            className={`flex items-center justify-center gap-1 px-2 py-1 border rounded-full text-[10px] font-bold uppercase transition-all tracking-wider ${isOnyx
                 ? 'bg-onyx-accent-purple/10 border-onyx-accent-purple/30 text-onyx-accent-purple hover:bg-onyx-accent-purple/20'
                 : 'bg-fuchsia-50 border-fuchsia-300 text-fuchsia-800 hover:bg-fuchsia-100'
-            }`}
+              }`}
           >
             <Globe size={10} />
             <span>Router</span>
           </button>
-          
-          <button 
+
+          <button
             onClick={() => setIsMobileDrawerOpen(true)}
-            className={`p-1.5 rounded-full border transition-all flex items-center justify-center ${
-              isOnyx ? 'bg-zinc-950 border-zinc-800 hover:border-zinc-600 text-zinc-300' : 'bg-white border-zinc-200 hover:border-zinc-400 text-zinc-700'
-            }`}
+            className={`p-1.5 rounded-full border transition-all flex items-center justify-center ${isOnyx ? 'bg-zinc-950 border-zinc-800 hover:border-zinc-600 text-zinc-300' : 'bg-white border-zinc-200 hover:border-zinc-400 text-zinc-700'
+              }`}
           >
             <Menu size={14} />
           </button>
@@ -1101,31 +1083,28 @@ export default function Dashboard() {
 
       {/* Mobile Drawer Overlay */}
       {isMobileDrawerOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-45 md:hidden bg-black/60 backdrop-blur-sm"
           onClick={() => setIsMobileDrawerOpen(false)}
         >
-          <div 
-            className={`w-64 h-full border-r flex flex-col transition-all duration-300 transform translate-x-0 ${
-              isOnyx ? 'bg-[#000000] text-[#fafafa] border-[#27272a]' : 'bg-[#ffffff] text-[#09090b] border-[#e4e4e7]'
-            }`}
+          <div
+            className={`w-64 h-full border-r flex flex-col transition-all duration-300 transform translate-x-0 ${isOnyx ? 'bg-[#000000] text-[#fafafa] border-[#27272a]' : 'bg-[#ffffff] text-[#09090b] border-[#e4e4e7]'
+              }`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Logo & Close Button */}
             <div className={`px-4 py-4 border-b flex items-center justify-between ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
               <div className="flex items-center gap-2.5">
-                <div className={`w-7 h-7 rounded-md flex items-center justify-center border ${
-                  isOnyx ? 'bg-onyx-accent-green/10 border-onyx-accent-green/30' : 'bg-emerald-800/10 border-emerald-800/30'
-                }`}>
+                <div className={`w-7 h-7 rounded-md flex items-center justify-center border ${isOnyx ? 'bg-onyx-accent-green/10 border-onyx-accent-green/30' : 'bg-emerald-800/10 border-emerald-800/30'
+                  }`}>
                   <Zap size={14} className={isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'} />
                 </div>
                 <span className={`text-sm font-bold tracking-tight ${isOnyx ? 'text-[#fafafa]' : 'text-black'}`}>ZETA</span>
               </div>
-              <button 
+              <button
                 onClick={() => setIsMobileDrawerOpen(false)}
-                className={`p-1.5 rounded-md border min-h-[44px] min-w-[44px] flex items-center justify-center ${
-                  isOnyx ? 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-black'
-                }`}
+                className={`p-1.5 rounded-md border min-h-[44px] min-w-[44px] flex items-center justify-center ${isOnyx ? 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-black'
+                  }`}
               >
                 <X size={14} />
               </button>
@@ -1136,9 +1115,8 @@ export default function Dashboard() {
               <div className={`px-3 py-3 border-b relative ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
                 <p className={`text-[9px] tracking-widest uppercase mb-1.5 ${isOnyx ? 'text-zinc-500' : 'text-zinc-600'}`}>Workspace</p>
                 {currentUser?.role === 'tenant_rep' ? (
-                  <div className={`w-full flex items-center justify-between border rounded-md px-3 py-2 text-xs font-semibold select-none ${
-                    isOnyx ? 'bg-[#000000] border-[#27272a] text-[#fafafa]' : 'bg-[#ffffff] border-[#e4e4e7] text-[#09090b]'
-                  }`}>
+                  <div className={`w-full flex items-center justify-between border rounded-md px-3 py-2 text-xs font-semibold select-none ${isOnyx ? 'bg-[#000000] border-[#27272a] text-[#fafafa]' : 'bg-[#ffffff] border-[#e4e4e7] text-[#09090b]'
+                    }`}>
                     <span className="truncate">{TENANT_LABELS[tenantFilter]}</span>
                     <span className="text-[8px] bg-emerald-950/40 border border-emerald-800/20 text-[#22c55e] font-mono px-1 rounded uppercase tracking-wider scale-95">
                       LOCKED
@@ -1149,9 +1127,8 @@ export default function Dashboard() {
                     <button
                       id="mobile-tenant-switcher-btn"
                       onClick={() => setTenantDropOpen((o) => !o)}
-                      className={`w-full flex items-center justify-between border rounded-md px-3 py-3 min-h-[44px] text-xs font-semibold transition-colors duration-150 ${
-                        isOnyx ? 'bg-[#000000] border-[#27272a] text-[#fafafa] hover:border-zinc-500' : 'bg-[#ffffff] border-[#e4e4e7] text-[#09090b] hover:border-zinc-400'
-                      }`}
+                      className={`w-full flex items-center justify-between border rounded-md px-3 py-3 min-h-[44px] text-xs font-semibold transition-colors duration-150 ${isOnyx ? 'bg-[#000000] border-[#27272a] text-[#fafafa] hover:border-zinc-500' : 'bg-[#ffffff] border-[#e4e4e7] text-[#09090b] hover:border-zinc-400'
+                        }`}
                     >
                       <span className="truncate">{TENANT_LABELS[tenantFilter]}</span>
                       <ChevronDown
@@ -1160,9 +1137,8 @@ export default function Dashboard() {
                       />
                     </button>
                     {tenantDropOpen && (
-                      <div className={`absolute left-3 right-3 top-full mt-1 z-50 border rounded-md shadow-xl overflow-hidden ${
-                        isOnyx ? 'bg-[#09090b] border-[#27272a]' : 'bg-[#f4f4f5] border-[#e4e4e7]'
-                      }`}>
+                      <div className={`absolute left-3 right-3 top-full mt-1 z-50 border rounded-md shadow-xl overflow-hidden ${isOnyx ? 'bg-[#09090b] border-[#27272a]' : 'bg-[#f4f4f5] border-[#e4e4e7]'
+                        }`}>
                         {(Object.keys(TENANT_LABELS) as TenantFilter[]).map((key) => (
                           <button
                             key={key}
@@ -1171,13 +1147,11 @@ export default function Dashboard() {
                               setTenantDropOpen(false);
                               setIsMobileDrawerOpen(false);
                             }}
-                            className={`w-full text-left px-3 py-2 text-xs transition-colors duration-100 ${
-                              isOnyx ? 'hover:bg-[#000000]' : 'hover:bg-[#ffffff]'
-                            } ${
-                              tenantFilter === key
+                            className={`w-full text-left px-3 py-2 text-xs transition-colors duration-100 ${isOnyx ? 'hover:bg-[#000000]' : 'hover:bg-[#ffffff]'
+                              } ${tenantFilter === key
                                 ? (isOnyx ? 'text-onyx-accent-green font-semibold' : 'text-emerald-800 font-semibold')
                                 : (isOnyx ? 'text-zinc-300' : 'text-zinc-700')
-                            }`}
+                              }`}
                           >
                             {TENANT_LABELS[key]}
                           </button>
@@ -1201,15 +1175,14 @@ export default function Dashboard() {
                       setActiveNav(id);
                       setIsMobileDrawerOpen(false);
                     }}
-                    className={`w-full flex items-center gap-3 px-3 py-3 min-h-[44px] rounded-md text-xs font-medium transition-all duration-150 ${
-                      isActive
-                        ? (isOnyx 
-                            ? 'bg-onyx-accent-green/10 text-onyx-accent-green border border-onyx-accent-green/20' 
-                            : 'bg-emerald-800/10 text-emerald-800 border border-emerald-800/20')
-                        : (isOnyx 
-                            ? 'text-zinc-400 hover:text-zinc-200 hover:bg-[#09090b] border border-transparent' 
-                            : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 border border-transparent')
-                    }`}
+                    className={`w-full flex items-center gap-3 px-3 py-3 min-h-[44px] rounded-md text-xs font-medium transition-all duration-150 ${isActive
+                        ? (isOnyx
+                          ? 'bg-onyx-accent-green/10 text-onyx-accent-green border border-onyx-accent-green/20'
+                          : 'bg-emerald-800/10 text-emerald-800 border border-emerald-800/20')
+                        : (isOnyx
+                          ? 'text-zinc-400 hover:text-zinc-200 hover:bg-[#09090b] border border-transparent'
+                          : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 border border-transparent')
+                      }`}
                   >
                     <Icon size={14} />
                     {label}
@@ -1227,17 +1200,16 @@ export default function Dashboard() {
                 <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${isOnyx ? 'bg-onyx-accent-green' : 'bg-emerald-800'}`} />
                 <span className={`text-[10px] font-mono ${isOnyx ? 'text-zinc-500' : 'text-zinc-600'}`}>Agents running</span>
               </div>
-              
+
               <button
                 onClick={() => {
                   lockSession();
                   setIsMobileDrawerOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-3 py-3 min-h-[44px] rounded-md text-xs font-medium border border-transparent transition-all duration-150 text-left ${
-                  isOnyx 
-                    ? 'text-onyx-accent-cyan hover:bg-onyx-accent-cyan/5 hover:border-onyx-accent-cyan/20' 
+                className={`w-full flex items-center gap-3 px-3 py-3 min-h-[44px] rounded-md text-xs font-medium border border-transparent transition-all duration-150 text-left ${isOnyx
+                    ? 'text-onyx-accent-cyan hover:bg-onyx-accent-cyan/5 hover:border-onyx-accent-cyan/20'
                     : 'text-cyan-700 hover:bg-cyan-700/5 hover:border-cyan-700/20'
-                }`}
+                  }`}
               >
                 <Lock size={14} />
                 <span>Lock Session</span>
@@ -1248,11 +1220,10 @@ export default function Dashboard() {
                   logout();
                   setIsMobileDrawerOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-3 py-3 min-h-[44px] rounded-md text-xs font-medium border border-transparent transition-all duration-150 text-left ${
-                  isOnyx 
-                    ? 'text-onyx-accent-rose hover:bg-onyx-accent-rose/5 hover:border-onyx-accent-rose/20' 
+                className={`w-full flex items-center gap-3 px-3 py-3 min-h-[44px] rounded-md text-xs font-medium border border-transparent transition-all duration-150 text-left ${isOnyx
+                    ? 'text-onyx-accent-rose hover:bg-onyx-accent-rose/5 hover:border-onyx-accent-rose/20'
                     : 'text-rose-700 hover:bg-rose-700/5 hover:border-rose-700/20'
-                }`}
+                  }`}
               >
                 <LogOut size={14} />
                 <span>Secure Log Out</span>
@@ -1263,14 +1234,12 @@ export default function Dashboard() {
       )}
 
       {/* ── Left Navigation Rail ─────────────────────────────────────────── */}
-      <aside className={`hidden md:flex w-52 flex-shrink-0 border-r flex flex-col ${
-        isOnyx ? 'bg-[#000000] text-[#fafafa] border-[#27272a]' : 'bg-[#ffffff] text-[#09090b] border-[#e4e4e7]'
-      }`}>
+      <aside className={`hidden md:flex w-52 flex-shrink-0 border-r flex flex-col ${isOnyx ? 'bg-[#000000] text-[#fafafa] border-[#27272a]' : 'bg-[#ffffff] text-[#09090b] border-[#e4e4e7]'
+        }`}>
         {/* Logo */}
         <div className={`px-4 py-4 border-b flex items-center gap-2.5 ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
-          <div className={`w-7 h-7 rounded-md flex items-center justify-center border ${
-            isOnyx ? 'bg-onyx-accent-green/10 border-onyx-accent-green/30' : 'bg-emerald-800/10 border-emerald-800/30'
-          }`}>
+          <div className={`w-7 h-7 rounded-md flex items-center justify-center border ${isOnyx ? 'bg-onyx-accent-green/10 border-onyx-accent-green/30' : 'bg-emerald-800/10 border-emerald-800/30'
+            }`}>
             <Zap size={14} className={isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'} />
           </div>
           <span className={`text-sm font-bold tracking-tight ${isOnyx ? 'text-[#fafafa]' : 'text-black'}`}>ZETA</span>
@@ -1282,9 +1251,8 @@ export default function Dashboard() {
           <div className={`px-3 py-3 border-b relative ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
             <p className={`text-[9px] tracking-widest uppercase mb-1.5 ${isOnyx ? 'text-zinc-500' : 'text-zinc-600'}`}>Workspace</p>
             {currentUser?.role === 'tenant_rep' ? (
-              <div className={`w-full flex items-center justify-between border rounded-md px-3 py-2 text-xs font-semibold select-none ${
-                isOnyx ? 'bg-[#000000] border-[#27272a] text-[#fafafa]' : 'bg-[#ffffff] border-[#e4e4e7] text-[#09090b]'
-              }`}>
+              <div className={`w-full flex items-center justify-between border rounded-md px-3 py-2 text-xs font-semibold select-none ${isOnyx ? 'bg-[#000000] border-[#27272a] text-[#fafafa]' : 'bg-[#ffffff] border-[#e4e4e7] text-[#09090b]'
+                }`}>
                 <span className="truncate">{TENANT_LABELS[tenantFilter]}</span>
                 <span className="text-[8px] bg-emerald-950/40 border border-emerald-800/20 text-[#22c55e] font-mono px-1 rounded uppercase tracking-wider scale-95">
                   LOCKED
@@ -1295,9 +1263,8 @@ export default function Dashboard() {
                 <button
                   id="tenant-switcher-btn"
                   onClick={() => setTenantDropOpen((o) => !o)}
-                  className={`w-full flex items-center justify-between border rounded-md px-3 py-2 text-xs font-semibold transition-colors duration-150 ${
-                    isOnyx ? 'bg-[#000000] border-[#27272a] text-[#fafafa] hover:border-zinc-500' : 'bg-[#ffffff] border-[#e4e4e7] text-[#09090b] hover:border-zinc-400'
-                  }`}
+                  className={`w-full flex items-center justify-between border rounded-md px-3 py-2 text-xs font-semibold transition-colors duration-150 ${isOnyx ? 'bg-[#000000] border-[#27272a] text-[#fafafa] hover:border-zinc-500' : 'bg-[#ffffff] border-[#e4e4e7] text-[#09090b] hover:border-zinc-400'
+                    }`}
                 >
                   <span className="truncate">{TENANT_LABELS[tenantFilter]}</span>
                   <ChevronDown
@@ -1306,9 +1273,8 @@ export default function Dashboard() {
                   />
                 </button>
                 {tenantDropOpen && (
-                  <div className={`absolute left-3 right-3 top-full mt-1 z-50 border rounded-md shadow-xl overflow-hidden ${
-                    isOnyx ? 'bg-[#09090b] border-[#27272a]' : 'bg-[#f4f4f5] border-[#e4e4e7]'
-                  }`}>
+                  <div className={`absolute left-3 right-3 top-full mt-1 z-50 border rounded-md shadow-xl overflow-hidden ${isOnyx ? 'bg-[#09090b] border-[#27272a]' : 'bg-[#f4f4f5] border-[#e4e4e7]'
+                    }`}>
                     {(Object.keys(TENANT_LABELS) as TenantFilter[]).map((key) => (
                       <button
                         key={key}
@@ -1316,13 +1282,11 @@ export default function Dashboard() {
                           setTenantFilter(key);
                           setTenantDropOpen(false);
                         }}
-                        className={`w-full text-left px-3 py-2 text-xs transition-colors duration-100 ${
-                          isOnyx ? 'hover:bg-[#000000]' : 'hover:bg-[#ffffff]'
-                        } ${
-                          tenantFilter === key
+                        className={`w-full text-left px-3 py-2 text-xs transition-colors duration-100 ${isOnyx ? 'hover:bg-[#000000]' : 'hover:bg-[#ffffff]'
+                          } ${tenantFilter === key
                             ? (isOnyx ? 'text-onyx-accent-green font-semibold' : 'text-emerald-800 font-semibold')
                             : (isOnyx ? 'text-zinc-300' : 'text-zinc-700')
-                        }`}
+                          }`}
                       >
                         {TENANT_LABELS[key]}
                       </button>
@@ -1343,15 +1307,14 @@ export default function Dashboard() {
                 key={id}
                 id={`nav-${id}`}
                 onClick={() => setActiveNav(id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-xs font-medium transition-all duration-150 ${
-                  isActive
-                    ? (isOnyx 
-                        ? 'bg-onyx-accent-green/10 text-onyx-accent-green border border-onyx-accent-green/20' 
-                        : 'bg-emerald-800/10 text-emerald-800 border border-emerald-800/20')
-                    : (isOnyx 
-                        ? 'text-zinc-400 hover:text-zinc-200 hover:bg-[#09090b] border border-transparent' 
-                        : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 border border-transparent')
-                }`}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-xs font-medium transition-all duration-150 ${isActive
+                    ? (isOnyx
+                      ? 'bg-onyx-accent-green/10 text-onyx-accent-green border border-onyx-accent-green/20'
+                      : 'bg-emerald-800/10 text-emerald-800 border border-emerald-800/20')
+                    : (isOnyx
+                      ? 'text-zinc-400 hover:text-zinc-200 hover:bg-[#09090b] border border-transparent'
+                      : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 border border-transparent')
+                  }`}
               >
                 <Icon size={14} />
                 {label}
@@ -1369,14 +1332,13 @@ export default function Dashboard() {
             <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${isOnyx ? 'bg-onyx-accent-green' : 'bg-emerald-800'}`} />
             <span className={`text-[10px] font-mono ${isOnyx ? 'text-zinc-500' : 'text-zinc-600'}`}>Agents running</span>
           </div>
-          
+
           <button
             onClick={() => lockSession()}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-xs font-medium border border-transparent transition-all duration-150 text-left ${
-              isOnyx 
-                ? 'text-onyx-accent-cyan hover:bg-onyx-accent-cyan/5 hover:border-onyx-accent-cyan/20' 
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-xs font-medium border border-transparent transition-all duration-150 text-left ${isOnyx
+                ? 'text-onyx-accent-cyan hover:bg-onyx-accent-cyan/5 hover:border-onyx-accent-cyan/20'
                 : 'text-cyan-700 hover:bg-cyan-700/5 hover:border-cyan-700/20'
-            }`}
+              }`}
           >
             <Lock size={14} />
             <span>Lock Session</span>
@@ -1384,11 +1346,10 @@ export default function Dashboard() {
 
           <button
             onClick={() => logout()}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-xs font-medium border border-transparent transition-all duration-150 text-left ${
-              isOnyx 
-                ? 'text-onyx-accent-rose hover:bg-onyx-accent-rose/5 hover:border-onyx-accent-rose/20' 
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-xs font-medium border border-transparent transition-all duration-150 text-left ${isOnyx
+                ? 'text-onyx-accent-rose hover:bg-onyx-accent-rose/5 hover:border-onyx-accent-rose/20'
                 : 'text-rose-700 hover:bg-rose-700/5 hover:border-rose-700/20'
-            }`}
+              }`}
           >
             <LogOut size={14} />
             <span>Secure Log Out</span>
@@ -1397,9 +1358,8 @@ export default function Dashboard() {
       </aside>
 
       {/* ── Center Panel ─────────────────────────────────────────────────── */}
-      <main className={`w-full max-w-full px-4 pt-16 pb-20 overflow-x-hidden block md:flex-1 md:flex md:flex-col md:min-w-0 md:overflow-hidden md:pt-0 md:px-0 md:pb-0 ${
-        isOnyx ? 'bg-[#000000] text-[#fafafa] border-[#27272a]' : 'bg-[#ffffff] text-[#09090b] border-[#e4e4e7]'
-      }`}>
+      <main className={`w-full max-w-full px-4 pt-16 pb-20 overflow-x-hidden block md:flex-1 md:flex md:flex-col md:min-w-0 md:overflow-hidden md:pt-0 md:px-0 md:pb-0 ${isOnyx ? 'bg-[#000000] text-[#fafafa] border-[#27272a]' : 'bg-[#ffffff] text-[#09090b] border-[#e4e4e7]'
+        }`}>
         {/* Top bar */}
         <header className={`hidden md:flex h-12 flex-shrink-0 border-b items-center px-5 gap-4 ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
           <div className="flex-1 flex items-center">
@@ -1412,11 +1372,10 @@ export default function Dashboard() {
           <div className="flex items-center gap-4 text-[10px] font-mono">
             <button
               onClick={() => setShowGatewayRouter(true)}
-              className={`flex items-center gap-1.5 px-3 py-1 border rounded-md font-bold uppercase transition-all tracking-wider ${
-                isOnyx
+              className={`flex items-center gap-1.5 px-3 py-1 border rounded-md font-bold uppercase transition-all tracking-wider ${isOnyx
                   ? 'bg-onyx-accent-purple/10 border-onyx-accent-purple/30 text-onyx-accent-purple hover:bg-onyx-accent-purple/20 shadow-sm shadow-fuchsia-950/20'
                   : 'bg-fuchsia-50 border-fuchsia-300 text-fuchsia-800 hover:bg-fuchsia-100'
-              }`}
+                }`}
             >
               <Globe size={11} />
               Venture Router
@@ -1424,9 +1383,8 @@ export default function Dashboard() {
             <span className={`select-none ${isOnyx ? 'text-zinc-800' : 'text-zinc-300'}`}>|</span>
             <button
               onClick={() => toggleTheme()}
-              className={`hover:underline cursor-pointer tracking-widest uppercase font-bold ${
-                isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'
-              }`}
+              className={`hover:underline cursor-pointer tracking-widest uppercase font-bold ${isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'
+                }`}
             >
               {themeProfile === 'ONYX' ? '[ ENV_RENDER: ONYX_DARK ]' : '[ ENV_RENDER: ALABASTER_LIGHT ]'}
             </button>
@@ -1478,9 +1436,8 @@ export default function Dashboard() {
 
         {/* KPI Grid */}
         <section className={`hidden md:block flex-shrink-0 p-4 border-b ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
-          <div key={activeNav} className={`flex flex-row overflow-x-auto snap-x snap-mandatory gap-3 w-full scrollbar-none pb-4 md:grid md:grid-cols-3 ${
-            ['dashboard', 'erp', 'invoices', 'ambassadors'].includes(activeNav) ? 'xl:grid-cols-4' : 'xl:grid-cols-3'
-          } md:gap-6 animate-fade-in transition-all duration-200 ease-in-out`}>
+          <div key={activeNav} className={`flex flex-row overflow-x-auto snap-x snap-mandatory gap-3 w-full scrollbar-none pb-4 md:grid md:grid-cols-3 ${['dashboard', 'erp', 'invoices', 'ambassadors'].includes(activeNav) ? 'xl:grid-cols-4' : 'xl:grid-cols-3'
+            } md:gap-6 animate-fade-in transition-all duration-200 ease-in-out`}>
             {(() => {
               switch (activeNav) {
                 case 'hr_portal':
@@ -1609,12 +1566,12 @@ export default function Dashboard() {
 
         {/* Dynamic Panel Renderer */}
         <div className="w-full max-w-full px-4 pt-16 pb-24 overflow-x-hidden block box-border md:flex-1 md:overflow-auto md:p-6 md:min-h-0">
-          
+
           {/* 1. Dashboard Tab */}
           {activeNav === 'dashboard' && (
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 h-full">
               <div className="flex flex-col gap-6">
-                
+
                 {/* Pipeline Stages widget */}
                 <div className={`border rounded-xl p-6 flex flex-col gap-4 shadow-2xl ${isOnyx ? 'bg-[#09090b] border-[#27272a] shadow-zinc-950/40' : 'bg-[#f4f4f5] border-[#e4e4e7] shadow-zinc-200'}`}>
                   <div className={`flex justify-between items-center border-b pb-3 ${isOnyx ? 'border-[#27272a]/50' : 'border-[#e4e4e7]'}`}>
@@ -1632,12 +1589,11 @@ export default function Dashboard() {
                             <span className={`${isOnyx ? 'text-zinc-400' : 'text-zinc-600'} font-bold`}>{count} ({percent.toFixed(0)}%)</span>
                           </div>
                           <div className={`h-2.5 w-full border rounded overflow-hidden ${isOnyx ? 'bg-[#000000] border-[#27272a]' : 'bg-[#ffffff] border-[#e4e4e7]'}`}>
-                            <div 
-                              className={`h-full rounded transition-all duration-300 ${
-                                isOnyx
+                            <div
+                              className={`h-full rounded transition-all duration-300 ${isOnyx
                                   ? 'bg-gradient-to-r from-onyx-accent-cyan to-onyx-accent-purple opacity-90'
                                   : 'bg-gradient-to-r from-cyan-600 to-purple-600 opacity-100'
-                              }`}
+                                }`}
                               style={{ width: `${percent}%` }}
                             />
                           </div>
@@ -1667,13 +1623,12 @@ export default function Dashboard() {
                             </div>
                             <div className="flex items-center gap-3 font-mono">
                               <span className="text-xs text-onyx-accent-green font-bold">${lead.potentialValue.toLocaleString()}</span>
-                              <button 
+                              <button
                                 onClick={() => setActiveLeadForModal(lead)}
-                                className={`text-xs font-bold border px-3 py-1.5 rounded uppercase ${
-                                  isOnyx 
-                                    ? 'bg-onyx-accent-cyan/15 hover:bg-onyx-accent-cyan/25 border-onyx-accent-cyan/30 text-onyx-accent-cyan' 
+                                className={`text-xs font-bold border px-3 py-1.5 rounded uppercase ${isOnyx
+                                    ? 'bg-onyx-accent-cyan/15 hover:bg-onyx-accent-cyan/25 border-onyx-accent-cyan/30 text-onyx-accent-cyan'
                                     : 'bg-cyan-600/10 hover:bg-cyan-600/20 border-cyan-600/30 text-cyan-700'
-                                }`}
+                                  }`}
                               >
                                 Action
                               </button>
@@ -1685,9 +1640,9 @@ export default function Dashboard() {
                 </div>
 
               </div>
-              
+
               <div className="flex flex-col gap-6">
-                
+
                 {/* Low Stock Alerts widget */}
                 <div className={`border rounded-xl p-6 flex flex-col gap-4 shadow-2xl flex-1 ${isOnyx ? 'bg-[#09090b] border-[#27272a] shadow-zinc-950/40' : 'bg-[#f4f4f5] border-[#e4e4e7] shadow-zinc-200'}`}>
                   <div className={`flex justify-between items-center border-b pb-2 ${isOnyx ? 'border-[#27272a]/50' : 'border-[#e4e4e7]'}`}>
@@ -1696,11 +1651,10 @@ export default function Dashboard() {
                   </div>
                   <div className="flex-1 min-h-[300px] overflow-y-auto space-y-3 pr-1">
                     {getLowStockAssets().length === 0 ? (
-                      <div className={`text-center py-6 text-sm font-mono border border-dashed rounded flex flex-col items-center justify-center gap-1.5 ${
-                        isOnyx 
-                          ? 'text-onyx-accent-green border-onyx-accent-green/20 bg-onyx-accent-green/5' 
+                      <div className={`text-center py-6 text-sm font-mono border border-dashed rounded flex flex-col items-center justify-center gap-1.5 ${isOnyx
+                          ? 'text-onyx-accent-green border-onyx-accent-green/20 bg-onyx-accent-green/5'
                           : 'text-emerald-800 border-emerald-800/20 bg-emerald-800/5'
-                      }`}>
+                        }`}>
                         <Check size={18} />
                         All warehouse inventory levels healthy.
                       </div>
@@ -1713,16 +1667,15 @@ export default function Dashboard() {
                           </div>
                           <div className="flex items-center gap-3">
                             <span className="text-sm font-bold font-mono text-onyx-accent-rose tabular-nums">{asset.quantity} / {asset.restockThreshold}</span>
-                            <button 
+                            <button
                               onClick={() => {
                                 restockSKU(asset.skuCode);
                                 alert(`Restocked ${asset.skuCode} to safety threshold.`);
                               }}
-                              className={`text-xs border px-3 py-1.5 rounded font-bold uppercase transition-colors ${
-                                isOnyx
+                              className={`text-xs border px-3 py-1.5 rounded font-bold uppercase transition-colors ${isOnyx
                                   ? 'bg-onyx-accent-amber/15 hover:bg-onyx-accent-amber/25 border-onyx-accent-amber/30 text-onyx-accent-amber'
                                   : 'bg-amber-600/10 hover:bg-amber-600/20 border-amber-600/30 text-amber-700'
-                              }`}
+                                }`}
                             >
                               Replenish
                             </button>
@@ -1733,7 +1686,7 @@ export default function Dashboard() {
                   </div>
                 </div>
 
- 
+
               </div>
             </div>
           )}
@@ -1765,11 +1718,10 @@ export default function Dashboard() {
                       setTimeout(() => setIsPipelineIngesting(false), 2500);
                     }}
                     disabled={isPipelineIngesting}
-                    className={`flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded border transition-all font-mono ${
-                      isPipelineIngesting
+                    className={`flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded border transition-all font-mono ${isPipelineIngesting
                         ? 'bg-onyx-accent-cyan/5 border-onyx-accent-cyan/20 text-onyx-accent-cyan cursor-wait animate-pulse'
                         : 'bg-onyx-accent-cyan/10 border-onyx-accent-cyan/30 text-onyx-accent-cyan hover:bg-onyx-accent-cyan/20'
-                    }`}
+                      }`}
                   >
                     <Zap size={13} />
                     {isPipelineIngesting ? 'INGESTING...' : 'ADS PIPELINE INGESTION'}
@@ -1789,7 +1741,7 @@ export default function Dashboard() {
                     </button>
                   )}
                 </div>
-                <button 
+                <button
                   onClick={() => setIsAddLeadModalOpen(true)}
                   className="flex items-center gap-1.5 text-xs font-semibold text-onyx-canvas bg-onyx-accent-green hover:bg-emerald-400 px-3.5 py-2 rounded shadow-glow-green transition-all"
                 >
@@ -1806,15 +1758,14 @@ export default function Dashboard() {
                     <button
                       key={stage}
                       onClick={() => setActiveMobileStage(stage)}
-                      className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold font-mono tracking-wider transition-all border ${
-                        isActive
-                          ? (isOnyx 
-                              ? 'bg-onyx-accent-cyan/20 border-onyx-accent-cyan text-onyx-accent-cyan' 
-                              : 'bg-cyan-100 border-cyan-600 text-cyan-800')
-                          : (isOnyx 
-                              ? 'bg-[#09090b] border-[#27272a] text-zinc-400 hover:text-zinc-200' 
-                              : 'bg-[#f4f4f5] border-[#e4e4e7] text-zinc-600 hover:text-zinc-950')
-                      }`}
+                      className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold font-mono tracking-wider transition-all border ${isActive
+                          ? (isOnyx
+                            ? 'bg-onyx-accent-cyan/20 border-onyx-accent-cyan text-onyx-accent-cyan'
+                            : 'bg-cyan-100 border-cyan-600 text-cyan-800')
+                          : (isOnyx
+                            ? 'bg-[#09090b] border-[#27272a] text-zinc-400 hover:text-zinc-200'
+                            : 'bg-[#f4f4f5] border-[#e4e4e7] text-zinc-600 hover:text-zinc-950')
+                        }`}
                     >
                       {stage.replace('_', ' ')} ({stageLeads.length})
                     </button>
@@ -1834,10 +1785,10 @@ export default function Dashboard() {
                     );
                   }
                   return stageLeads.map((lead) => (
-                    <LeadCard 
-                      key={lead.id} 
-                      lead={lead} 
-                      onClick={() => setActiveLeadForModal(lead)} 
+                    <LeadCard
+                      key={lead.id}
+                      lead={lead}
+                      onClick={() => setActiveLeadForModal(lead)}
                     />
                   ));
                 })()}
@@ -1860,10 +1811,10 @@ export default function Dashboard() {
                           </div>
                         ) : (
                           stageLeads.map((lead) => (
-                            <LeadCard 
-                              key={lead.id} 
-                              lead={lead} 
-                              onClick={() => setActiveLeadForModal(lead)} 
+                            <LeadCard
+                              key={lead.id}
+                              lead={lead}
+                              onClick={() => setActiveLeadForModal(lead)}
                             />
                           ))
                         )}
@@ -1894,13 +1845,13 @@ export default function Dashboard() {
                     />
                   </div>
                   <div className="flex border border-onyx-border rounded-lg overflow-hidden text-sm font-semibold font-mono h-12">
-                    <button 
+                    <button
                       onClick={() => setErpFilter('all')}
                       className={`px-4 h-full transition-colors ${erpFilter === 'all' ? 'bg-onyx-accent-amber/25 text-onyx-accent-amber border-r border-onyx-border' : 'bg-onyx-panel text-onyx-muted hover:text-zinc-300 border-r border-onyx-border'}`}
                     >
                       All Assets
                     </button>
-                    <button 
+                    <button
                       onClick={() => setErpFilter('low')}
                       className={`px-4 h-full transition-colors ${erpFilter === 'low' ? 'bg-onyx-accent-rose/25 text-onyx-accent-rose' : 'bg-onyx-panel text-onyx-muted hover:text-zinc-300'}`}
                     >
@@ -1951,18 +1902,18 @@ export default function Dashboard() {
                           </td>
                           <td className="py-4 px-6">
                             <div className="flex items-center gap-2">
-                              <input 
-                                type="number" 
-                                placeholder="Qty" 
+                              <input
+                                type="number"
+                                placeholder="Qty"
                                 min="0"
-                                value={manualRestockQty[asset.skuCode] || ''} 
+                                value={manualRestockQty[asset.skuCode] || ''}
                                 onChange={(e) => {
                                   const val = parseInt(e.target.value);
                                   setManualRestockQty(prev => ({ ...prev, [asset.skuCode]: isNaN(val) ? 0 : val }));
                                 }}
                                 className="w-16 h-10 text-center bg-onyx-canvas border border-onyx-border rounded-lg text-sm text-onyx-bright font-mono focus:outline-none focus:border-zinc-500"
                               />
-                              <button 
+                              <button
                                 onClick={() => handleManualRestock(asset.skuCode)}
                                 className="text-xs bg-onyx-accent-amber/10 hover:bg-onyx-accent-amber/20 border border-onyx-accent-amber/30 px-3 py-2 rounded-lg text-onyx-accent-amber font-mono font-bold uppercase transition-all h-10"
                               >
@@ -1974,11 +1925,10 @@ export default function Dashboard() {
                             <button
                               onClick={() => openInvoiceComposer(asset)}
                               disabled={asset.quantity === 0}
-                              className={`text-xs font-bold uppercase tracking-wider px-4 py-2.5 rounded-lg transition-all whitespace-nowrap flex items-center gap-1.5 ${
-                                asset.quantity === 0
+                              className={`text-xs font-bold uppercase tracking-wider px-4 py-2.5 rounded-lg transition-all whitespace-nowrap flex items-center gap-1.5 ${asset.quantity === 0
                                   ? 'bg-zinc-800 text-zinc-500 border border-zinc-700 cursor-not-allowed'
                                   : 'text-onyx-accent-cyan bg-onyx-accent-cyan/10 border border-onyx-accent-cyan/30 hover:bg-onyx-accent-cyan/25 shadow-sm'
-                              }`}
+                                }`}
                             >
                               <FileSignature size={12} /> Bill Lead
                             </button>
@@ -2009,7 +1959,7 @@ export default function Dashboard() {
                           </span>
                         )}
                       </div>
-                      
+
                       <div className="space-y-1.5 text-xs text-zinc-400 py-1 font-mono">
                         <div className="flex justify-between">
                           <span className="text-zinc-500">NAME:</span>
@@ -2033,18 +1983,18 @@ export default function Dashboard() {
 
                       {/* Manual Restock input row */}
                       <div className="flex items-center gap-2 mt-1 border-t border-zinc-800/50 pt-2">
-                        <input 
-                          type="number" 
-                          placeholder="Qty" 
+                        <input
+                          type="number"
+                          placeholder="Qty"
                           min="0"
-                          value={manualRestockQty[asset.skuCode] || ''} 
+                          value={manualRestockQty[asset.skuCode] || ''}
                           onChange={(e) => {
                             const val = parseInt(e.target.value);
                             setManualRestockQty(prev => ({ ...prev, [asset.skuCode]: isNaN(val) ? 0 : val }));
                           }}
                           className="w-20 h-9 px-2 text-center bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white font-mono focus:outline-none"
                         />
-                        <button 
+                        <button
                           onClick={() => handleManualRestock(asset.skuCode)}
                           className="flex-1 h-9 bg-zinc-800 text-zinc-300 hover:text-white rounded-lg text-xs font-semibold font-mono border border-zinc-700 transition-all"
                         >
@@ -2056,11 +2006,10 @@ export default function Dashboard() {
                       <button
                         onClick={() => openInvoiceComposer(asset)}
                         disabled={asset.quantity === 0}
-                        className={`w-full h-10 mt-2 bg-zinc-100 text-zinc-950 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
-                          asset.quantity === 0
+                        className={`w-full h-10 mt-2 bg-zinc-100 text-zinc-950 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${asset.quantity === 0
                             ? 'bg-zinc-800 text-zinc-500 border border-zinc-700 cursor-not-allowed'
                             : 'bg-zinc-100 text-zinc-950 hover:bg-white'
-                        }`}
+                          }`}
                       >
                         <FileSignature size={12} /> Bill Lead
                       </button>
@@ -2091,7 +2040,7 @@ export default function Dashboard() {
                   </div>
                   <div className="flex flex-wrap border border-onyx-border rounded-lg overflow-hidden text-sm font-semibold font-mono h-12 items-center">
                     {(['ALL', 'SENT', 'PAID', 'OVERDUE', 'VOID'] as const).map(status => (
-                      <button 
+                      <button
                         key={status}
                         onClick={() => setInvoiceStatusFilter(status)}
                         className={`px-4 h-full transition-colors border-r last:border-r-0 border-onyx-border ${invoiceStatusFilter === status ? 'bg-onyx-accent-cyan/20 text-onyx-accent-cyan' : 'bg-onyx-panel text-onyx-muted hover:text-zinc-300'}`}
@@ -2129,12 +2078,11 @@ export default function Dashboard() {
                           <td className="py-4 px-6 font-mono text-sm font-semibold">${invoice.taxAmount.toFixed(2)}</td>
                           <td className="py-4 px-6 font-mono text-sm text-onyx-accent-green font-bold">${invoice.total.toFixed(2)}</td>
                           <td className="py-4 px-6">
-                            <span className={`inline-block text-xs font-bold px-3 py-1 rounded-md tracking-wider font-mono ${
-                              invoice.status === 'PAID' ? 'bg-onyx-accent-green/10 text-onyx-accent-green border border-onyx-accent-green/20' :
-                              invoice.status === 'SENT' ? 'bg-onyx-accent-cyan/10 text-onyx-accent-cyan border border-onyx-accent-cyan/20' :
-                              invoice.status === 'OVERDUE' ? 'bg-onyx-accent-amber/10 text-onyx-accent-amber border border-onyx-accent-amber/20' :
-                              'bg-zinc-800/40 text-zinc-500 border border-zinc-700/20'
-                            }`}>
+                            <span className={`inline-block text-xs font-bold px-3 py-1 rounded-md tracking-wider font-mono ${invoice.status === 'PAID' ? 'bg-onyx-accent-green/10 text-onyx-accent-green border border-onyx-accent-green/20' :
+                                invoice.status === 'SENT' ? 'bg-onyx-accent-cyan/10 text-onyx-accent-cyan border border-onyx-accent-cyan/20' :
+                                  invoice.status === 'OVERDUE' ? 'bg-onyx-accent-amber/10 text-onyx-accent-amber border border-onyx-accent-amber/20' :
+                                    'bg-zinc-800/40 text-zinc-500 border border-zinc-700/20'
+                              }`}>
                               {invoice.status}
                             </span>
                           </td>
@@ -2163,16 +2111,15 @@ export default function Dashboard() {
                     <div key={invoice.id} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-4 mb-3 flex flex-col gap-2">
                       <div className="flex justify-between items-center border-b border-zinc-800 pb-2">
                         <span className="font-mono text-onyx-accent-cyan text-sm font-bold">{invoice.invoiceNumber}</span>
-                        <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-md tracking-wider font-mono ${
-                          invoice.status === 'PAID' ? 'bg-onyx-accent-green/10 text-onyx-accent-green border border-onyx-accent-green/20' :
-                          invoice.status === 'SENT' ? 'bg-onyx-accent-cyan/10 text-onyx-accent-cyan border border-onyx-accent-cyan/20' :
-                          invoice.status === 'OVERDUE' ? 'bg-onyx-accent-amber/10 text-onyx-accent-amber border border-onyx-accent-amber/20' :
-                          'bg-zinc-800/40 text-zinc-500 border border-zinc-700/20'
-                        }`}>
+                        <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-md tracking-wider font-mono ${invoice.status === 'PAID' ? 'bg-onyx-accent-green/10 text-onyx-accent-green border border-onyx-accent-green/20' :
+                            invoice.status === 'SENT' ? 'bg-onyx-accent-cyan/10 text-onyx-accent-cyan border border-onyx-accent-cyan/20' :
+                              invoice.status === 'OVERDUE' ? 'bg-onyx-accent-amber/10 text-onyx-accent-amber border border-onyx-accent-amber/20' :
+                                'bg-zinc-800/40 text-zinc-500 border border-zinc-700/20'
+                          }`}>
                           {invoice.status}
                         </span>
                       </div>
-                      
+
                       <div className="space-y-1.5 text-xs text-zinc-400 py-1 font-mono">
                         <div className="flex justify-between">
                           <span className="text-zinc-500">CUSTOMER:</span>
@@ -2217,7 +2164,7 @@ export default function Dashboard() {
                 <div className="text-sm text-onyx-muted font-mono font-medium">
                   Seeded and registered ambassador discount codes for sales referral velocity.
                 </div>
-                <button 
+                <button
                   onClick={() => setIsAddAmbassadorModalOpen(true)}
                   className="flex items-center gap-2 text-sm font-bold text-onyx-canvas bg-onyx-accent-purple hover:bg-fuchsia-400 px-5 py-3 rounded-xl shadow-glow-purple transition-all h-12"
                 >
@@ -2279,7 +2226,7 @@ export default function Dashboard() {
                             ACTIVE
                           </span>
                         </div>
-                        
+
                         <div className="space-y-1.5 text-xs text-zinc-400 py-1 font-mono">
                           <div className="flex justify-between">
                             <span className="text-zinc-500">PARTNER:</span>
@@ -2325,38 +2272,33 @@ export default function Dashboard() {
       </main>
 
       {/* ── Right Panel — Agent Activity Matrix ──────────────────────────── */}
-      <aside className={`hidden lg:flex flex-shrink-0 flex-col border-l transition-all duration-300 ${
-        isTerminalCollapsed ? 'w-16' : 'w-80 xl:w-96'
-      } ${
-        isOnyx ? 'bg-[#09090b] border-[#27272a]' : 'bg-[#f4f4f5] border-[#e4e4e7]'
-      }`}>
+      <aside className={`hidden lg:flex flex-shrink-0 flex-col border-l transition-all duration-300 ${isTerminalCollapsed ? 'w-16' : 'w-80 xl:w-96'
+        } ${isOnyx ? 'bg-[#09090b] border-[#27272a]' : 'bg-[#f4f4f5] border-[#e4e4e7]'
+        }`}>
         {isTerminalCollapsed ? (
           <>
             {/* Collapsed Header */}
             <div className={`px-2 py-4 border-b flex-shrink-0 flex flex-col items-center gap-3 ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
               <button
                 onClick={() => setIsTerminalCollapsed(false)}
-                className={`p-1.5 rounded-lg border transition-all ${
-                  isOnyx 
-                    ? 'bg-zinc-950 border-zinc-800 text-onyx-accent-green hover:border-zinc-600' 
+                className={`p-1.5 rounded-lg border transition-all ${isOnyx
+                    ? 'bg-zinc-950 border-zinc-800 text-onyx-accent-green hover:border-zinc-600'
                     : 'bg-white border-zinc-200 text-emerald-800 hover:border-zinc-400'
-                }`}
+                  }`}
                 title="Expand Agent Command Matrix"
               >
                 <ChevronLeft size={16} />
               </button>
               <div className={`h-4 w-px my-1 ${isOnyx ? 'bg-zinc-800' : 'bg-zinc-300'}`} />
-              <span className={`text-[10px] font-bold font-mono tracking-widest uppercase rotate-90 my-10 whitespace-nowrap ${
-                isOnyx ? 'text-zinc-500' : 'text-zinc-600'
-              }`}>
+              <span className={`text-[10px] font-bold font-mono tracking-widest uppercase rotate-90 my-10 whitespace-nowrap ${isOnyx ? 'text-zinc-500' : 'text-zinc-600'
+                }`}>
                 TELEMETRY
               </span>
             </div>
 
             {/* Collapsed Stream */}
-            <div className={`flex-1 overflow-y-auto px-2 py-4 flex flex-col items-center gap-3 min-h-0 ${
-              isOnyx ? 'bg-[#000000]' : 'bg-[#ffffff]'
-            }`}>
+            <div className={`flex-1 overflow-y-auto px-2 py-4 flex flex-col items-center gap-3 min-h-0 ${isOnyx ? 'bg-[#000000]' : 'bg-[#ffffff]'
+              }`}>
               {filteredTerminalEntries.slice(0, 15).map((entry) => {
                 const colorClass = (() => {
                   const agent = (entry.agentName || '').toLowerCase();
@@ -2377,9 +2319,8 @@ export default function Dashboard() {
             </div>
 
             {/* Collapsed Footer */}
-            <div className={`flex-shrink-0 border-t py-3 flex flex-col items-center justify-center font-mono ${
-              isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'
-            }`}>
+            <div className={`flex-shrink-0 border-t py-3 flex flex-col items-center justify-center font-mono ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'
+              }`}>
               <span className={`text-xs font-bold ${isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'}`}>
                 {filteredTerminalEntries.length}
               </span>
@@ -2406,11 +2347,10 @@ export default function Dashboard() {
               </div>
               <button
                 onClick={() => setIsTerminalCollapsed(true)}
-                className={`p-1.5 rounded-lg border transition-all ${
-                  isOnyx 
-                    ? 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600' 
+                className={`p-1.5 rounded-lg border transition-all ${isOnyx
+                    ? 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600'
                     : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-800 hover:border-zinc-400'
-                }`}
+                  }`}
                 title="Collapse Agent Command Matrix"
               >
                 <ChevronRight size={16} />
@@ -2420,15 +2360,14 @@ export default function Dashboard() {
             {/* Agent Legend */}
             <div className={`flex-shrink-0 px-4 py-2.5 border-b flex gap-2 flex-wrap ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
               {(['GrowthAgent', 'LogisticsAgent', 'NetworkAgent', 'DirectorAgent', 'SecurityAlert'] as const).map((agent) => (
-                <span key={agent} className={`text-[9px] font-bold px-2 py-0.5 rounded tracking-widest uppercase ${
-                  (() => {
+                <span key={agent} className={`text-[9px] font-bold px-2 py-0.5 rounded tracking-widest uppercase ${(() => {
                     const key = (agent || '').toLowerCase();
                     const style = AGENT_BADGE_STYLES[key];
                     return style
                       ? (themeProfile === 'ALABASTER' ? style.alabaster : style.onyx)
                       : (themeProfile === 'ALABASTER' ? 'text-zinc-600 bg-zinc-100 border border-zinc-300' : 'text-zinc-400 bg-zinc-800 border border-zinc-700');
                   })()
-                }`}>
+                  }`}>
                   {agent}
                 </span>
               ))}
@@ -2438,9 +2377,8 @@ export default function Dashboard() {
             <div
               id="agent-terminal"
               ref={terminalRef}
-              className={`flex-1 overflow-y-auto px-4 py-2 min-h-0 relative ${
-                isOnyx ? 'bg-[#000000]' : 'bg-[#ffffff]'
-              }`}
+              className={`flex-1 overflow-y-auto px-4 py-2 min-h-0 relative ${isOnyx ? 'bg-[#000000]' : 'bg-[#ffffff]'
+                }`}
             >
               {filteredTerminalEntries.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-3">
@@ -2460,9 +2398,8 @@ export default function Dashboard() {
             </div>
 
             {/* Footer stats */}
-            <div className={`flex-shrink-0 border-t px-4 py-2.5 grid grid-cols-4 gap-1 text-center ${
-              isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'
-            }`}>
+            <div className={`flex-shrink-0 border-t px-4 py-2.5 grid grid-cols-4 gap-1 text-center ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'
+              }`}>
               {(['GrowthAgent', 'LogisticsAgent', 'NetworkAgent', 'DirectorAgent'] as const).map((agent) => {
                 const count = filteredTerminalEntries.filter((e) => e.agentName === agent).length;
                 const colorClass = (() => {
@@ -2496,7 +2433,7 @@ export default function Dashboard() {
                 <X size={16} />
               </button>
             </div>
-            
+
             {/* Body */}
             <div className="p-4 overflow-y-auto max-h-[75vh] space-y-4">
               <div className="grid grid-cols-2 gap-3 bg-onyx-canvas/40 border border-onyx-border/40 p-3 rounded">
@@ -2595,7 +2532,7 @@ export default function Dashboard() {
                 <X size={16} />
               </button>
             </div>
-            
+
             <form onSubmit={handleAddLeadSubmit} className="p-4 space-y-3.5">
               <div className="space-y-1">
                 <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Lead Name *</label>
@@ -2757,11 +2694,10 @@ export default function Dashboard() {
                 <div className="flex justify-between items-center">
                   <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Referral Ambassador Code</label>
                   {invoiceAmbassador && (
-                    <span className={`text-[8px] px-1 py-0.2 rounded font-bold uppercase ${
-                      ambassadors.some(a => a.code.toUpperCase() === invoiceAmbassador.toUpperCase().trim()) 
-                        ? 'text-onyx-accent-green bg-onyx-accent-green/10' 
+                    <span className={`text-[8px] px-1 py-0.2 rounded font-bold uppercase ${ambassadors.some(a => a.code.toUpperCase() === invoiceAmbassador.toUpperCase().trim())
+                        ? 'text-onyx-accent-green bg-onyx-accent-green/10'
                         : 'text-onyx-accent-rose bg-onyx-accent-rose/10'
-                    }`}>
+                      }`}>
                       {ambassadors.some(a => a.code.toUpperCase() === invoiceAmbassador.toUpperCase().trim()) ? 'VALID (5% Off)' : 'INVALID'}
                     </span>
                   )}
@@ -2814,11 +2750,10 @@ export default function Dashboard() {
               <button
                 type="submit"
                 disabled={filteredLeads.filter(l => l.pipelineStage === 'CLOSED_WON').length === 0}
-                className={`w-full py-2.5 rounded font-bold uppercase tracking-widest transition-all ${
-                  filteredLeads.filter(l => l.pipelineStage === 'CLOSED_WON').length === 0
+                className={`w-full py-2.5 rounded font-bold uppercase tracking-widest transition-all ${filteredLeads.filter(l => l.pipelineStage === 'CLOSED_WON').length === 0
                     ? 'bg-zinc-800 text-zinc-500 border border-zinc-700 cursor-not-allowed'
                     : 'bg-onyx-accent-cyan hover:bg-cyan-400 text-onyx-canvas shadow-glow-cyan'
-                }`}
+                  }`}
               >
                 Issue Invoice
               </button>
@@ -2839,7 +2774,7 @@ export default function Dashboard() {
             </div>
 
             <div className="p-5 overflow-y-auto max-h-[75vh] space-y-6">
-              
+
               {/* Receipt Banner */}
               <div className="flex justify-between items-start border-b border-onyx-border pb-4">
                 <div>
@@ -2847,12 +2782,11 @@ export default function Dashboard() {
                   <p className="text-[9px] text-onyx-muted uppercase mt-0.5">Enterprise isolation transactions division</p>
                 </div>
                 <div className="text-right">
-                  <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded tracking-wide ${
-                    activeInvoiceForModal.status === 'PAID' ? 'bg-onyx-accent-green/10 text-onyx-accent-green border border-onyx-accent-green/20' :
-                    activeInvoiceForModal.status === 'SENT' ? 'bg-onyx-accent-cyan/10 text-onyx-accent-cyan border border-onyx-accent-cyan/20' :
-                    activeInvoiceForModal.status === 'OVERDUE' ? 'bg-onyx-accent-amber/10 text-onyx-accent-amber border border-onyx-accent-amber/20' :
-                    'bg-zinc-800/40 text-zinc-500 border border-zinc-700/20'
-                  }`}>
+                  <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded tracking-wide ${activeInvoiceForModal.status === 'PAID' ? 'bg-onyx-accent-green/10 text-onyx-accent-green border border-onyx-accent-green/20' :
+                      activeInvoiceForModal.status === 'SENT' ? 'bg-onyx-accent-cyan/10 text-onyx-accent-cyan border border-onyx-accent-cyan/20' :
+                        activeInvoiceForModal.status === 'OVERDUE' ? 'bg-onyx-accent-amber/10 text-onyx-accent-amber border border-onyx-accent-amber/20' :
+                          'bg-zinc-800/40 text-zinc-500 border border-zinc-700/20'
+                    }`}>
                     {activeInvoiceForModal.status}
                   </span>
                   <p className="text-[10px] font-bold text-onyx-accent-cyan mt-1.5">{activeInvoiceForModal.invoiceNumber}</p>
@@ -3108,11 +3042,10 @@ export default function Dashboard() {
                     setMergeDuplicateId('');
                   }}
                   disabled={!mergePrimaryId || !mergeDuplicateId || mergePrimaryId === mergeDuplicateId}
-                  className={`flex-1 py-2.5 rounded font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 ${
-                    !mergePrimaryId || !mergeDuplicateId || mergePrimaryId === mergeDuplicateId
+                  className={`flex-1 py-2.5 rounded font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 ${!mergePrimaryId || !mergeDuplicateId || mergePrimaryId === mergeDuplicateId
                       ? 'bg-zinc-800 text-zinc-500 border border-zinc-700 cursor-not-allowed'
                       : 'bg-onyx-accent-amber hover:bg-amber-400 text-onyx-canvas shadow-sm'
-                  }`}
+                    }`}
                 >
                   <RefreshCw size={14} /> Execute Merge
                 </button>
@@ -3133,9 +3066,8 @@ export default function Dashboard() {
         {flywheelToasts.map(toast => (
           <div
             key={toast.id}
-            className={`pointer-events-auto transition-all duration-500 ${
-              toast.visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-            }`}
+            className={`pointer-events-auto transition-all duration-500 ${toast.visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              }`}
           >
             <div className="bg-[#09090b] border border-onyx-accent-purple/40 rounded-xl p-4 shadow-[0_0_30px_rgba(168,85,247,0.2)] font-mono text-xs relative overflow-hidden">
               {/* Animated glow border */}
@@ -3171,23 +3103,23 @@ export default function Dashboard() {
                 <Globe size={16} className="text-onyx-accent-purple animate-spin-slow" style={{ animationDuration: '6s' }} />
                 <span className="text-xs font-bold text-onyx-accent-purple tracking-widest uppercase">CENTLE VENTURE ROUTER</span>
               </div>
-              <button 
+              <button
                 onClick={() => {
                   setShowGatewayRouter(false);
                   setGatewayRouterChoice(null);
-                }} 
+                }}
                 className="text-zinc-500 hover:text-zinc-200 transition-colors"
               >
                 <X size={16} />
               </button>
             </div>
-            
+
             {/* Body */}
             <div className="p-6 space-y-4">
               <p className="text-zinc-400 text-[10px] leading-relaxed">
                 Identify your primary operational cohort. The autonomic router will classify your session and trigger cross-sell matchmaking with partner ventures.
               </p>
-              
+
               <div className="space-y-3">
                 {[
                   {
@@ -3218,9 +3150,8 @@ export default function Dashboard() {
                     <button
                       key={cohort.id}
                       onClick={() => setGatewayRouterChoice(cohort.id)}
-                      className={`w-full text-left p-4 rounded-xl border transition-all flex items-start gap-4 ${cohort.color} ${
-                        isSelected ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-black border-transparent' : ''
-                      }`}
+                      className={`w-full text-left p-4 rounded-xl border transition-all flex items-start gap-4 ${cohort.color} ${isSelected ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-black border-transparent' : ''
+                        }`}
                     >
                       <CohortIcon size={20} className="mt-1 flex-shrink-0" />
                       <div className="min-w-0 flex-1">
@@ -3248,10 +3179,9 @@ export default function Dashboard() {
       {/* Mobile Terminal Bottom Sheet */}
       {isMobileTerminalOpen && (
         <div className="fixed inset-0 z-50 md:hidden bg-black flex flex-col w-screen h-screen">
-          <div 
-            className={`flex-1 flex flex-col w-full h-full transition-all duration-300 ${
-              isOnyx ? 'bg-[#000000] text-[#fafafa]' : 'bg-[#ffffff] text-[#09090b]'
-            }`}
+          <div
+            className={`flex-1 flex flex-col w-full h-full transition-all duration-300 ${isOnyx ? 'bg-[#000000] text-[#fafafa]' : 'bg-[#ffffff] text-[#09090b]'
+              }`}
           >
             <div className={`px-4 py-3 border-b flex items-center justify-between ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
               <div className="flex items-center gap-2">
@@ -3260,11 +3190,10 @@ export default function Dashboard() {
                   Agent Command Matrix
                 </span>
               </div>
-              <button 
+              <button
                 onClick={() => setIsMobileTerminalOpen(false)}
-                className={`min-h-[44px] min-w-[44px] flex items-center justify-center p-1 rounded-md border ${
-                  isOnyx ? 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-black'
-                }`}
+                className={`min-h-[44px] min-w-[44px] flex items-center justify-center p-1 rounded-md border ${isOnyx ? 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-black'
+                  }`}
               >
                 <X size={16} />
               </button>
@@ -3290,8 +3219,8 @@ export default function Dashboard() {
         <div className="fixed inset-0 z-50 bg-zinc-950 p-5 overflow-y-auto font-mono text-xs text-[#fafafa] flex flex-col gap-4">
           <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
             <span className="text-xs font-bold tracking-widest uppercase text-onyx-accent-rose">⚡ Create Intern Dossier</span>
-            <button 
-              onClick={() => setIsAddDossierMobileOpen(false)} 
+            <button
+              onClick={() => setIsAddDossierMobileOpen(false)}
               className="text-zinc-400 min-h-[44px] min-w-[44px] flex items-center justify-center border border-zinc-800 rounded bg-zinc-900"
             >
               <X size={18} />
@@ -3388,8 +3317,8 @@ export default function Dashboard() {
         <div className="fixed inset-0 z-50 bg-zinc-950 p-5 overflow-y-auto font-mono text-xs text-[#fafafa] flex flex-col gap-4">
           <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
             <span className="text-xs font-bold tracking-widest uppercase text-onyx-accent-rose">⚡ Secure Msg Dispatch</span>
-            <button 
-              onClick={() => setIsDispatchMobileOpen(false)} 
+            <button
+              onClick={() => setIsDispatchMobileOpen(false)}
               className="text-zinc-400 min-h-[44px] min-w-[44px] flex items-center justify-center border border-zinc-800 rounded bg-zinc-900"
             >
               <X size={18} />
