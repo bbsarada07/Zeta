@@ -502,18 +502,19 @@ export default function AdminHRPortal() {
       </div>
 
       {/* Tab Controls */}
-      <div className={`flex flex-col sm:flex-row gap-1 border p-1 rounded w-full md:w-auto self-start ${isDark ? 'bg-[#000000] border-[#27272a]' : 'bg-[#ffffff] border-[#e4e4e7]'}`}>
+      <div className={`flex flex-col md:flex-row gap-1 md:border md:p-1 md:rounded w-full md:w-auto self-start ${isDark ? 'bg-transparent md:bg-[#000000] md:border-[#27272a]' : 'bg-transparent md:bg-[#ffffff] md:border-[#e4e4e7]'}`}>
         {(['directory', 'dispatcher', 'create'] as TabType[]).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`w-full md:w-auto min-h-[44px] md:min-h-0 flex items-center justify-center py-3 px-4 md:py-1.5 text-[9px] font-black uppercase tracking-wider rounded transition-all ${
+            className={`w-full h-12 md:h-auto md:w-auto flex justify-between md:justify-center items-center px-4 py-3 md:py-1.5 text-[9px] font-black uppercase tracking-wider rounded-xl md:rounded transition-all mb-3 md:mb-0 ${
               activeTab === tab
-                ? 'bg-onyx-accent-rose text-white'
-                : (isDark ? 'text-zinc-500 hover:text-zinc-300' : 'text-zinc-500 hover:text-zinc-800')
+                ? 'bg-onyx-accent-rose text-white border border-transparent'
+                : (isDark ? 'text-zinc-500 hover:text-zinc-300 border border-zinc-800 bg-zinc-900 md:bg-transparent md:border-transparent' : 'text-zinc-500 hover:text-zinc-800 border border-zinc-350 bg-zinc-100 md:bg-transparent md:border-transparent')
             }`}
           >
-            {tab === 'directory' ? 'Dossier Directory' : tab === 'dispatcher' ? 'Secure Dispatcher' : 'New Dossier'}
+            <span>{tab === 'directory' ? 'Dossier Directory' : tab === 'dispatcher' ? 'Secure Dispatcher' : 'New Dossier'}</span>
+            <span className="md:hidden text-zinc-500">→</span>
           </button>
         ))}
       </div>
@@ -541,14 +542,14 @@ export default function AdminHRPortal() {
                           : 'bg-white border-zinc-200 hover:border-zinc-400 text-[#09090b]')
                   }`}
                 >
-                  <div className="flex justify-between items-center gap-3">
-                    <span className={`text-sm font-semibold truncate ${selectedInternId === dossier.intern_id ? 'text-onyx-accent-rose font-bold' : (isDark ? 'text-[#fafafa]' : 'text-black')}`}>{dossier.profile_metadata.full_name}</span>
+                  <div className="flex justify-between items-center gap-3 w-full">
+                    <span className={`text-sm font-semibold break-words whitespace-normal ${selectedInternId === dossier.intern_id ? 'text-onyx-accent-rose font-bold' : (isDark ? 'text-[#fafafa]' : 'text-black')}`}>{dossier.profile_metadata.full_name}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-md uppercase font-bold flex-shrink-0 ${isDark ? 'bg-zinc-900 border border-zinc-800 text-zinc-400' : 'bg-zinc-100 border border-zinc-200 text-zinc-600'}`}>
                       {dossier.intern_id}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-zinc-500 truncate">{dossier.profile_metadata.department_role}</span>
+                  <div className="flex justify-between items-center text-xs w-full gap-2">
+                    <span className="text-zinc-500 break-words whitespace-normal">{dossier.profile_metadata.department_role}</span>
                     <span className="text-onyx-accent-rose uppercase font-semibold flex-shrink-0">
                       {dossier.tenant_company.replace(/_/g, ' ')}
                     </span>

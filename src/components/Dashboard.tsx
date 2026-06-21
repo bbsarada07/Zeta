@@ -363,6 +363,8 @@ export default function Dashboard() {
   const restockAsset = useZetaStore((s) => s.restockAsset);
   const addAmbassador = useZetaStore((s) => s.addAmbassador);
   const updateInvoiceStatus = useZetaStore((s) => s.updateInvoiceStatus);
+  const createInternDossierAction = useZetaStore((s) => s.createInternDossierAction);
+  const dispatchSecureMessage = useZetaStore((s) => s.dispatchSecureMessage);
 
   // Flywheel Cross-sell Toast System
   const [flywheelToasts, setFlywheelToasts] = useState<FlywheelToast[]>([]);
@@ -414,6 +416,19 @@ export default function Dashboard() {
   const [assetForInvoiceModal, setAssetForInvoiceModal] = useState<WarehouseAsset | null>(null);
   const [activeInvoiceForModal, setActiveInvoiceForModal] = useState<Invoice | null>(null);
   const [isAddAmbassadorModalOpen, setIsAddAmbassadorModalOpen] = useState(false);
+  const [isAddDossierMobileOpen, setIsAddDossierMobileOpen] = useState(false);
+  const [isDispatchMobileOpen, setIsDispatchMobileOpen] = useState(false);
+
+  // Mobile form input states
+  const [mobileDossierName, setMobileDossierName] = useState('');
+  const [mobileDossierEmail, setMobileDossierEmail] = useState('');
+  const [mobileDossierRole, setMobileDossierRole] = useState('');
+  const [mobileDossierTenant, setMobileDossierTenant] = useState<TenantCompany>('skill_tank');
+  const [mobileDossierStipend, setMobileDossierStipend] = useState('2000');
+
+  const [mobileDispatchRecipient, setMobileDispatchRecipient] = useState('');
+  const [mobileDispatchSubject, setMobileDispatchSubject] = useState<'PAYROLL' | 'COMPLAINT' | 'PERFORMANCE'>('PAYROLL');
+  const [mobileDispatchBody, setMobileDispatchBody] = useState('');
 
   // Search & Filter UI States
   const [crmSearch, setCrmSearch] = useState('');
@@ -1069,7 +1084,7 @@ export default function Dashboard() {
       </aside>
 
       {/* ── Center Panel ─────────────────────────────────────────────────── */}
-      <main className={`w-full px-4 pt-20 pb-24 overflow-y-auto block md:flex-1 md:flex md:flex-col md:min-w-0 md:overflow-hidden md:pt-0 md:px-0 md:pb-0 ${
+      <main className={`w-full max-w-full px-4 pt-16 pb-20 overflow-x-hidden block md:flex-1 md:flex md:flex-col md:min-w-0 md:overflow-hidden md:pt-0 md:px-0 md:pb-0 ${
         isOnyx ? 'bg-[#000000] text-[#fafafa] border-[#27272a]' : 'bg-[#ffffff] text-[#09090b] border-[#e4e4e7]'
       }`}>
         {/* Top bar */}
@@ -1110,8 +1125,46 @@ export default function Dashboard() {
           </div>
         </header>
 
+        {/* Micro KPI Ticker Strip */}
+        <div className="flex flex-row items-center gap-2 overflow-x-auto scrollbar-none w-full py-1 border-b border-zinc-900/50 mb-3 md:hidden">
+          <div className="px-2 py-0.5 bg-zinc-950 border border-zinc-800 rounded-full text-[10px] text-zinc-400 whitespace-nowrap">
+            Rev: ${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+          </div>
+          <div className="px-2 py-0.5 bg-zinc-950 border border-zinc-800 rounded-full text-[10px] text-zinc-400 whitespace-nowrap">
+            Conv: {conversionRate}%
+          </div>
+          <div className="px-2 py-0.5 bg-zinc-950 border border-zinc-800 rounded-full text-[10px] text-zinc-400 whitespace-nowrap">
+            Stock: {lowStockCount}
+          </div>
+          <div className="px-2 py-0.5 bg-zinc-950 border border-zinc-800 rounded-full text-[10px] text-zinc-400 whitespace-nowrap">
+            Compliance: 94.8%
+          </div>
+        </div>
+
+        {/* High-Performance Mobile Quick Action Launchpad */}
+        <div className="grid grid-cols-3 gap-2 w-full mb-4 md:hidden">
+          <button
+            onClick={() => setIsAddLeadModalOpen(true)}
+            className="h-10 bg-zinc-900 border border-zinc-800 rounded-lg text-xs font-semibold text-zinc-200 flex items-center justify-center active:scale-95 transition-transform"
+          >
+            + Lead
+          </button>
+          <button
+            onClick={() => setIsAddDossierMobileOpen(true)}
+            className="h-10 bg-zinc-900 border border-zinc-800 rounded-lg text-xs font-semibold text-zinc-200 flex items-center justify-center active:scale-95 transition-transform"
+          >
+            + Dossier
+          </button>
+          <button
+            onClick={() => setIsDispatchMobileOpen(true)}
+            className="h-10 bg-zinc-900 border border-zinc-800 rounded-lg text-xs font-semibold text-zinc-200 flex items-center justify-center active:scale-95 transition-transform"
+          >
+            + Dispatch
+          </button>
+        </div>
+
         {/* KPI Grid */}
-        <section className={`flex-shrink-0 p-4 border-b ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
+        <section className={`hidden md:block flex-shrink-0 p-4 border-b ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
           <div key={activeNav} className={`flex flex-row overflow-x-auto snap-x snap-mandatory gap-3 w-full scrollbar-none pb-4 md:grid md:grid-cols-3 ${
             ['dashboard', 'erp', 'invoices', 'ambassadors'].includes(activeNav) ? 'xl:grid-cols-4' : 'xl:grid-cols-3'
           } md:gap-6 animate-fade-in transition-all duration-200 ease-in-out`}>
@@ -2097,11 +2150,11 @@ export default function Dashboard() {
 
       {/* 2. Add Lead Modal */}
       {isAddLeadModalOpen && (
-        <div className="fixed inset-0 bg-onyx-canvas/80 backdrop-blur-sm z-50 flex justify-center items-center p-4">
-          <div className="bg-onyx-panel border border-onyx-border rounded-lg w-full max-w-sm overflow-hidden flex flex-col font-mono text-xs shadow-glow-green animate-fade-in">
+        <div className="fixed inset-0 bg-onyx-canvas/80 backdrop-blur-sm z-50 flex justify-center items-center p-0 md:p-4">
+          <div className="bg-onyx-panel border border-onyx-border md:rounded-lg w-full h-full md:h-auto md:max-w-sm overflow-y-auto flex flex-col font-mono text-xs shadow-glow-green animate-fade-in">
             <div className="p-4 border-b border-onyx-border flex justify-between items-center bg-onyx-panel/80">
               <span className="text-[10px] text-onyx-accent-green font-bold tracking-widest uppercase">Register New Pipeline Lead</span>
-              <button onClick={() => setIsAddLeadModalOpen(false)} className="text-onyx-muted hover:text-onyx-bright transition-colors">
+              <button onClick={() => setIsAddLeadModalOpen(false)} className="text-onyx-muted hover:text-onyx-bright transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center">
                 <X size={16} />
               </button>
             </div>
@@ -2792,6 +2845,183 @@ export default function Dashboard() {
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* 9. Mobile Add Dossier Slide-up Sheet */}
+      {isAddDossierMobileOpen && (
+        <div className="fixed inset-0 z-50 bg-zinc-950 p-5 overflow-y-auto font-mono text-xs text-[#fafafa] flex flex-col gap-4">
+          <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
+            <span className="text-xs font-bold tracking-widest uppercase text-onyx-accent-rose">⚡ Create Intern Dossier</span>
+            <button 
+              onClick={() => setIsAddDossierMobileOpen(false)} 
+              className="text-zinc-400 min-h-[44px] min-w-[44px] flex items-center justify-center border border-zinc-800 rounded bg-zinc-900"
+            >
+              <X size={18} />
+            </button>
+          </div>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            if (!mobileDossierName || !mobileDossierEmail || !mobileDossierRole || !mobileDossierStipend) {
+              alert('Please fill out all fields.');
+              return;
+            }
+            createInternDossierAction(mobileDossierTenant, {
+              full_name: mobileDossierName,
+              corporate_email: mobileDossierEmail,
+              department_role: mobileDossierRole,
+              base_stipend: Number(mobileDossierStipend) * 100
+            });
+            setIsAddDossierMobileOpen(false);
+            setMobileDossierName('');
+            setMobileDossierEmail('');
+            setMobileDossierRole('');
+            setMobileDossierStipend('2000');
+            alert('Dossier created successfully!');
+          }} className="space-y-4">
+            <div className="space-y-1">
+              <label className="block text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Legal Name *</label>
+              <input
+                type="text"
+                required
+                placeholder="Alex Mercer"
+                value={mobileDossierName}
+                onChange={(e) => setMobileDossierName(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded p-3 text-xs text-white focus:outline-none focus:border-zinc-500"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Corporate Email *</label>
+              <input
+                type="email"
+                required
+                placeholder="alex@skilltank.com"
+                value={mobileDossierEmail}
+                onChange={(e) => setMobileDossierEmail(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded p-3 text-xs text-white focus:outline-none focus:border-zinc-500"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Department Role *</label>
+              <input
+                type="text"
+                required
+                placeholder="QA Automation Intern"
+                value={mobileDossierRole}
+                onChange={(e) => setMobileDossierRole(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded p-3 text-xs text-white focus:outline-none focus:border-zinc-500"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Base stipend (USD) *</label>
+              <input
+                type="number"
+                required
+                value={mobileDossierStipend}
+                onChange={(e) => setMobileDossierStipend(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded p-3 text-xs text-white focus:outline-none focus:border-zinc-500"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Tenant Workspace *</label>
+              <select
+                value={mobileDossierTenant}
+                onChange={(e) => setMobileDossierTenant(e.target.value as TenantCompany)}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded p-3 text-xs text-white focus:outline-none focus:border-zinc-500"
+              >
+                <option value="skill_tank">Skill Tank Systems</option>
+                <option value="vriddhi">Vriddhi Logistics</option>
+                <option value="tobofu">Tobofu Agri Group</option>
+                <option value="promtal">Promtal Media</option>
+                <option value="maceco">Maceco Roman Steel</option>
+              </select>
+            </div>
+            <button
+              type="submit"
+              className="w-full h-12 bg-onyx-accent-rose text-white font-bold uppercase tracking-widest rounded-lg transition-transform active:scale-95 mt-4"
+            >
+              Register Dossier
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* 10. Mobile Dispatch Secure message Slide-up Sheet */}
+      {isDispatchMobileOpen && (
+        <div className="fixed inset-0 z-50 bg-zinc-950 p-5 overflow-y-auto font-mono text-xs text-[#fafafa] flex flex-col gap-4">
+          <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
+            <span className="text-xs font-bold tracking-widest uppercase text-onyx-accent-rose">⚡ Secure Msg Dispatch</span>
+            <button 
+              onClick={() => setIsDispatchMobileOpen(false)} 
+              className="text-zinc-400 min-h-[44px] min-w-[44px] flex items-center justify-center border border-zinc-800 rounded bg-zinc-900"
+            >
+              <X size={18} />
+            </button>
+          </div>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            if (!mobileDispatchRecipient || !mobileDispatchBody) {
+              alert('Please enter recipient and body.');
+              return;
+            }
+            dispatchSecureMessage({
+              recipient_intern_id: mobileDispatchRecipient,
+              sender_role: 'Admin',
+              subject_category: mobileDispatchSubject,
+              body_content_encrypted_string: mobileDispatchBody,
+              is_ephemeral: false
+            });
+            setIsDispatchMobileOpen(false);
+            setMobileDispatchRecipient('');
+            setMobileDispatchBody('');
+            alert('Payload transmitted successfully.');
+          }} className="space-y-4">
+            <div className="space-y-1">
+              <label className="block text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Recipient Intern *</label>
+              <select
+                required
+                value={mobileDispatchRecipient}
+                onChange={(e) => setMobileDispatchRecipient(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded p-3 text-xs text-white focus:outline-none focus:border-zinc-500"
+              >
+                <option value="" disabled>Select target...</option>
+                {internDossiers.map((d) => (
+                  <option key={d.intern_id} value={d.intern_id}>
+                    {d.profile_metadata.full_name} ({d.intern_id})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="block text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Subject Classification *</label>
+              <select
+                value={mobileDispatchSubject}
+                onChange={(e) => setMobileDispatchSubject(e.target.value as any)}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded p-3 text-xs text-white focus:outline-none focus:border-zinc-500"
+              >
+                <option value="PAYROLL">PAYROLL</option>
+                <option value="COMPLAINT">COMPLAINT</option>
+                <option value="PERFORMANCE">PERFORMANCE</option>
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="block text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Message Payload *</label>
+              <textarea
+                required
+                rows={5}
+                placeholder="Type secure details..."
+                value={mobileDispatchBody}
+                onChange={(e) => setMobileDispatchBody(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded p-3 text-xs text-white focus:outline-none focus:border-zinc-500 resize-none leading-relaxed"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full h-12 bg-onyx-accent-rose text-white font-bold uppercase tracking-widest rounded-lg transition-transform active:scale-95 mt-4"
+            >
+              Transmit Payload
+            </button>
+          </form>
         </div>
       )}
 

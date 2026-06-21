@@ -304,7 +304,7 @@ const SecureMessageItem = ({
       <div className="flex items-center gap-3 mt-1 border-t border-onyx-border/20 pt-2.5">
         <button
           onClick={handleDecryptToggle}
-          className="flex items-center gap-1.5 text-[9px] font-mono font-bold uppercase tracking-widest text-onyx-accent-cyan bg-onyx-accent-cyan/10 hover:bg-onyx-accent-cyan/20 border border-onyx-accent-cyan/30 px-3 py-1.5 rounded transition-all"
+          className="flex items-center justify-center gap-1.5 text-[9px] font-mono font-bold uppercase tracking-widest text-onyx-accent-cyan bg-onyx-accent-cyan/10 hover:bg-onyx-accent-cyan/20 border border-onyx-accent-cyan/30 px-4 py-2 min-h-[44px] rounded transition-all"
         >
           {isDecrypted ? (
             <><EyeOff size={10} /> Mask Ciphertext</>
@@ -315,7 +315,7 @@ const SecureMessageItem = ({
 
         <button
           onClick={() => onDismiss(msg.message_id)}
-          className="flex items-center gap-1 text-[9px] font-mono font-bold uppercase tracking-widest text-rose-400 bg-rose-950/20 hover:bg-rose-950/50 border border-rose-800/30 px-3 py-1.5 rounded transition-all ml-auto"
+          className="flex items-center justify-center gap-1 text-[9px] font-mono font-bold uppercase tracking-widest text-rose-400 bg-rose-950/20 hover:bg-rose-950/50 border border-rose-800/30 px-4 py-2 min-h-[44px] rounded transition-all ml-auto"
         >
           {msg.is_ephemeral ? (
             <><Flame size={10} /> Dismiss &amp; Burn</>
