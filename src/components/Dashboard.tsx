@@ -40,7 +40,7 @@ import { initZetaAgents, stopZetaAgents } from '../agents/zetaOrchestrator';
 import { redactConfidentialData } from '../agents/agentRouter';
 import SecureMailbox, { KineticTextScrambler } from './SecureMailbox';
 import AdminHRPortal from './AdminHRPortal';
-import type { Lead, WarehouseAsset, ThoughtLedgerEntry, Invoice, InvoiceStatus } from '../types/zeta';
+import type { Lead, WarehouseAsset, ThoughtLedgerEntry, Invoice, InvoiceStatus, Ambassador } from '../types/zeta';
 import type { TenantCompany, PipelineStage } from '../types/zeta';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -418,6 +418,8 @@ const fallbackMockLeads: Lead[] = [
   } as any
 ];
 
+const INITIAL_SEED_LEADS = fallbackMockLeads;
+
 const fallbackMockAssets: WarehouseAsset[] = [
   {
     id: 'asset_mock_1',
@@ -482,14 +484,62 @@ export default function Dashboard() {
 
   // Store lists
   const storeLeads = useZetaStore((s) => s.leads);
-  const leads = storeLeads.length > 0 ? storeLeads : fallbackMockLeads;
   const storeWarehouseAssets = useZetaStore((s) => s.warehouseAssets);
-  const warehouseAssets = storeWarehouseAssets.length > 0 ? storeWarehouseAssets : fallbackMockAssets;
-  const invoices = useZetaStore((s) => s.invoices);
+  const storeInvoices = useZetaStore((s) => s.invoices);
+  const storeAmbassadors = useZetaStore((s) => s.ambassadors);
+
+  const [leads, setLeads] = useState<Lead[]>(() => {
+    const cached = localStorage.getItem('zeta_leads');
+    return cached ? JSON.parse(cached) : INITIAL_SEED_LEADS;
+  });
+
+  const [warehouseAssets, setWarehouseAssets] = useState<WarehouseAsset[]>(() => {
+    const cached = localStorage.getItem('zeta_warehouse_assets');
+    return cached ? JSON.parse(cached) : fallbackMockAssets;
+  });
+
+  const [invoices, setInvoices] = useState<Invoice[]>(() => {
+    const cached = localStorage.getItem('zeta_invoices');
+    return cached ? JSON.parse(cached) : [];
+  });
+
+  const [ambassadors, setAmbassadors] = useState<Ambassador[]>(() => {
+    const cached = localStorage.getItem('zeta_ambassadors');
+    return cached ? JSON.parse(cached) : [];
+  });
+
   const agentThoughtLedger = useZetaStore((s) => s.agentThoughtLedger);
-  const ambassadors = useZetaStore((s) => s.ambassadors);
   const internDossiers = useZetaStore((s) => s.internDossiers);
   const secureMailboxQueue = useZetaStore((s) => s.secureMailboxQueue);
+
+  // Sync state loops with error guards
+  useEffect(() => {
+    if (storeLeads && storeLeads.length > 0) {
+      setLeads(storeLeads);
+      localStorage.setItem('zeta_leads', JSON.stringify(storeLeads));
+    }
+  }, [storeLeads]);
+
+  useEffect(() => {
+    if (storeWarehouseAssets && storeWarehouseAssets.length > 0) {
+      setWarehouseAssets(storeWarehouseAssets);
+      localStorage.setItem('zeta_warehouse_assets', JSON.stringify(storeWarehouseAssets));
+    }
+  }, [storeWarehouseAssets]);
+
+  useEffect(() => {
+    if (storeInvoices && storeInvoices.length > 0) {
+      setInvoices(storeInvoices);
+      localStorage.setItem('zeta_invoices', JSON.stringify(storeInvoices));
+    }
+  }, [storeInvoices]);
+
+  useEffect(() => {
+    if (storeAmbassadors && storeAmbassadors.length > 0) {
+      setAmbassadors(storeAmbassadors);
+      localStorage.setItem('zeta_ambassadors', JSON.stringify(storeAmbassadors));
+    }
+  }, [storeAmbassadors]);
 
   // Store actions
   const getLowStockAssets = useZetaStore((s) => s.getLowStockAssets);
@@ -628,9 +678,9 @@ export default function Dashboard() {
   // Async data fetching on user login or change
   useEffect(() => {
     if (currentUser) {
-      useZetaStore.getState().fetchLeadsAction();
-      useZetaStore.getState().fetchInvoicesAction();
-      useZetaStore.getState().fetchAmbassadorsAction();
+      useZetaStore.getState().fetchLeadsAction().catch(err => console.warn('Leads fetch 404 or drop, using fallback cache', err));
+      useZetaStore.getState().fetchInvoicesAction().catch(err => console.warn('Invoices fetch 404 or drop, using fallback cache', err));
+      useZetaStore.getState().fetchAmbassadorsAction().catch(err => console.warn('Ambassadors fetch 404 or drop, using fallback cache', err));
     }
   }, [currentUser]);
 
@@ -2148,7 +2198,7 @@ export default function Dashboard() {
                             </td>
                             <td className="py-4 px-6 font-mono text-onyx-accent-purple text-sm font-bold">{amb.code}</td>
                             <td className="py-4 px-6 text-onyx-bright font-semibold">{amb.name}</td>
-                            <td className="py-4 px-6 text-onyx-muted font-mono text-sm font-semibold">{amb.tenant_company ? TENANT_LABELS[amb.tenant_company] : 'GLOBAL'}</td>
+                            <td className="py-4 px-6 text-onyx-muted font-mono text-sm font-semibold">{amb.tenant_company ? TENANT_LABELS[amb.tenant_company as TenantCompany] : 'GLOBAL'}</td>
                             <td className="py-4 px-6 font-mono font-bold text-center tabular-nums text-sm">{amb.referrals}</td>
                             <td className="py-4 px-6 font-mono text-onyx-accent-green font-bold text-sm">${amb.salesGenerated.toFixed(2)}</td>
                             <td className="py-4 px-6 font-mono text-onyx-accent-rose font-bold text-sm">${amb.discountsEarned.toFixed(2)}</td>
@@ -2187,7 +2237,7 @@ export default function Dashboard() {
                           </div>
                           <div className="flex justify-between">
                             <span className="text-zinc-500">CONTEXT:</span>
-                            <span className="text-zinc-200 break-words text-wrap whitespace-normal">{amb.tenant_company ? TENANT_LABELS[amb.tenant_company] : 'GLOBAL'}</span>
+                            <span className="text-zinc-200 break-words text-wrap whitespace-normal">{amb.tenant_company ? TENANT_LABELS[amb.tenant_company as TenantCompany] : 'GLOBAL'}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-zinc-500">REFERRALS:</span>

@@ -374,9 +374,9 @@ export default function AdminHRPortal() {
 
   useEffect(() => {
     if (store.currentUser) {
-      store.fetchLeadsAction();
-      store.fetchInvoicesAction();
-      store.fetchAmbassadorsAction();
+      store.fetchLeadsAction().catch(err => console.warn('HR Leads fetch 404 or drop, using fallback cache', err));
+      store.fetchInvoicesAction().catch(err => console.warn('HR Invoices fetch 404 or drop, using fallback cache', err));
+      store.fetchAmbassadorsAction().catch(err => console.warn('HR Ambassadors fetch 404 or drop, using fallback cache', err));
     }
   }, [store.currentUser]);
 
@@ -411,7 +411,18 @@ export default function AdminHRPortal() {
   // Kinetic decryption toggle for admin financial fields
   const [revealedFields, setRevealedFields] = useState<Set<string>>(new Set());
 
-  const dossiers = store.internDossiers.length > 0 ? store.internDossiers : fallbackDossiers;
+  const [dossiers, setDossiers] = useState<InternDossier[]>(() => {
+    const cached = localStorage.getItem('_zeta_dossiers');
+    return cached ? JSON.parse(cached) : fallbackDossiers;
+  });
+
+  const storeDossiers = store.internDossiers;
+  useEffect(() => {
+    if (storeDossiers && storeDossiers.length > 0) {
+      setDossiers(storeDossiers);
+      localStorage.setItem('_zeta_dossiers', JSON.stringify(storeDossiers));
+    }
+  }, [storeDossiers]);
 
   // Default-select first intern
   useEffect(() => {
