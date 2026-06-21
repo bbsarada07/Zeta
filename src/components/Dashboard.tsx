@@ -148,13 +148,13 @@ const KpiCard = ({
   const themeProfile = useZetaStore((s) => s.themeProfile);
   const isOnyx = themeProfile === 'ONYX';
   return (
-    <div className={`border rounded-xl shadow-2xl transition-all duration-200 snap-center flex-shrink-0 ${
-      hiddenMobile ? 'hidden md:flex' : 'flex'
-    } ${
+    <div className={`snap-center flex-shrink-0 ${
+      hiddenMobile ? 'hidden max-md:hidden md:flex' : 'flex'
+    } min-w-[150px] max-w-[150px] h-16 p-2 flex flex-col justify-center bg-[#09090b]/50 border border-zinc-800 rounded-lg transition-all duration-200 ${
       isOnyx 
-        ? 'bg-[#09090b] text-[#fafafa] border-[#27272a] hover:border-zinc-500 shadow-zinc-950/50' 
-        : 'bg-[#f4f4f5] text-[#09090b] border-[#e4e4e7] hover:border-zinc-300 shadow-zinc-200'
-    } p-3 min-w-[140px] max-w-[160px] h-20 md:p-6 md:min-w-0 md:max-w-none md:h-auto flex-col gap-1 md:gap-4 md:flex-1`}>
+        ? 'md:bg-[#09090b] md:text-[#fafafa] md:border-[#27272a] md:hover:border-zinc-500 md:shadow-zinc-950/50' 
+        : 'md:bg-[#f4f4f5] md:text-[#09090b] md:border-[#e4e4e7] md:hover:border-zinc-300 md:shadow-zinc-200'
+    } md:p-6 md:min-w-0 md:max-w-none md:h-auto md:flex-1 md:border md:rounded-xl md:shadow-2xl md:gap-4 md:bg-inherit`}>
       <div className="flex items-center justify-between gap-1">
         <span className={`text-[9px] md:text-sm font-semibold tracking-wider uppercase truncate ${
           isOnyx ? 'text-zinc-400' : 'text-zinc-600'
@@ -164,7 +164,7 @@ const KpiCard = ({
           <Icon size={16} className="hidden md:block" />
         </div>
       </div>
-      <div className={`text-base md:text-3xl font-bold tracking-tight truncate ${
+      <div className={`text-sm md:text-3xl font-bold tracking-tight truncate ${
         isOnyx ? 'text-[#fafafa]' : 'text-black'
       }`}>{value}</div>
       {sub && <div className={`hidden md:block text-xs font-medium ${
@@ -447,6 +447,15 @@ export default function Dashboard() {
     return () => stopZetaAgents();
   }, []);
 
+  // Async data fetching on user login or change
+  useEffect(() => {
+    if (currentUser) {
+      useZetaStore.getState().fetchLeadsAction();
+      useZetaStore.getState().fetchInvoicesAction();
+      useZetaStore.getState().fetchAmbassadorsAction();
+    }
+  }, [currentUser]);
+
   // Filter agent ledger based on venture workspace context (isolation / global override rules)
   const filteredTerminalEntries = useMemo(() => {
     if (!currentUser || currentUser.role === 'global_admin') {
@@ -709,7 +718,7 @@ export default function Dashboard() {
   }, [currentUser]);
 
   return (
-    <div className={`flex h-screen w-screen max-w-full overflow-hidden font-sans select-none relative ${
+    <div className={`flex flex-col min-h-screen max-w-full overflow-hidden font-sans select-none relative md:flex-row md:h-screen md:w-screen ${
       isOnyx ? 'bg-[#000000] text-[#fafafa] border-[#27272a]' : 'bg-[#ffffff] text-[#09090b] border-[#e4e4e7]'
     }`}>
       {/* Mobile Sticky Top Header */}
@@ -736,7 +745,7 @@ export default function Dashboard() {
             }`}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
-            <span className="animate-pulse">● 12 AGENTS</span>
+            <span className="animate-pulse">● Live Engine Sync</span>
           </button>
 
           <button
@@ -1060,7 +1069,7 @@ export default function Dashboard() {
       </aside>
 
       {/* ── Center Panel ─────────────────────────────────────────────────── */}
-      <main className={`flex-1 flex flex-col min-w-0 overflow-hidden pt-16 md:pt-0 ${
+      <main className={`w-full px-4 pt-20 pb-24 overflow-y-auto block md:flex-1 md:flex md:flex-col md:min-w-0 md:overflow-hidden md:pt-0 md:px-0 md:pb-0 ${
         isOnyx ? 'bg-[#000000] text-[#fafafa] border-[#27272a]' : 'bg-[#ffffff] text-[#09090b] border-[#e4e4e7]'
       }`}>
         {/* Top bar */}
@@ -1103,7 +1112,7 @@ export default function Dashboard() {
 
         {/* KPI Grid */}
         <section className={`flex-shrink-0 p-4 border-b ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
-          <div key={activeNav} className={`flex flex-row overflow-x-auto snap-x snap-mandatory scrollbar-none gap-3 w-full pb-2 md:grid md:grid-cols-3 ${
+          <div key={activeNav} className={`flex flex-row overflow-x-auto snap-x snap-mandatory gap-3 w-full scrollbar-none pb-4 md:grid md:grid-cols-3 ${
             ['dashboard', 'erp', 'invoices', 'ambassadors'].includes(activeNav) ? 'xl:grid-cols-4' : 'xl:grid-cols-3'
           } md:gap-6 animate-fade-in transition-all duration-200 ease-in-out`}>
             {(() => {
@@ -1359,7 +1368,7 @@ export default function Dashboard() {
                 </div>
  
                 {/* Dashboard live terminal stream */}
-                <div className={`border rounded-xl p-6 hidden md:flex flex-col gap-4 flex-1 min-h-[200px] shadow-2xl ${isOnyx ? 'bg-[#09090b] border-[#27272a] shadow-zinc-950/40' : 'bg-[#f4f4f5] border-[#e4e4e7] shadow-zinc-200'}`}>
+                <div className={`border rounded-xl p-6 hidden max-md:hidden md:flex flex-col gap-4 flex-1 min-h-[200px] shadow-2xl ${isOnyx ? 'bg-[#09090b] border-[#27272a] shadow-zinc-950/40' : 'bg-[#f4f4f5] border-[#e4e4e7] shadow-zinc-200'}`}>
                   <div className={`flex items-center justify-between border-b pb-2 ${isOnyx ? 'border-[#27272a]/50' : 'border-[#e4e4e7]'}`}>
                     <h3 className={`text-lg font-semibold tracking-wide uppercase ${isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'}`}>Live Agent Diagnostics Stream</h3>
                     <span className={`text-xs font-semibold ${isOnyx ? 'text-zinc-400' : 'text-zinc-500'}`}>{filteredTerminalEntries.length} entries</span>
@@ -2748,12 +2757,11 @@ export default function Dashboard() {
 
       {/* Mobile Terminal Bottom Sheet */}
       {isMobileTerminalOpen && (
-        <div className="fixed inset-0 z-50 md:hidden bg-black/60 backdrop-blur-sm" onClick={() => setIsMobileTerminalOpen(false)}>
+        <div className="fixed inset-0 z-50 md:hidden bg-black flex flex-col w-screen h-screen">
           <div 
-            className={`fixed bottom-0 left-0 right-0 h-[60vh] border-t flex flex-col rounded-t-2xl transition-all duration-300 ${
-              isOnyx ? 'bg-[#000000] border-[#27272a] text-[#fafafa]' : 'bg-[#ffffff] border-[#e4e4e7] text-[#09090b]'
+            className={`flex-1 flex flex-col w-full h-full transition-all duration-300 ${
+              isOnyx ? 'bg-[#000000] text-[#fafafa]' : 'bg-[#ffffff] text-[#09090b]'
             }`}
-            onClick={(e) => e.stopPropagation()}
           >
             <div className={`px-4 py-3 border-b flex items-center justify-between ${isOnyx ? 'border-[#27272a]' : 'border-[#e4e4e7]'}`}>
               <div className="flex items-center gap-2">

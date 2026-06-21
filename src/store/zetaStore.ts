@@ -23,7 +23,15 @@ import {
   updateStipendOrPayout,
   loadSecureMessages,
   saveSecureMessages,
+  fetchLeads,
+  saveLead,
+  fetchInvoices,
+  saveInvoice,
+  fetchAmbassadors,
+  saveAmbassador,
+  saveActivityLog
 } from '../db/dbManager';
+
 import type { InternDossier, Task, InitialProfile } from '../types/database';
 
 type MutationListener = (
@@ -131,6 +139,14 @@ export interface ZetaState {
   // Getters / Selectors
   getLowStockAssets: () => WarehouseAsset[];
   getLeadsByTenant: (tenant: TenantCompany) => Lead[];
+
+  // Async Database Actions
+  fetchLeadsAction: () => Promise<Lead[]>;
+  fetchInvoicesAction: () => Promise<Invoice[]>;
+  fetchAmbassadorsAction: () => Promise<Ambassador[]>;
+  setLeads: (leads: Lead[]) => void;
+  setInvoices: (invoices: Invoice[]) => void;
+  setAmbassadors: (ambassadors: Ambassador[]) => void;
 }
 
 
@@ -594,6 +610,7 @@ export const useZetaStore = create<ZetaState>((set, get) => ({
         ...filtered
       };
     });
+    void saveLead(newLead);
     notifyMutation('leads', 'merge_duplicates', { lead: newLead });
   },
 
@@ -638,6 +655,10 @@ export const useZetaStore = create<ZetaState>((set, get) => ({
 
       setLocalStorageItem('zeta_leads', currentRawLeads);
       setLocalStorageItem('zeta_audit_logs', updatedRawAuditLogs);
+
+      // Async updates
+      void saveLead(updatedLead);
+      void saveActivityLog(auditLogEntry, state.currentUser?.displayName || 'System');
 
       return {
         rawLeads: currentRawLeads,
@@ -685,6 +706,12 @@ export const useZetaStore = create<ZetaState>((set, get) => ({
 
       const filtered = filterState(state.currentUser, updatedRawLeads, state.rawContacts, state.rawInvoices, state.rawAuditLogs);
       setLocalStorageItem('zeta_leads', updatedRawLeads);
+      
+      const primaryLead = updatedRawLeads.find(l => l.id === primaryId);
+      if (primaryLead) {
+        void saveLead(primaryLead);
+      }
+
       return { rawLeads: updatedRawLeads, ...filtered };
     });
     notifyMutation('leads', 'merge_duplicates', { primaryId, duplicateId });
@@ -885,6 +912,9 @@ export const useZetaStore = create<ZetaState>((set, get) => ({
       const updatedRawInvoices = [newInvoice, ...state.rawInvoices];
       const filtered = filterState(state.currentUser, state.rawLeads, state.rawContacts, updatedRawInvoices, state.rawAuditLogs);
       setLocalStorageItem('zeta_invoices', updatedRawInvoices);
+      
+      void saveInvoice(newInvoice, state.currentUser?.tenantLock || 'skill_tank');
+
       return {
         rawInvoices: updatedRawInvoices,
         ...filtered
@@ -1096,6 +1126,7 @@ export const useZetaStore = create<ZetaState>((set, get) => ({
         email: email.toLowerCase().trim(),
         role,
         tenantLock: userMatch.tenant,
+        activeWorkspace: userMatch.tenant,
         displayName: userMatch.name,
         internId: userMatch.internId
       };
@@ -1154,6 +1185,7 @@ export const useZetaStore = create<ZetaState>((set, get) => ({
       setLocalStorageItem('zeta_ambassadors', updated);
       return { ambassadors: updated };
     });
+    void saveAmbassador(newAmbassador);
     notifyMutation('payouts', 'approve_commission', { ambassador: newAmbassador });
     // Log ambassador registration event to terminal
     setTimeout(() => {
@@ -1175,6 +1207,12 @@ export const useZetaStore = create<ZetaState>((set, get) => ({
       );
       const filtered = filterState(state.currentUser, state.rawLeads, state.rawContacts, updatedRawInvoices, state.rawAuditLogs);
       setLocalStorageItem('zeta_invoices', updatedRawInvoices);
+      
+      const invObj = updatedRawInvoices.find((i) => i.id === id);
+      if (invObj) {
+        void saveInvoice(invObj, state.currentUser?.tenantLock || 'skill_tank');
+      }
+
       return {
         rawInvoices: updatedRawInvoices,
         ...filtered
@@ -1223,6 +1261,48 @@ export const useZetaStore = create<ZetaState>((set, get) => ({
 
   getLeadsByTenant: (tenant) => {
     return get().leads.filter((lead) => lead.tenant_company === tenant);
+  },
+
+  fetchLeadsAction: async () => {
+    const data = await fetchLeads();
+    set((state) => {
+      const filtered = filterState(state.currentUser, data, state.rawContacts, state.rawInvoices, state.rawAuditLogs);
+      return { rawLeads: data, ...filtered };
+    });
+    return data;
+  },
+
+  fetchInvoicesAction: async () => {
+    const data = await fetchInvoices();
+    set((state) => {
+      const filtered = filterState(state.currentUser, state.rawLeads, state.rawContacts, data, state.rawAuditLogs);
+      return { rawInvoices: data, ...filtered };
+    });
+    return data;
+  },
+
+  fetchAmbassadorsAction: async () => {
+    const data = await fetchAmbassadors();
+    set({ ambassadors: data });
+    return data;
+  },
+
+  setLeads: (leads) => {
+    set((state) => {
+      const filtered = filterState(state.currentUser, leads, state.rawContacts, state.rawInvoices, state.rawAuditLogs);
+      return { rawLeads: leads, ...filtered };
+    });
+  },
+
+  setInvoices: (invoices) => {
+    set((state) => {
+      const filtered = filterState(state.currentUser, state.rawLeads, state.rawContacts, invoices, state.rawAuditLogs);
+      return { rawInvoices: invoices, ...filtered };
+    });
+  },
+
+  setAmbassadors: (ambassadors) => {
+    set({ ambassadors });
   }
 }));
 

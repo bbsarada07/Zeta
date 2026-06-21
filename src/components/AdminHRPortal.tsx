@@ -210,7 +210,7 @@ const AnimatedSubmitButton = ({
       type={onClick ? 'button' : 'submit'}
       disabled={disabled || btnState !== 'idle'}
       onClick={onClick}
-      className={`w-full h-12 rounded-lg text-sm font-semibold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 border ${cfg.cls}`}
+      className={`w-full h-11 md:h-12 rounded-lg text-sm font-semibold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 border ${cfg.cls}`}
     >
       {cfg.icon}
       {cfg.label}
@@ -226,6 +226,14 @@ export default function AdminHRPortal() {
   const isDark = themeProfile === 'ONYX';
   const [activeTab, setActiveTab] = useState<TabType>('directory');
   const [selectedInternId, setSelectedInternId] = useState('');
+
+  useEffect(() => {
+    if (store.currentUser) {
+      store.fetchLeadsAction();
+      store.fetchInvoicesAction();
+      store.fetchAmbassadorsAction();
+    }
+  }, [store.currentUser]);
 
   // Dispatcher state
   const [subject, setSubject] = useState<SubjectCategory>('PAYROLL');
@@ -615,8 +623,8 @@ export default function AdminHRPortal() {
                     </div>
 
                     {/* Adjust financials form */}
-                    <form onSubmit={handleFinancialUpdate} className={`border rounded-xl p-4 space-y-3 ${isDark ? 'bg-black/40 border-[#27272a]' : 'bg-white border-zinc-200'}`}>
-                      <div className="flex flex-col sm:flex-row gap-3">
+                    <form onSubmit={handleFinancialUpdate} className={`border rounded-xl p-4 flex flex-col w-full gap-3 ${isDark ? 'bg-black/40 border-[#27272a]' : 'bg-white border-zinc-200'}`}>
+                      <div className="flex flex-col sm:flex-row gap-3 w-full">
                         <select
                           value={finField}
                           onChange={(e) => setFinField(e.target.value as FinField)}
@@ -685,8 +693,8 @@ export default function AdminHRPortal() {
                   </h3>
 
                   {/* Log entry form */}
-                  <form onSubmit={handleAddWorkLog} className={`border rounded-xl p-5 grid grid-cols-1 md:grid-cols-12 gap-4 items-end ${isDark ? 'bg-black/35 border-[#27272a]/80' : 'bg-white border-zinc-200'}`}>
-                    <div className="md:col-span-4 space-y-1.5">
+                  <form onSubmit={handleAddWorkLog} className={`border rounded-xl p-5 flex flex-col w-full gap-3 md:grid md:grid-cols-12 md:gap-4 md:items-end ${isDark ? 'bg-black/35 border-[#27272a]/80' : 'bg-white border-zinc-200'}`}>
+                    <div className="md:col-span-4 space-y-1.5 w-full">
                       <label className={`text-xs font-semibold uppercase ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>Project Title *</label>
                       <input
                         type="text"
@@ -793,7 +801,7 @@ export default function AdminHRPortal() {
       {activeTab === 'dispatcher' && (
         <form
           onSubmit={handleStartDispatch}
-          className={`border rounded-2xl p-5 md:p-8 space-y-5 shadow-2xl max-w-xl mx-auto w-full transition-colors ${
+          className={`border rounded-2xl p-5 md:p-8 flex flex-col w-full gap-3 shadow-2xl max-w-xl mx-auto transition-colors ${
             isDark ? 'bg-[#09090b] text-[#fafafa] border-[#27272a]' : 'bg-[#f4f4f5] text-[#09090b] border-[#e4e4e7]'
           }`}
         >
@@ -907,7 +915,7 @@ export default function AdminHRPortal() {
       {activeTab === 'create' && (
         <form
           onSubmit={handleCreateDossier}
-          className={`border rounded-2xl p-5 md:p-8 space-y-5 shadow-2xl max-w-md mx-auto w-full transition-colors ${
+          className={`border rounded-2xl p-5 md:p-8 flex flex-col w-full gap-3 shadow-2xl max-w-md mx-auto transition-colors ${
             isDark ? 'bg-[#09090b] text-[#fafafa] border-[#27272a]' : 'bg-[#f4f4f5] text-[#09090b] border-[#e4e4e7]'
           }`}
         >

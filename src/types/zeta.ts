@@ -194,6 +194,7 @@ export interface UserSession {
   email: string;
   role: UserRole;
   tenantLock?: TenantCompany;
+  activeWorkspace?: string;
   displayName: string;
   internId?: string;
 }

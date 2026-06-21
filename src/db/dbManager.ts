@@ -25,7 +25,8 @@ import type {
   DbCommitEvent,
   FinancialLedger,
 } from '../types/database';
-import type { TenantCompany, UserRole, SecureMessage } from '../types/zeta';
+import type { TenantCompany, UserRole, SecureMessage, Lead, Invoice, Ambassador, LeadAuditLog } from '../types/zeta';
+import { supabase, useLocalStorageFallback } from './supabaseClient';
 
 // ─── CONSTANTS ──────────────────────────────────────────────────────────────
 
@@ -788,4 +789,234 @@ export const loadSecureMessages = (): SecureMessage[] => {
 export const saveSecureMessages = (messages: SecureMessage[]): void => {
   if (typeof window === 'undefined') return;
   localStorage.setItem('zeta_secure_mailbox_queue', JSON.stringify(messages));
+};
+
+export const fetchLeads = async (tenantWorkspace?: string): Promise<Lead[]> => {
+  if (useLocalStorageFallback || !supabase) {
+    const data = localStorage.getItem('zeta_leads');
+    const parsed = data ? JSON.parse(data) : [];
+    return tenantWorkspace ? parsed.filter((l: any) => l.tenant_company === tenantWorkspace) : parsed;
+  }
+  try {
+    let query = supabase.from('leads').select('*');
+    if (tenantWorkspace) {
+      query = query.eq('tenant_workspace', tenantWorkspace);
+    }
+    const { data, error } = await query;
+    if (error) throw error;
+    return (data || []).map((row: any) => ({
+      id: row.id,
+      tenant_company: row.tenant_workspace,
+      name: row.name,
+      companyName: row.company,
+      email: row.email,
+      pipelineStage: row.pipeline_stage,
+      dealVelocity: 1,
+      potentialValue: row.value || 0,
+      createdAt: row.created_at || new Date().toISOString(),
+      updatedAt: row.updated_at || new Date().toISOString(),
+      activityLogs: []
+    }));
+  } catch (err) {
+    console.error('[SUPABASE ERROR] fetchLeads failed:', err);
+    const data = localStorage.getItem('zeta_leads');
+    const parsed = data ? JSON.parse(data) : [];
+    return tenantWorkspace ? parsed.filter((l: any) => l.tenant_company === tenantWorkspace) : parsed;
+  }
+};
+
+export const saveLead = async (lead: Lead): Promise<void> => {
+  if (useLocalStorageFallback || !supabase) {
+    const existing = await fetchLeads();
+    const updated = [lead, ...existing.filter(l => l.id !== lead.id)];
+    localStorage.setItem('zeta_leads', JSON.stringify(updated));
+    return;
+  }
+  try {
+    const { error } = await supabase.from('leads').upsert({
+      id: lead.id,
+      tenant_workspace: lead.tenant_company,
+      name: lead.name,
+      company: lead.companyName,
+      email: lead.email,
+      pipeline_stage: lead.pipelineStage,
+      tracking_source: lead.phone || '',
+      value: lead.potentialValue
+    });
+    if (error) throw error;
+  } catch (err) {
+    console.error('[SUPABASE ERROR] saveLead failed:', err);
+    const existing = await fetchLeads();
+    const updated = [lead, ...existing.filter(l => l.id !== lead.id)];
+    localStorage.setItem('zeta_leads', JSON.stringify(updated));
+  }
+};
+
+export const fetchInvoices = async (tenantWorkspace?: string): Promise<Invoice[]> => {
+  if (useLocalStorageFallback || !supabase) {
+    const data = localStorage.getItem('zeta_invoices');
+    const parsed = data ? JSON.parse(data) : [];
+    // Filter locally if needed
+    return parsed;
+  }
+  try {
+    let query = supabase.from('invoices').select('*');
+    if (tenantWorkspace) {
+      query = query.eq('tenant_workspace', tenantWorkspace);
+    }
+    const { data, error } = await query;
+    if (error) throw error;
+    return (data || []).map((row: any) => ({
+      id: row.id,
+      invoiceNumber: row.serial_code,
+      customerId: row.lead_id,
+      customerName: row.customer_name || 'Customer',
+      issueDate: new Date().toISOString(),
+      dueDate: new Date().toISOString(),
+      lineItems: row.line_items || [],
+      subtotal: row.total_amount || 0,
+      taxRate: 0,
+      taxAmount: 0,
+      discount: 0,
+      total: row.total_amount || 0,
+      status: row.payment_status || 'DRAFT',
+      createdAt: new Date().toISOString()
+    }));
+  } catch (err) {
+    console.error('[SUPABASE ERROR] fetchInvoices failed:', err);
+    const data = localStorage.getItem('zeta_invoices');
+    const parsed = data ? JSON.parse(data) : [];
+    return parsed;
+  }
+};
+
+export const saveInvoice = async (invoice: Invoice, tenantWorkspace: string): Promise<void> => {
+  if (useLocalStorageFallback || !supabase) {
+    const existing = await fetchInvoices();
+    const updated = [invoice, ...existing.filter(i => i.id !== invoice.id)];
+    localStorage.setItem('zeta_invoices', JSON.stringify(updated));
+    return;
+  }
+  try {
+    const { error } = await supabase.from('invoices').upsert({
+      id: invoice.id,
+      lead_id: invoice.customerId,
+      tenant_workspace: tenantWorkspace,
+      serial_code: invoice.invoiceNumber,
+      line_items: invoice.lineItems,
+      total_amount: invoice.total,
+      payment_status: invoice.status
+    });
+    if (error) throw error;
+  } catch (err) {
+    console.error('[SUPABASE ERROR] saveInvoice failed:', err);
+    const existing = await fetchInvoices();
+    const updated = [invoice, ...existing.filter(i => i.id !== invoice.id)];
+    localStorage.setItem('zeta_invoices', JSON.stringify(updated));
+  }
+};
+
+export const fetchAmbassadors = async (tenantWorkspace?: string): Promise<Ambassador[]> => {
+  if (useLocalStorageFallback || !supabase) {
+    const data = localStorage.getItem('zeta_ambassadors');
+    const parsed = data ? JSON.parse(data) : [];
+    return tenantWorkspace ? parsed.filter((a: any) => a.tenant_company === tenantWorkspace) : parsed;
+  }
+  try {
+    let query = supabase.from('ambassadors').select('*');
+    if (tenantWorkspace) {
+      query = query.eq('tenant_workspace', tenantWorkspace);
+    }
+    const { data, error } = await query;
+    if (error) throw error;
+    return (data || []).map((row: any) => ({
+      id: row.id,
+      code: row.referral_code,
+      name: row.name || 'Ambassador',
+      tenant_company: row.tenant_workspace,
+      createdAt: new Date().toISOString()
+    }));
+  } catch (err) {
+    console.error('[SUPABASE ERROR] fetchAmbassadors failed:', err);
+    const data = localStorage.getItem('zeta_ambassadors');
+    const parsed = data ? JSON.parse(data) : [];
+    return tenantWorkspace ? parsed.filter((a: any) => a.tenant_company === tenantWorkspace) : parsed;
+  }
+};
+
+export const saveAmbassador = async (ambassador: Ambassador): Promise<void> => {
+  if (useLocalStorageFallback || !supabase) {
+    const existing = await fetchAmbassadors();
+    const updated = [ambassador, ...existing.filter(a => a.id !== ambassador.id)];
+    localStorage.setItem('zeta_ambassadors', JSON.stringify(updated));
+    return;
+  }
+  try {
+    const { error } = await supabase.from('ambassadors').upsert({
+      id: ambassador.id,
+      user_id: ambassador.id,
+      referral_code: ambassador.code,
+      total_clicks: 0,
+      conversions: 0,
+      pending_payout_balance: 0,
+      tenant_workspace: ambassador.tenant_company
+    });
+    if (error) throw error;
+  } catch (err) {
+    console.error('[SUPABASE ERROR] saveAmbassador failed:', err);
+    const existing = await fetchAmbassadors();
+    const updated = [ambassador, ...existing.filter(a => a.id !== ambassador.id)];
+    localStorage.setItem('zeta_ambassadors', JSON.stringify(updated));
+  }
+};
+
+export const fetchActivityLogs = async (leadId: string): Promise<LeadAuditLog[]> => {
+  if (useLocalStorageFallback || !supabase) {
+    const data = localStorage.getItem('zeta_audit_logs');
+    const logs = data ? JSON.parse(data) : [];
+    return logs.filter((log: LeadAuditLog) => log.leadId === leadId);
+  }
+  try {
+    const { data, error } = await supabase.from('activity_logs').select('*').eq('lead_id', leadId);
+    if (error) throw error;
+    return (data || []).map((row: any) => ({
+      id: row.id || Math.random().toString(),
+      leadId: row.lead_id,
+      leadName: 'Lead',
+      tenant_company: 'skill_tank',
+      previousStage: 'PROSPECT',
+      newStage: 'PROSPECT',
+      timestamp: row.timestamp || new Date().toISOString()
+    }));
+  } catch (err) {
+    console.error('[SUPABASE ERROR] fetchActivityLogs failed:', err);
+    const data = localStorage.getItem('zeta_audit_logs');
+    const logs = data ? JSON.parse(data) : [];
+    return logs.filter((log: LeadAuditLog) => log.leadId === leadId);
+  }
+};
+
+export const saveActivityLog = async (log: LeadAuditLog, actor: string): Promise<void> => {
+  if (useLocalStorageFallback || !supabase) {
+    const data = localStorage.getItem('zeta_audit_logs');
+    const logs = data ? JSON.parse(data) : [];
+    logs.push(log);
+    localStorage.setItem('zeta_audit_logs', JSON.stringify(logs));
+    return;
+  }
+  try {
+    const { error } = await supabase.from('activity_logs').insert({
+      timestamp: log.timestamp || new Date().toISOString(),
+      lead_id: log.leadId,
+      actor: actor,
+      change_description: `Stage changed from ${log.previousStage} to ${log.newStage}`
+    });
+    if (error) throw error;
+  } catch (err) {
+    console.error('[SUPABASE ERROR] saveActivityLog failed:', err);
+    const data = localStorage.getItem('zeta_audit_logs');
+    const logs = data ? JSON.parse(data) : [];
+    logs.push(log);
+    localStorage.setItem('zeta_audit_logs', JSON.stringify(logs));
+  }
 };

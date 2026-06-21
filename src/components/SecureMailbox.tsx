@@ -275,7 +275,7 @@ const SecureMessageItem = ({
 
       {/* Reply Container - Inline Conditional Protocol */}
       {isDecrypted && isReceived && (
-        <div className="p-5 border border-onyx-border rounded-xl bg-[#09090b]/80 space-y-4 animate-fade-in">
+        <div className="p-5 border border-onyx-border rounded-xl bg-[#09090b]/80 flex flex-col w-full gap-3 animate-fade-in">
           <h4 className="text-xs font-bold uppercase tracking-widest text-onyx-accent-rose flex items-center gap-1.5">
             <Lock size={10} />
             REPLY SECURE PROTOCOL
@@ -293,7 +293,7 @@ const SecureMessageItem = ({
           />
           <button
             onClick={handleSendReply}
-            className="w-full sm:w-auto h-12 text-xs font-mono font-bold uppercase tracking-wider text-onyx-canvas bg-onyx-accent-rose hover:bg-rose-400 border border-onyx-accent-rose px-5 rounded-lg transition-all shadow-glow-rose flex items-center justify-center"
+            className="w-full sm:w-auto h-11 md:h-12 text-xs font-mono font-bold uppercase tracking-wider text-onyx-canvas bg-onyx-accent-rose hover:bg-rose-400 border border-onyx-accent-rose px-5 rounded-lg transition-all shadow-glow-rose flex items-center justify-center"
           >
             Send Response
           </button>
@@ -335,6 +335,14 @@ export default function SecureMailbox({ tenantFilter }: { tenantFilter: string }
   const dismissSecureMessage = useZetaStore((s) => s.dismissSecureMessage);
   const dispatchSecureMessage = useZetaStore((s) => s.dispatchSecureMessage);
   const dossiers       = useZetaStore((s) => s.internDossiers);
+
+  useEffect(() => {
+    if (currentUser) {
+      useZetaStore.getState().fetchLeadsAction();
+      useZetaStore.getState().fetchInvoicesAction();
+      useZetaStore.getState().fetchAmbassadorsAction();
+    }
+  }, [currentUser]);
 
   const isAdmin  = currentUser?.role === 'global_admin';
   const isIntern = currentUser?.role === 'intern';
@@ -527,7 +535,7 @@ export default function SecureMailbox({ tenantFilter }: { tenantFilter: string }
                 </div>
               </div>
 
-              <form onSubmit={handleAdminDispatch} className="space-y-5">
+              <form onSubmit={handleAdminDispatch} className="flex flex-col w-full gap-3">
                 <div className="space-y-2">
                   <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
                     Recipient Intern
@@ -577,7 +585,7 @@ export default function SecureMailbox({ tenantFilter }: { tenantFilter: string }
 
                 <button
                   type="submit"
-                  className="w-full h-12 text-sm font-bold uppercase tracking-widest text-onyx-canvas bg-onyx-accent-rose hover:bg-rose-400 border border-onyx-accent-rose rounded-lg transition-all shadow-glow-rose flex items-center justify-center gap-2"
+                  className="w-full h-11 md:h-12 text-sm font-bold uppercase tracking-widest text-onyx-canvas bg-onyx-accent-rose hover:bg-rose-400 border border-onyx-accent-rose rounded-lg transition-all shadow-glow-rose flex items-center justify-center gap-2"
                 >
                   <Send size={14} />
                   Transmit Payload
