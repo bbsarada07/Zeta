@@ -319,6 +319,144 @@ const ThoughtEntry = ({ entry, currentUser }: { entry: ThoughtLedgerEntry; curre
   );
 };
 
+const fallbackMockLeads: Lead[] = [
+  {
+    id: 'lead_mock_1',
+    name: 'Aria Thorne',
+    companyName: 'SkillTank Systems',
+    company: 'SkillTank Systems',
+    potentialValue: 2500,
+    value: 2500,
+    pipelineStage: 'PROSPECT',
+    stage: 'prospect',
+    tenant_company: 'skill_tank',
+    tenantContext: 'skill_tank',
+    dealVelocity: 3,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    activityLogs: ['Scoping call completed']
+  } as any,
+  {
+    id: 'lead_mock_2',
+    name: 'Beckett Thorne',
+    companyName: 'Cyberia Solutions',
+    company: 'Cyberia Solutions',
+    potentialValue: 4500,
+    value: 4500,
+    pipelineStage: 'QUALIFICATION',
+    stage: 'qualification',
+    tenant_company: 'skill_tank',
+    tenantContext: 'skill_tank',
+    dealVelocity: 5,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    activityLogs: ['Introduction request received']
+  } as any,
+  {
+    id: 'lead_mock_3',
+    name: 'Clara Sterling',
+    companyName: 'Sterling Operations',
+    company: 'Sterling Operations',
+    potentialValue: 15000,
+    value: 15000,
+    pipelineStage: 'CLOSED_WON',
+    stage: 'won',
+    tenant_company: 'skill_tank',
+    tenantContext: 'skill_tank',
+    dealVelocity: 14,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    activityLogs: ['Contract signed']
+  } as any,
+  {
+    id: 'lead_mock_4',
+    name: 'Devon Brooks',
+    companyName: 'Vriddhi Logistics',
+    company: 'Vriddhi Logistics',
+    potentialValue: 8500,
+    value: 8500,
+    pipelineStage: 'PROPOSAL',
+    stage: 'proposal',
+    tenant_company: 'vriddhi',
+    tenantContext: 'vriddhi',
+    dealVelocity: 8,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    activityLogs: ['Proposal v1 delivered']
+  } as any,
+  {
+    id: 'lead_mock_5',
+    name: 'Elena Rostova',
+    companyName: 'Red Star Holdings',
+    company: 'Red Star Holdings',
+    potentialValue: 12000,
+    value: 12000,
+    pipelineStage: 'NEGOTIATION',
+    stage: 'negotiation',
+    tenant_company: 'vriddhi',
+    tenantContext: 'vriddhi',
+    dealVelocity: 19,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    activityLogs: ['Contract terms under discussion']
+  } as any,
+  {
+    id: 'lead_mock_6',
+    name: 'Luna Lovegood',
+    companyName: 'The Quibbler Publishing',
+    company: 'The Quibbler Publishing',
+    potentialValue: 5000,
+    value: 5000,
+    pipelineStage: 'CLOSED_LOST',
+    stage: 'lost',
+    tenant_company: 'promtal',
+    tenantContext: 'promtal',
+    dealVelocity: 9,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    activityLogs: ['Lost to competitor']
+  } as any
+];
+
+const fallbackMockAssets: WarehouseAsset[] = [
+  {
+    id: 'asset_mock_1',
+    skuCode: 'SKU-MON-27',
+    name: 'UltraWide 27" Monitor',
+    description: 'IPS QHD Resolution Office Monitor',
+    quantity: 4,
+    restockThreshold: 5,
+    isBelowThreshold: true,
+    unitPrice: 299.99,
+    warehouseLocation: 'A-Row-2-Shelf-4',
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'asset_mock_2',
+    skuCode: 'SKU-KEY-MX',
+    name: 'Mechanical Keyboard MX',
+    description: 'Hot-swappable tactile mechanical switches',
+    quantity: 25,
+    restockThreshold: 10,
+    isBelowThreshold: false,
+    unitPrice: 89.99,
+    warehouseLocation: 'B-Row-1-Shelf-2',
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'asset_mock_3',
+    skuCode: 'SKU-LAP-Z1',
+    name: 'Zeta Pro Laptop Z1',
+    description: 'Core Ultra 7, 32GB RAM, 1TB SSD',
+    quantity: 12,
+    restockThreshold: 3,
+    isBelowThreshold: false,
+    unitPrice: 1499.00,
+    warehouseLocation: 'Secured-Cage-1',
+    updatedAt: new Date().toISOString()
+  }
+];
+
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
 export default function Dashboard() {
@@ -343,8 +481,10 @@ export default function Dashboard() {
   const terminalEndRef = useRef<HTMLDivElement>(null);
 
   // Store lists
-  const leads = useZetaStore((s) => s.leads);
-  const warehouseAssets = useZetaStore((s) => s.warehouseAssets);
+  const storeLeads = useZetaStore((s) => s.leads);
+  const leads = storeLeads.length > 0 ? storeLeads : fallbackMockLeads;
+  const storeWarehouseAssets = useZetaStore((s) => s.warehouseAssets);
+  const warehouseAssets = storeWarehouseAssets.length > 0 ? storeWarehouseAssets : fallbackMockAssets;
   const invoices = useZetaStore((s) => s.invoices);
   const agentThoughtLedger = useZetaStore((s) => s.agentThoughtLedger);
   const ambassadors = useZetaStore((s) => s.ambassadors);
@@ -515,7 +655,10 @@ export default function Dashboard() {
   // ── Tenant isolation filters ──────────────────────────────────────────────
   const filteredLeads = useMemo(() => {
     const term = crmSearch.toLowerCase().trim();
-    let list = tenantFilter === 'global' ? leads : leads.filter((l) => l.tenant_company === tenantFilter);
+    const activeWorkspace = (tenantFilter as string) === 'global' || (tenantFilter as string) === 'Global Admin' || (tenantFilter as string) === 'global_admin' ? 'Global Admin' : (tenantFilter as string);
+    const allLeads = leads as any[];
+    const displayedLeads = activeWorkspace === 'Global Admin' ? allLeads : allLeads.filter(l => l.tenantContext === activeWorkspace || l.tenant_company === activeWorkspace);
+    let list = displayedLeads as Lead[];
     if (term) {
       list = list.filter((l) => l.name.toLowerCase().includes(term) || l.companyName.toLowerCase().includes(term));
     }

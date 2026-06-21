@@ -13,6 +13,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useZetaStore } from '../store/zetaStore';
+import type { InternDossier } from '../types/database';
 import { mockEncryptString, generateTxHash } from '../agents/agentRouter';
 import { KineticTextScrambler } from './SecureMailbox';
 import {
@@ -218,6 +219,150 @@ const AnimatedSubmitButton = ({
   );
 };
 
+const fallbackDossiers: InternDossier[] = [
+  {
+    intern_id: 'ST-204',
+    tenant_company: 'skill_tank',
+    profile_metadata: {
+      full_name: 'Alex Intern',
+      corporate_email: 'intern204@skilltank.com',
+      joining_date: new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString(),
+      onboarding_status: 'Active',
+      department_role: 'Full Stack Developer Intern'
+    },
+    financial_ledger: {
+      base_stipend: 220000,
+      paid_to_date_total: 440000,
+      pending_payout: 25000,
+      bank_payout_status: 'Cleared'
+    },
+    crm_contribution_metrics: {
+      associated_lead_ids: ['lead_mock_1'],
+      total_contracts_value: 2500,
+      ambassador_referrals_count: 2
+    },
+    work_history_stream: [
+      {
+        task_id: 'task_ST-204_0',
+        timestamp_iso: new Date(Date.now() - 5 * 24 * 3600 * 1000).toISOString(),
+        project_title: 'Zero-Trust Auth Audit',
+        description: 'Reviewed session token expiry logic, verified tenant boundary enforcement.',
+        efficiency_score: 91,
+        reviewer_notes: 'Security posture significantly improved.'
+      },
+      {
+        task_id: 'task_ST-204_1',
+        timestamp_iso: new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString(),
+        project_title: 'CRM Duplicate Scan Run',
+        description: 'Audited lead files for matching email patterns, merging duplicate contacts.',
+        efficiency_score: 95,
+        reviewer_notes: 'Thorough and highly detailed duplicate report.'
+      }
+    ]
+  },
+  {
+    intern_id: 'ST-305',
+    tenant_company: 'maceco',
+    profile_metadata: {
+      full_name: 'Jordan Intern',
+      corporate_email: 'intern305@maceco.com',
+      joining_date: new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString(),
+      onboarding_status: 'Active',
+      department_role: 'Metallurgical Intern'
+    },
+    financial_ledger: {
+      base_stipend: 250000,
+      paid_to_date_total: 500000,
+      pending_payout: 0,
+      bank_payout_status: 'Cleared'
+    },
+    crm_contribution_metrics: {
+      associated_lead_ids: ['lead_mock_2'],
+      total_contracts_value: 4500,
+      ambassador_referrals_count: 1
+    },
+    work_history_stream: [
+      {
+        task_id: 'task_ST-305_0',
+        timestamp_iso: new Date(Date.now() - 4 * 24 * 3600 * 1000).toISOString(),
+        project_title: 'Metallurgical Stress Test',
+        description: 'Simulated high-pressure stress thresholds on composite alloy samples.',
+        efficiency_score: 94,
+        reviewer_notes: 'Excellent data log precision.'
+      }
+    ]
+  },
+  {
+    intern_id: 'ST-101',
+    tenant_company: 'promtal',
+    profile_metadata: {
+      full_name: 'Julia Roberts',
+      corporate_email: 'julia@promtal.com',
+      joining_date: new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString(),
+      onboarding_status: 'Active',
+      department_role: 'Creative Design Intern'
+    },
+    financial_ledger: {
+      base_stipend: 240000,
+      paid_to_date_total: 480000,
+      pending_payout: 15000,
+      bank_payout_status: 'Cleared'
+    },
+    crm_contribution_metrics: {
+      associated_lead_ids: [],
+      total_contracts_value: 0,
+      ambassador_referrals_count: 0
+    },
+    work_history_stream: []
+  },
+  {
+    intern_id: 'ST-102',
+    tenant_company: 'vriddhi',
+    profile_metadata: {
+      full_name: 'Devon Brooks',
+      corporate_email: 'devon@vriddhi.com',
+      joining_date: new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString(),
+      onboarding_status: 'Active',
+      department_role: 'Logistics Analyst Intern'
+    },
+    financial_ledger: {
+      base_stipend: 210000,
+      paid_to_date_total: 420000,
+      pending_payout: 0,
+      bank_payout_status: 'Cleared'
+    },
+    crm_contribution_metrics: {
+      associated_lead_ids: ['lead_mock_4'],
+      total_contracts_value: 8500,
+      ambassador_referrals_count: 3
+    },
+    work_history_stream: []
+  },
+  {
+    intern_id: 'ST-103',
+    tenant_company: 'tobofu',
+    profile_metadata: {
+      full_name: 'Gideon Vance',
+      corporate_email: 'gideon@tobofu.com',
+      joining_date: new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString(),
+      onboarding_status: 'Active',
+      department_role: 'Agritech Research Intern'
+    },
+    financial_ledger: {
+      base_stipend: 230000,
+      paid_to_date_total: 460000,
+      pending_payout: 0,
+      bank_payout_status: 'Cleared'
+    },
+    crm_contribution_metrics: {
+      associated_lead_ids: [],
+      total_contracts_value: 0,
+      ambassador_referrals_count: 0
+    },
+    work_history_stream: []
+  }
+];
+
 // ─── AdminHRPortal ─────────────────────────────────────────────────────────────
 
 export default function AdminHRPortal() {
@@ -266,14 +411,16 @@ export default function AdminHRPortal() {
   // Kinetic decryption toggle for admin financial fields
   const [revealedFields, setRevealedFields] = useState<Set<string>>(new Set());
 
+  const dossiers = store.internDossiers.length > 0 ? store.internDossiers : fallbackDossiers;
+
   // Default-select first intern
   useEffect(() => {
-    if (store.internDossiers.length > 0 && !selectedInternId) {
-      setSelectedInternId(store.internDossiers[0].intern_id);
+    if (dossiers.length > 0 && !selectedInternId) {
+      setSelectedInternId(dossiers[0].intern_id);
     }
-  }, [store.internDossiers, selectedInternId]);
+  }, [dossiers, selectedInternId]);
 
-  const activeDossier = store.internDossiers.find((d) => d.intern_id === selectedInternId) ?? null;
+  const activeDossier = dossiers.find((d) => d.intern_id === selectedInternId) ?? null;
 
   // ── Biometric gate: queues an action and triggers the modal ──────────────────
   const gateThroughBiometric = useCallback((action: PendingAction) => {
@@ -342,7 +489,7 @@ export default function AdminHRPortal() {
             store.updateInternFinancialsAction(selectedInternId, 'pending_payout', Number(stipendOverride) * 100);
           }
 
-          const targetDossier = store.internDossiers.find((d) => d.intern_id === selectedInternId);
+          const targetDossier = dossiers.find((d) => d.intern_id === selectedInternId);
           const tenantTag = targetDossier ? targetDossier.tenant_company.toUpperCase() : 'SKILL_TANK';
           const payrollLogMsg =
             `[OpsAgent] Compiled payroll processing event for Tenant: [${tenantTag}] -> Intern ID: [${selectedInternId}]. [CONFIDENTIAL FINANCIAL DATA REDACTED].`;
@@ -526,10 +673,10 @@ export default function AdminHRPortal() {
           <div className={`lg:col-span-4 rounded-xl p-6 flex flex-col gap-4 max-h-[70vh] overflow-y-auto border shadow-2xl ${isDark ? 'bg-[#09090b] text-[#fafafa] border-[#27272a]' : 'bg-[#f4f4f5] text-[#09090b] border-[#e4e4e7]'}`}>
             <h2 className={`text-sm font-bold uppercase tracking-widest flex items-center gap-2 border-b pb-3 ${isDark ? 'text-zinc-400 border-[#27272a]/50' : 'text-zinc-600 border-zinc-200'}`}>
               <FolderOpen size={14} className="text-onyx-accent-rose" />
-              Intern Files ({store.internDossiers.length})
+              Intern Files ({dossiers.length})
             </h2>
             <div className="space-y-3">
-              {store.internDossiers.map((dossier) => (
+              {dossiers.map((dossier) => (
                 <button
                   key={dossier.intern_id}
                   onClick={() => setSelectedInternId(dossier.intern_id)}
