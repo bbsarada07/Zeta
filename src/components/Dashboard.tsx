@@ -1860,8 +1860,8 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Invoices Table */}
-              <div className="bg-onyx-panel border border-onyx-border rounded-xl shadow-2xl overflow-auto flex-1 min-h-0">
+              {/* Invoices Table - Desktop Only */}
+              <div className="bg-onyx-panel border border-onyx-border rounded-xl shadow-2xl overflow-auto flex-1 min-h-0 hidden md:block">
                 <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="border-b border-onyx-border bg-onyx-panel/80">
@@ -1910,6 +1910,59 @@ export default function Dashboard() {
                   </tbody>
                 </table>
               </div>
+
+              {/* Mobile Cards View - Mobile Only */}
+              <div className="block md:hidden overflow-y-auto flex-1 min-h-0 space-y-3">
+                {filteredInvoices.length === 0 ? (
+                  <div className="text-center py-12 text-onyx-muted font-mono text-sm">No transactional receipts generated.</div>
+                ) : (
+                  filteredInvoices.map((invoice) => (
+                    <div key={invoice.id} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-4 mb-3 flex flex-col gap-2">
+                      <div className="flex justify-between items-center border-b border-zinc-800 pb-2">
+                        <span className="font-mono text-onyx-accent-cyan text-sm font-bold">{invoice.invoiceNumber}</span>
+                        <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-md tracking-wider font-mono ${
+                          invoice.status === 'PAID' ? 'bg-onyx-accent-green/10 text-onyx-accent-green border border-onyx-accent-green/20' :
+                          invoice.status === 'SENT' ? 'bg-onyx-accent-cyan/10 text-onyx-accent-cyan border border-onyx-accent-cyan/20' :
+                          invoice.status === 'OVERDUE' ? 'bg-onyx-accent-amber/10 text-onyx-accent-amber border border-onyx-accent-amber/20' :
+                          'bg-zinc-800/40 text-zinc-500 border border-zinc-700/20'
+                        }`}>
+                          {invoice.status}
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-1.5 text-xs text-zinc-400 py-1 font-mono">
+                        <div className="flex justify-between">
+                          <span className="text-zinc-500">CUSTOMER:</span>
+                          <span className="text-zinc-200 font-semibold break-words text-wrap whitespace-normal">{invoice.customerName}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-zinc-500">DATE:</span>
+                          <span className="text-zinc-200">{new Date(invoice.issueDate).toLocaleDateString()}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-zinc-500">SUBTOTAL / TAX:</span>
+                          <span className="text-zinc-200">${invoice.subtotal.toFixed(2)} / ${invoice.taxAmount.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-zinc-500">DISCOUNT:</span>
+                          <span className="text-onyx-accent-rose font-bold">-${invoice.discount.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between border-t border-zinc-800/50 pt-1.5">
+                          <span className="text-zinc-500">TOTAL:</span>
+                          <span className="text-onyx-accent-green font-bold text-sm">${invoice.total.toFixed(2)}</span>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => setActiveInvoiceForModal(invoice)}
+                        className="w-full h-10 mt-2 bg-zinc-100 text-zinc-950 rounded-lg text-xs font-semibold hover:bg-white transition-all flex items-center justify-center"
+                      >
+                        View Receipt
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           )}
 
@@ -1929,8 +1982,8 @@ export default function Dashboard() {
                 </button>
               </div>
 
-              {/* Ambassadors table list */}
-              <div className="bg-onyx-panel border border-onyx-border rounded-xl shadow-2xl overflow-auto flex-1 min-h-0">
+              {/* Ambassadors Table - Desktop Only */}
+              <div className="bg-onyx-panel border border-onyx-border rounded-xl shadow-2xl overflow-auto flex-1 min-h-0 hidden md:block">
                 <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="border-b border-onyx-border bg-onyx-panel/80">
@@ -1966,6 +2019,49 @@ export default function Dashboard() {
                       })}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Mobile Cards View - Mobile Only */}
+              <div className="block md:hidden overflow-y-auto flex-1 min-h-0 space-y-3">
+                {[...ambassadorStats]
+                  .sort((a, b) => b.salesGenerated - a.salesGenerated)
+                  .map((amb, idx) => {
+                    const rankEmoji = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+                    const rankColor = idx === 0 ? 'text-yellow-400' : idx === 1 ? 'text-zinc-400' : idx === 2 ? 'text-amber-600' : 'text-zinc-600';
+                    return (
+                      <div key={amb.id} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-4 mb-3 flex flex-col gap-2">
+                        <div className="flex justify-between items-center border-b border-zinc-800 pb-2">
+                          <span className={`font-mono font-black text-sm ${rankColor}`}>{rankEmoji} {amb.code}</span>
+                          <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-onyx-accent-green bg-onyx-accent-green/10 border border-onyx-accent-green/20 px-2 py-0.5 rounded-md font-mono">
+                            ACTIVE
+                          </span>
+                        </div>
+                        
+                        <div className="space-y-1.5 text-xs text-zinc-400 py-1 font-mono">
+                          <div className="flex justify-between">
+                            <span className="text-zinc-500">PARTNER:</span>
+                            <span className="text-zinc-200 font-semibold break-words text-wrap whitespace-normal">{amb.name}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-zinc-500">CONTEXT:</span>
+                            <span className="text-zinc-200 break-words text-wrap whitespace-normal">{amb.tenant_company ? TENANT_LABELS[amb.tenant_company] : 'GLOBAL'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-zinc-500">REFERRALS:</span>
+                            <span className="text-zinc-200 font-bold">{amb.referrals}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-zinc-500">REVENUE GEN:</span>
+                            <span className="text-onyx-accent-green font-bold">${amb.salesGenerated.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-zinc-500">COMMISSIONS PAID:</span>
+                            <span className="text-onyx-accent-rose font-bold">${amb.discountsEarned.toFixed(2)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
             </div>
           )}
