@@ -502,19 +502,18 @@ export default function AdminHRPortal() {
       </div>
 
       {/* Tab Controls */}
-      <div className={`flex flex-col md:flex-row gap-1 md:border md:p-1 md:rounded w-full md:w-auto self-start ${isDark ? 'bg-transparent md:bg-[#000000] md:border-[#27272a]' : 'bg-transparent md:bg-[#ffffff] md:border-[#e4e4e7]'}`}>
+      <div className="flex flex-row items-center gap-2 overflow-x-auto scrollbar-none w-full py-2 mb-4">
         {(['directory', 'dispatcher', 'create'] as TabType[]).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`w-full h-12 md:h-auto md:w-auto flex justify-between md:justify-center items-center px-4 py-3 md:py-1.5 text-[9px] font-black uppercase tracking-wider rounded-xl md:rounded transition-all mb-3 md:mb-0 ${
+            className={`whitespace-nowrap px-4 h-9 text-xs rounded-full border transition-all ${
               activeTab === tab
-                ? 'bg-onyx-accent-rose text-white border border-transparent'
-                : (isDark ? 'text-zinc-500 hover:text-zinc-300 border border-zinc-800 bg-zinc-900 md:bg-transparent md:border-transparent' : 'text-zinc-500 hover:text-zinc-800 border border-zinc-350 bg-zinc-100 md:bg-transparent md:border-transparent')
+                ? 'border-onyx-accent-rose bg-onyx-accent-rose text-white'
+                : 'border-zinc-800 bg-zinc-900 text-zinc-300 hover:text-white'
             }`}
           >
-            <span>{tab === 'directory' ? 'Dossier Directory' : tab === 'dispatcher' ? 'Secure Dispatcher' : 'New Dossier'}</span>
-            <span className="md:hidden text-zinc-500">→</span>
+            {tab === 'directory' ? 'Dossier Directory' : tab === 'dispatcher' ? 'Secure Dispatcher' : 'New Dossier'}
           </button>
         ))}
       </div>
@@ -586,7 +585,7 @@ export default function AdminHRPortal() {
                     ].map(([label, value]) => (
                       <div key={label} className={`flex justify-between py-2 border-b ${isDark ? 'border-[#27272a]/20' : 'border-zinc-200'}`}>
                         <span className={`uppercase font-medium ${isDark ? 'text-zinc-500' : 'text-zinc-600'}`}>{label}:</span>
-                        <span className={`font-mono font-semibold ${isDark ? 'text-[#fafafa]' : 'text-black'}`}>{value}</span>
+                        <span className={`font-mono font-semibold break-words text-wrap whitespace-normal text-right ${isDark ? 'text-[#fafafa]' : 'text-black'}`}>{value}</span>
                       </div>
                     ))}
                   </div>

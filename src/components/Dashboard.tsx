@@ -462,6 +462,29 @@ export default function Dashboard() {
     return () => stopZetaAgents();
   }, []);
 
+  // Lock scroll when any mobile menu or modal is active
+  const isAnyOverlayOpen = 
+    isMobileDrawerOpen || 
+    showGatewayRouter || 
+    isMobileTerminalOpen || 
+    !!activeLeadForModal || 
+    isAddLeadModalOpen || 
+    !!assetForInvoiceModal || 
+    isAddDossierMobileOpen || 
+    isDispatchMobileOpen;
+
+  useEffect(() => {
+    if (isAnyOverlayOpen) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
+  }, [isAnyOverlayOpen]);
+
+
   // Async data fetching on user login or change
   useEffect(() => {
     if (currentUser) {
@@ -736,52 +759,48 @@ export default function Dashboard() {
     <div className={`flex flex-col min-h-screen max-w-full overflow-hidden font-sans select-none relative md:flex-row md:h-screen md:w-screen ${
       isOnyx ? 'bg-[#000000] text-[#fafafa] border-[#27272a]' : 'bg-[#ffffff] text-[#09090b] border-[#e4e4e7]'
     }`}>
-      {/* Mobile Sticky Top Header */}
-      <header className={`fixed top-0 left-0 right-0 h-16 border-b px-4 flex items-center justify-between z-40 md:hidden backdrop-blur ${
-        isOnyx ? 'bg-[#000000]/95 border-[#27272a] text-[#fafafa]' : 'bg-[#ffffff]/95 border-[#e4e4e7] text-[#09090b]'
-      }`}>
+      <header className="w-full h-14 flex items-center justify-between px-3 bg-zinc-950 border-b border-zinc-900 fixed top-0 z-40 md:hidden">
         <div className="flex items-center gap-2">
           <div className={`w-6 h-6 rounded flex items-center justify-center border ${
             isOnyx ? 'bg-onyx-accent-green/10 border-onyx-accent-green/30' : 'bg-emerald-800/10 border-emerald-800/30'
           }`}>
             <Zap size={12} className={isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'} />
           </div>
-          <span className={`text-xs font-bold tracking-tight ${isOnyx ? 'text-[#fafafa]' : 'text-black'}`}>ZETA</span>
+          <span className="text-xs font-bold tracking-tight text-white">ZETA</span>
         </div>
         
-        <div className="flex items-center gap-2">
-          {/* Sleek green blinking system status indicator */}
+        <div className="flex items-center gap-1.5">
           <button
             onClick={() => setIsMobileTerminalOpen(true)}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 border rounded-md text-[9px] font-bold font-mono tracking-wider transition-all min-h-[44px] ${
+            className={`flex items-center gap-1 px-2 py-1 border rounded-full text-[10px] font-bold font-mono tracking-wider transition-all ${
               isOnyx
                 ? 'bg-onyx-accent-green/10 border-onyx-accent-green/20 text-onyx-accent-green'
                 : 'bg-emerald-50 border-emerald-200 text-emerald-800'
             }`}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
-            <span className="animate-pulse">● Live Engine Sync</span>
+            <span>Sync</span>
           </button>
 
           <button
             onClick={() => setShowGatewayRouter(true)}
-            className={`flex items-center justify-center gap-1 px-2.5 py-1.5 border rounded-md text-[9px] font-bold uppercase transition-all tracking-wider min-h-[44px] min-w-[44px] ${
+            className={`flex items-center justify-center gap-1 px-2 py-1 border rounded-full text-[10px] font-bold uppercase transition-all tracking-wider ${
               isOnyx
                 ? 'bg-onyx-accent-purple/10 border-onyx-accent-purple/30 text-onyx-accent-purple hover:bg-onyx-accent-purple/20'
                 : 'bg-fuchsia-50 border-fuchsia-300 text-fuchsia-800 hover:bg-fuchsia-100'
             }`}
           >
             <Globe size={10} />
-            Router
+            <span>Router</span>
           </button>
           
           <button 
             onClick={() => setIsMobileDrawerOpen(true)}
-            className={`p-1.5 rounded-lg border transition-all min-h-[44px] min-w-[44px] flex items-center justify-center ${
+            className={`p-1.5 rounded-full border transition-all flex items-center justify-center ${
               isOnyx ? 'bg-zinc-950 border-zinc-800 hover:border-zinc-600 text-zinc-300' : 'bg-white border-zinc-200 hover:border-zinc-400 text-zinc-700'
             }`}
           >
-            <Menu size={16} />
+            <Menu size={14} />
           </button>
         </div>
       </header>
@@ -789,7 +808,7 @@ export default function Dashboard() {
       {/* Mobile Drawer Overlay */}
       {isMobileDrawerOpen && (
         <div 
-          className="fixed inset-0 z-50 md:hidden bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-45 md:hidden bg-black/60 backdrop-blur-sm"
           onClick={() => setIsMobileDrawerOpen(false)}
         >
           <div 
@@ -1295,7 +1314,7 @@ export default function Dashboard() {
         </section>
 
         {/* Dynamic Panel Renderer */}
-        <div className="flex-1 overflow-auto p-6 min-h-0">
+        <div className="w-full max-w-full px-4 pt-16 pb-24 overflow-x-hidden block box-border md:flex-1 md:overflow-auto md:p-6 md:min-h-0">
           
           {/* 1. Dashboard Tab */}
           {activeNav === 'dashboard' && (
@@ -1648,8 +1667,8 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Table Ledger */}
-              <div className="bg-onyx-panel border border-onyx-border rounded-xl shadow-2xl overflow-auto flex-1 min-h-0">
+              {/* Table Ledger - Desktop Only */}
+              <div className="bg-onyx-panel border border-onyx-border rounded-xl shadow-2xl overflow-auto flex-1 min-h-0 hidden md:block">
                 <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="border-b border-onyx-border bg-onyx-panel/80">
@@ -1726,6 +1745,85 @@ export default function Dashboard() {
                     )}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Mobile Cards View - Mobile Only */}
+              <div className="block md:hidden overflow-y-auto flex-1 min-h-0 space-y-3">
+                {filteredAssets.length === 0 ? (
+                  <div className="text-center py-12 text-onyx-muted font-mono text-sm">No inventory records resolved.</div>
+                ) : (
+                  filteredAssets.map((asset) => (
+                    <div key={asset.id} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-4 mb-3 flex flex-col gap-2">
+                      <div className="flex justify-between items-center border-b border-zinc-800 pb-2">
+                        <span className="font-mono text-onyx-accent-cyan text-sm font-semibold">{asset.skuCode}</span>
+                        {asset.isBelowThreshold ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-onyx-accent-rose bg-onyx-accent-rose/10 border border-onyx-accent-rose/20 px-2 py-0.5 rounded-md">
+                            <AlertTriangle size={8} /> LOW STOCK
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-onyx-accent-green bg-onyx-accent-green/10 border border-onyx-accent-green/20 px-2 py-0.5 rounded-md">
+                            HEALTHY
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-1.5 text-xs text-zinc-400 py-1 font-mono">
+                        <div className="flex justify-between">
+                          <span className="text-zinc-500">NAME:</span>
+                          <span className="text-zinc-200 font-semibold break-words text-wrap whitespace-normal">{asset.name}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-zinc-500">LOCATION:</span>
+                          <span className="text-zinc-200 break-words text-wrap whitespace-normal">{asset.warehouseLocation ?? '—'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-zinc-500">STOCK:</span>
+                          <span className={`font-bold ${asset.isBelowThreshold ? 'text-onyx-accent-rose' : 'text-zinc-200'}`}>
+                            {asset.quantity} / {asset.restockThreshold} Threshold
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-zinc-500">UNIT PRICE:</span>
+                          <span className="text-onyx-accent-green font-bold">${asset.unitPrice.toFixed(2)}</span>
+                        </div>
+                      </div>
+
+                      {/* Manual Restock input row */}
+                      <div className="flex items-center gap-2 mt-1 border-t border-zinc-800/50 pt-2">
+                        <input 
+                          type="number" 
+                          placeholder="Qty" 
+                          min="0"
+                          value={manualRestockQty[asset.skuCode] || ''} 
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value);
+                            setManualRestockQty(prev => ({ ...prev, [asset.skuCode]: isNaN(val) ? 0 : val }));
+                          }}
+                          className="w-20 h-9 px-2 text-center bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white font-mono focus:outline-none"
+                        />
+                        <button 
+                          onClick={() => handleManualRestock(asset.skuCode)}
+                          className="flex-1 h-9 bg-zinc-800 text-zinc-300 hover:text-white rounded-lg text-xs font-semibold font-mono border border-zinc-700 transition-all"
+                        >
+                          SET STOCK
+                        </button>
+                      </div>
+
+                      {/* Bill Lead Button */}
+                      <button
+                        onClick={() => openInvoiceComposer(asset)}
+                        disabled={asset.quantity === 0}
+                        className={`w-full h-10 mt-2 bg-zinc-100 text-zinc-950 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                          asset.quantity === 0
+                            ? 'bg-zinc-800 text-zinc-500 border border-zinc-700 cursor-not-allowed'
+                            : 'bg-zinc-100 text-zinc-950 hover:bg-white'
+                        }`}
+                      >
+                        <FileSignature size={12} /> Bill Lead
+                      </button>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           )}
@@ -2726,7 +2824,7 @@ export default function Dashboard() {
 
       {/* 8. Gateway Router Survey Modal */}
       {showGatewayRouter && (
-        <div className="fixed inset-0 bg-onyx-canvas/80 backdrop-blur-sm z-50 flex justify-center items-center p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-45 flex justify-center items-center p-4">
           <div className="bg-[#09090b] border border-[#27272a] rounded-2xl w-full max-w-md overflow-hidden flex flex-col font-mono text-xs shadow-[0_0_50px_rgba(168,85,247,0.3)] animate-fade-in text-[#fafafa]">
             {/* Header */}
             <div className="p-5 border-b border-[#27272a] flex justify-between items-center bg-[#09090b]/85">
