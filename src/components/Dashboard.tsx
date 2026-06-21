@@ -459,6 +459,97 @@ const fallbackMockAssets: WarehouseAsset[] = [
   }
 ];
 
+const fallbackMockInvoices: Invoice[] = [
+  {
+    id: 'inv_mock_1',
+    invoiceNumber: 'INV-2026-001',
+    customerId: 'lead_mock_3',
+    customerName: 'Clara Sterling (Sterling Operations)',
+    issueDate: new Date(Date.now() - 5 * 24 * 3600 * 1000).toISOString().split('T')[0],
+    dueDate: new Date(Date.now() + 25 * 24 * 3600 * 1000).toISOString().split('T')[0],
+    lineItems: [
+      { id: 'li_1', assetId: 'asset_mock_2', description: 'Mechanical Keyboard MX', quantity: 2, unitPrice: 89.99, totalPrice: 179.98 }
+    ],
+    subtotal: 179.98,
+    taxRate: 0.1,
+    taxAmount: 18.00,
+    discount: 10.00,
+    total: 187.98,
+    status: 'PAID',
+    ambassadorCode: 'AMB-ST-01',
+    createdAt: new Date(Date.now() - 5 * 24 * 3600 * 1000).toISOString(),
+    tenantContext: 'skill_tank'
+  } as any,
+  {
+    id: 'inv_mock_2',
+    invoiceNumber: 'INV-2026-002',
+    customerId: 'lead_mock_4',
+    customerName: 'Devon Brooks (Vriddhi Logistics)',
+    issueDate: new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString().split('T')[0],
+    dueDate: new Date(Date.now() - 1 * 24 * 3600 * 1000).toISOString().split('T')[0],
+    lineItems: [
+      { id: 'li_2', assetId: 'asset_mock_3', description: 'Zeta Pro Laptop Z1', quantity: 1, unitPrice: 1499.00, totalPrice: 1499.00 }
+    ],
+    subtotal: 1499.00,
+    taxRate: 0.1,
+    taxAmount: 149.90,
+    discount: 50.00,
+    total: 1598.90,
+    status: 'OVERDUE',
+    ambassadorCode: 'AMB-VR-02',
+    createdAt: new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString(),
+    tenantContext: 'vriddhi'
+  } as any,
+  {
+    id: 'inv_mock_3',
+    invoiceNumber: 'INV-2026-003',
+    customerId: 'lead_mock_1',
+    customerName: 'Aria Thorne (SkillTank Systems)',
+    issueDate: new Date(Date.now() - 1 * 24 * 3600 * 1000).toISOString().split('T')[0],
+    dueDate: new Date(Date.now() + 29 * 24 * 3600 * 1000).toISOString().split('T')[0],
+    lineItems: [
+      { id: 'li_3', assetId: 'asset_mock_1', description: 'UltraWide 27" Monitor', quantity: 1, unitPrice: 299.99, totalPrice: 299.99 }
+    ],
+    subtotal: 299.99,
+    taxRate: 0.1,
+    taxAmount: 30.00,
+    discount: 0.00,
+    total: 329.99,
+    status: 'SENT',
+    ambassadorCode: 'AMB-ST-01',
+    createdAt: new Date(Date.now() - 1 * 24 * 3600 * 1000).toISOString(),
+    tenantContext: 'skill_tank'
+  } as any,
+  {
+    id: 'inv_mock_4',
+    invoiceNumber: 'INV-2026-004',
+    customerId: 'lead_mock_2',
+    customerName: 'Beckett Thorne (Cyberia Solutions)',
+    issueDate: new Date(Date.now()).toISOString().split('T')[0],
+    dueDate: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString().split('T')[0],
+    lineItems: [
+      { id: 'li_4', assetId: 'asset_mock_2', description: 'Mechanical Keyboard MX', quantity: 3, unitPrice: 89.99, totalPrice: 269.97 }
+    ],
+    subtotal: 269.97,
+    taxRate: 0.1,
+    taxAmount: 27.00,
+    discount: 15.00,
+    total: 281.97,
+    status: 'SENT',
+    ambassadorCode: 'AMB-PR-03',
+    createdAt: new Date().toISOString(),
+    tenantContext: 'skill_tank'
+  } as any
+];
+
+const fallbackMockAmbassadors: Ambassador[] = [
+  { id: 'amb_1', code: 'AMB-ST-01', name: 'Alex Partner', tenant_company: 'skill_tank', tenantContext: 'skill_tank', createdAt: new Date().toISOString() } as any,
+  { id: 'amb_2', code: 'AMB-VR-02', name: 'Brandon Partner', tenant_company: 'vriddhi', tenantContext: 'vriddhi', createdAt: new Date().toISOString() } as any,
+  { id: 'amb_3', code: 'AMB-PR-03', name: 'Kai Partner', tenant_company: 'promtal', tenantContext: 'promtal', createdAt: new Date().toISOString() } as any,
+  { id: 'amb_4', code: 'AMB-TB-04', name: 'Gideon Partner', tenant_company: 'tobofu', tenantContext: 'tobofu', createdAt: new Date().toISOString() } as any,
+  { id: 'amb_5', code: 'AMB-MC-05', name: 'Jordan Partner', tenant_company: 'maceco', tenantContext: 'maceco', createdAt: new Date().toISOString() } as any
+];
+
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
 export default function Dashboard() {
@@ -500,12 +591,12 @@ export default function Dashboard() {
 
   const [invoices, setInvoices] = useState<Invoice[]>(() => {
     const cached = localStorage.getItem('zeta_invoices');
-    return cached ? JSON.parse(cached) : [];
+    return cached ? JSON.parse(cached) : fallbackMockInvoices;
   });
 
   const [ambassadors, setAmbassadors] = useState<Ambassador[]>(() => {
     const cached = localStorage.getItem('zeta_ambassadors');
-    return cached ? JSON.parse(cached) : [];
+    return cached ? JSON.parse(cached) : fallbackMockAmbassadors;
   });
 
   const agentThoughtLedger = useZetaStore((s) => s.agentThoughtLedger);
@@ -726,11 +817,14 @@ export default function Dashboard() {
 
   const filteredInvoices = useMemo(() => {
     const term = invoiceSearch.toLowerCase().trim();
+    const activeWorkspace = (tenantFilter as string) === 'global' || (tenantFilter as string) === 'Global Admin' || (tenantFilter as string) === 'global_admin' ? 'Global Admin' : (tenantFilter as string);
     let list = invoices;
-    if (tenantFilter !== 'global') {
+    if (activeWorkspace !== 'Global Admin') {
       list = invoices.filter((i) => {
         const lead = leads.find((l) => l.id === i.customerId);
-        return lead ? lead.tenant_company === tenantFilter : false;
+        const tenantMatches = lead ? (lead.tenant_company === activeWorkspace || (lead as any).tenantContext === activeWorkspace) : false;
+        const invoiceMatches = (i as any).tenantContext === activeWorkspace;
+        return tenantMatches || invoiceMatches;
       });
     }
     if (invoiceStatusFilter !== 'ALL') {
@@ -778,6 +872,13 @@ export default function Dashboard() {
       };
     });
   }, [ambassadors, invoices]);
+
+  const displayedAmbassadors = useMemo(() => {
+    const activeWorkspace = (tenantFilter as string) === 'global' || (tenantFilter as string) === 'Global Admin' || (tenantFilter as string) === 'global_admin' ? 'Global Admin' : (tenantFilter as string);
+    const allAmbassadors = ambassadorStats;
+    const displayedItems = activeWorkspace === 'Global Admin' ? allAmbassadors : allAmbassadors.filter(item => (item as any).tenantContext === activeWorkspace || item.tenant_company === activeWorkspace);
+    return displayedItems;
+  }, [ambassadorStats, tenantFilter]);
 
   // ── CRM Handlers ───────────────────────────────────────────────────────────
   const handleAddLeadSubmit = (e: React.FormEvent) => {
@@ -2186,7 +2287,7 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {[...ambassadorStats]
+                    {[...displayedAmbassadors]
                       .sort((a, b) => b.salesGenerated - a.salesGenerated)
                       .map((amb, idx) => {
                         const rankEmoji = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
@@ -2216,7 +2317,7 @@ export default function Dashboard() {
 
               {/* Mobile Cards View - Mobile Only */}
               <div className="block md:hidden overflow-y-auto flex-1 min-h-0 space-y-3">
-                {[...ambassadorStats]
+                {[...displayedAmbassadors]
                   .sort((a, b) => b.salesGenerated - a.salesGenerated)
                   .map((amb, idx) => {
                     const rankEmoji = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
