@@ -708,9 +708,9 @@ export default function Login({ onHandshakeStart, onHandshakeComplete, onSecurit
                     x={node.screenX}
                     y={node.screenY + node.renderedR + 16}
                     textAnchor="middle"
-                    className="text-[8px] font-mono tracking-widest uppercase transition-colors duration-300"
+                    className="text-xs font-semibold tracking-widest uppercase transition-colors duration-300"
                     style={{
-                      fill: (isActive || isHovered || (isIdentityHub && isEmailFocused)) ? (isIdentityHub && isEmailFocused ? '#22c55e' : brandTheme.accent) : '#71717a',
+                      fill: (isActive || isHovered || (isIdentityHub && isEmailFocused)) ? (isIdentityHub && isEmailFocused ? '#22c55e' : brandTheme.accent) : '#a1a1aa',
                       willChange: 'transform, opacity'
                     }}
                   >
@@ -744,17 +744,17 @@ export default function Login({ onHandshakeStart, onHandshakeComplete, onSecurit
           <div className="pt-6">
             <div className="flex items-center gap-2 mb-2 min-h-[12px]">
               <div className={`w-2 h-2 rounded-full ${brandTheme.accent !== '#27272a' ? brandTheme.bg : 'bg-zinc-700'} animate-pulse`} />
-              <span className={`text-[8px] font-mono tracking-widest uppercase ${brandTheme.text}`}>
+              <span className="text-xs font-medium tracking-wide text-zinc-400 font-mono uppercase">
                 System Security Clearance Required
               </span>
             </div>
             {/* Frozen Layout Bounding Box for Scramble heading to prevent shifts */}
             <div className="h-16 w-full flex items-center justify-start overflow-hidden">
-              <h2 className={`text-xs font-bold tracking-[0.15em] uppercase font-mono leading-relaxed transition-colors duration-300 w-full break-words select-text ${brandTheme.text}`}>
+              <h2 className="text-lg font-bold tracking-widest text-zinc-100 font-mono leading-relaxed transition-colors duration-300 w-full break-words select-text">
                 {headerText}
               </h2>
             </div>
-            <p className="text-[9px] text-zinc-500 mt-0.5 uppercase tracking-wider font-mono min-h-[14px]">
+            <p className="text-xs font-medium tracking-wide text-zinc-400 mt-0.5 uppercase font-mono min-h-[14px]">
               {cryptoSub}
             </p>
           </div>
@@ -764,7 +764,7 @@ export default function Login({ onHandshakeStart, onHandshakeComplete, onSecurit
             <form onSubmit={handleSubmit} className="flex flex-col w-full gap-4 px-2">
               
               <div className="space-y-1.5">
-                <label className="text-[9px] font-bold text-zinc-400 tracking-wider uppercase font-mono">
+                <label className="text-xs font-bold text-zinc-300 tracking-wider uppercase font-mono">
                   Identity Email Node
                 </label>
                 <div className="relative">
@@ -785,7 +785,7 @@ export default function Login({ onHandshakeStart, onHandshakeComplete, onSecurit
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[9px] font-bold text-zinc-400 tracking-wider uppercase font-mono">
+                <label className="text-xs font-bold text-zinc-300 tracking-wider uppercase font-mono">
                   Access Security Matrix Key
                 </label>
                 <div className="relative">
@@ -850,7 +850,7 @@ export default function Login({ onHandshakeStart, onHandshakeComplete, onSecurit
 
           {/* QuickAccess Chips Panel */}
           <div className="pb-4">
-            <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest text-center mb-3 font-mono">
+            <p className="text-xs font-semibold tracking-wider text-zinc-400 uppercase text-center mb-3 font-mono">
               QuickAccess demo keys
             </p>
             <div className="grid grid-cols-3 gap-2">
