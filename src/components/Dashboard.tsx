@@ -1648,9 +1648,9 @@ export default function Dashboard() {
                 </div>
 
                 {/* Stuck & High-Value Deals Widget */}
-                <div className={`border rounded-xl p-6 flex flex-col gap-4 shadow-2xl ${isOnyx ? 'bg-[#09090b] border-[#27272a] shadow-zinc-950/40' : 'bg-[#f4f4f5] border-[#e4e4e7] shadow-zinc-200'}`}>
+                <div className={`border rounded-xl p-6 flex flex-col gap-4 shadow-2xl flex-1 ${isOnyx ? 'bg-[#09090b] border-[#27272a] shadow-zinc-950/40' : 'bg-[#f4f4f5] border-[#e4e4e7] shadow-zinc-200'}`}>
                   <h3 className={`text-lg font-semibold tracking-wide uppercase border-b pb-2 ${isOnyx ? 'text-onyx-accent-rose border-[#27272a]/50' : 'text-rose-700 border-[#e4e4e7]'}`}>Stuck & High-Value Deals</h3>
-                  <div className="max-h-[220px] overflow-y-auto space-y-3 pr-1">
+                  <div className="flex-1 min-h-[200px] overflow-y-auto space-y-3 pr-1">
                     {filteredLeads.filter(l => (l.potentialValue >= 10000) || (l.pipelineStage === 'PROPOSAL' || l.pipelineStage === 'NEGOTIATION')).length === 0 ? (
                       <div className={`text-center py-6 text-sm font-mono border border-dashed rounded ${isOnyx ? 'text-zinc-500 border-[#27272a]' : 'text-zinc-500 border-[#e4e4e7]'}`}>
                         No high-value/stuck opportunities logged.
@@ -1689,12 +1689,12 @@ export default function Dashboard() {
               <div className="flex flex-col gap-6">
                 
                 {/* Low Stock Alerts widget */}
-                <div className={`border rounded-xl p-6 flex flex-col gap-4 shadow-2xl ${isOnyx ? 'bg-[#09090b] border-[#27272a] shadow-zinc-950/40' : 'bg-[#f4f4f5] border-[#e4e4e7] shadow-zinc-200'}`}>
+                <div className={`border rounded-xl p-6 flex flex-col gap-4 shadow-2xl flex-1 ${isOnyx ? 'bg-[#09090b] border-[#27272a] shadow-zinc-950/40' : 'bg-[#f4f4f5] border-[#e4e4e7] shadow-zinc-200'}`}>
                   <div className={`flex justify-between items-center border-b pb-2 ${isOnyx ? 'border-[#27272a]/50' : 'border-[#e4e4e7]'}`}>
                     <h3 className={`text-lg font-semibold tracking-wide uppercase ${isOnyx ? 'text-onyx-accent-amber' : 'text-amber-700'}`}>Critical Warehouse Deficits</h3>
                     <button onClick={() => setActiveNav('erp')} className={`text-sm hover:underline font-semibold ${isOnyx ? 'text-onyx-accent-amber' : 'text-amber-700'}`}>View ERP</button>
                   </div>
-                  <div className="max-h-[220px] overflow-y-auto space-y-3 pr-1">
+                  <div className="flex-1 min-h-[300px] overflow-y-auto space-y-3 pr-1">
                     {getLowStockAssets().length === 0 ? (
                       <div className={`text-center py-6 text-sm font-mono border border-dashed rounded flex flex-col items-center justify-center gap-1.5 ${
                         isOnyx 
@@ -1732,58 +1732,7 @@ export default function Dashboard() {
                     )}
                   </div>
                 </div>
- 
-                {/* Dashboard live terminal stream */}
-                <div className={`border rounded-xl p-6 hidden max-md:hidden md:flex flex-col gap-4 flex-1 min-h-[200px] shadow-2xl ${isOnyx ? 'bg-[#09090b] border-[#27272a] shadow-zinc-950/40' : 'bg-[#f4f4f5] border-[#e4e4e7] shadow-zinc-200'}`}>
-                  <div className={`flex items-center justify-between border-b pb-2 ${isOnyx ? 'border-[#27272a]/50' : 'border-[#e4e4e7]'}`}>
-                    <h3 className={`text-lg font-semibold tracking-wide uppercase ${isOnyx ? 'text-onyx-accent-green' : 'text-emerald-800'}`}>Live Agent Diagnostics Stream</h3>
-                    <span className={`text-xs font-semibold ${isOnyx ? 'text-zinc-400' : 'text-zinc-500'}`}>{filteredTerminalEntries.length} entries</span>
-                  </div>
-                  <div className={`flex-1 rounded-lg p-4 font-mono text-sm overflow-y-auto max-h-[250px] space-y-2 border ${
-                    isOnyx ? 'bg-[#000000] text-zinc-400 border-[#27272a]' : 'bg-[#ffffff] text-zinc-800 border-[#e4e4e7]'
-                  }`} ref={terminalRef}>
-                    {filteredTerminalEntries.length === 0 ? (
-                      <div className="text-center text-onyx-muted py-10 animate-pulse">Waiting for autonomic loop...</div>
-                    ) : (
-                      filteredTerminalEntries.slice(0, 12).map(entry => {
-                        const isWal = entry.currentTask?.toLowerCase().includes('wal') || entry.thoughtProcess?.includes('WAL Sequence');
-                        const displayText = currentUser?.role !== 'global_admin'
-                          ? redactConfidentialData(entry.thoughtProcess)
-                          : entry.thoughtProcess;
-                        return (
-                          <div key={entry.id} className={`pb-2 border-b ${
-                            isOnyx ? 'border-zinc-900/50' : 'border-zinc-200'
-                          } ${isWal ? 'bg-emerald-950/10 -mx-3 px-3 border-l-2 border-l-emerald-800/40' : ''}`}>
-                            <div className="flex gap-2 mb-1 items-center flex-wrap">
-                              <span className={`px-2 py-1 rounded uppercase font-bold text-[10px] ${
-                                (() => {
-                                  const key = (entry.agentName || '').toLowerCase();
-                                  const style = AGENT_BADGE_STYLES[key];
-                                  return style
-                                    ? (themeProfile === 'ALABASTER' ? style.alabaster : style.onyx)
-                                    : (themeProfile === 'ALABASTER' ? 'text-zinc-600 bg-zinc-100 border border-zinc-300' : 'text-zinc-400 bg-zinc-800 border border-zinc-700');
-                                })()
-                              }`}>
-                                {entry.agentName}
-                              </span>
-                              {isWal && (
-                                <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">WAL</span>
-                              )}
-                              <span className={`text-xs ${isOnyx ? 'text-zinc-600' : 'text-zinc-500'}`}>{new Date(entry.timestamp).toLocaleTimeString()}</span>
-                              {entry.tx_hash && (
-                                <span className={`text-[10px] font-mono ml-auto ${isOnyx ? 'text-zinc-600' : 'text-zinc-500'}`} title={entry.tx_hash}>
-                                  {entry.tx_hash.slice(0, 14)}...
-                                </span>
-                              )}
-                            </div>
-                            <p className={`leading-relaxed text-xs break-words whitespace-pre-wrap ${isOnyx ? 'text-zinc-300' : 'text-zinc-700'}`}>{displayText}</p>
-                          </div>
-                        );
-                      })
-                    )}
-                    <div ref={terminalEndRef} />
-                  </div>
-                </div>
+
  
               </div>
             </div>
